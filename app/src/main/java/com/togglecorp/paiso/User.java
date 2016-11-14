@@ -8,7 +8,6 @@ public class User {
     public String displayName;
     public String email;
     public String photoUrl;
-    public HashMap<String, String> tokens = new HashMap<>();
 
     public User() {}
 
@@ -16,11 +15,5 @@ public class User {
         this.displayName = displayName;
         this.email = email;
         this.photoUrl = photoUrl;
-    }
-
-    public List<String> getTokens() {
-        if (tokens == null)
-            return new ArrayList<>();
-        return new ArrayList<>(tokens.values());
     }
 }
