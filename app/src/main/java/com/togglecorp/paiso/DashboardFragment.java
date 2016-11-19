@@ -9,9 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class DashboardFragment extends Fragment {
     private TimelineView timelineView;
 
