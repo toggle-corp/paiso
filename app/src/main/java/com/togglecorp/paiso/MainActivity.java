@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.FrameLayout;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -50,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
         // Set active user id to the database
         Database.get().selfId = mAuthUser.getFbUser().getUid();
         Database.get().self = mAuthUser.getUser();
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.frame, new DashboardFragment()).commit();
 
     }
 
