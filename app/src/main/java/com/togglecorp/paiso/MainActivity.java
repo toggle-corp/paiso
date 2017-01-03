@@ -1,21 +1,40 @@
 package com.togglecorp.paiso;
 
-import android.*;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
     private final static String TAG = "MainActivity";
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 1;
 
     private AuthUser mAuthUser;
+
+    private DrawerLayout mDrawerLayout;
+    private NavigationDrawerAdapter mNavigationAdapter;
+
+    DashboardFragment mDashboardFragment = new DashboardFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,12 +50,61 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Before anything, check for contacts read permission
+        // Before anything, check for contacts-read permission
         getContactsReadPermission();
 
         // Set active user id to the database
         Database.get().selfId = mAuthUser.getFbUser().getUid();
         Database.get().self = mAuthUser.getUser();
+
+
+        // Navigation item menu
+        ArrayList<NavigationDrawerAdapter.Item> navItems = new ArrayList<>();
+        navItems.add(new NavigationDrawerAdapter.Item("Dashboard",
+                ContextCompat.getDrawable(this, R.drawable.ic_home)));
+        navItems.add(new NavigationDrawerAdapter.Item("Transactions",
+                ContextCompat.getDrawable(this, R.drawable.ic_contents)));
+        navItems.add(new NavigationDrawerAdapter.Item("People",
+                ContextCompat.getDrawable(this, R.drawable.ic_people)));
+
+        mNavigationAdapter = new NavigationDrawerAdapter(this, navItems, mNavigationListener);
+        RecyclerView navigationRecyclerView =
+                (RecyclerView)findViewById(R.id.navigation_drawer_recycler_view);
+        navigationRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        navigationRecyclerView.setAdapter(mNavigationAdapter);
+        mNavigationAdapter.notifyDataSetChanged();
+
+        // Navigation header
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        View header = mDrawerLayout.findViewById(R.id.navigation_drawer_header);
+        ((TextView)header.findViewById(R.id.display_name))
+                .setText(mAuthUser.getFbUser().getDisplayName());
+        ((TextView)header.findViewById(R.id.email))
+                .setText(mAuthUser.getFbUser().getEmail());
+        Picasso.with(this)
+                .load(mAuthUser.getFbUser().getPhotoUrl())
+                .into((CircleImageView)header.findViewById(R.id.avatar));
+
+        // The toolbar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+        }
+
+        // The hamburger icon
+        ActionBarDrawerToggle drawerListener = new ActionBarDrawerToggle(this, mDrawerLayout,
+                toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+        };
+        mDrawerLayout.addDrawerListener(drawerListener);
+        drawerListener.syncState();
+
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.frame, mDashboardFragment).commit();
     }
 
     public void getContactsReadPermission() {
@@ -59,7 +127,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
 
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public ChangeListener mNavigationListener = new ChangeListener() {
+        @Override
+        public void onChange(int index) {
+            switch (index) {
+                case 0:
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.frame, mDashboardFragment).commit();
+                    break;
+            }
+        }
+    };
 
     @Override
     public void onStart() {

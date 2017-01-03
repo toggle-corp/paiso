@@ -5,16 +5,16 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.widget.ImageView;
+import android.view.View;
 
+import java.util.ArrayList;
 import java.util.Date;
 
-/**
- * Created by fhx on 11/14/16.
- */
+public class TimelineView extends View {
+    public static final String TAG = "Timeline View";
+    final float scale = getResources().getDisplayMetrics().density;
+    private ArrayList<TimeEvent> mTimeEvents;
 
-public class TimelineView extends ImageView {
-    private Paint mBgPaint;
     private Paint mLinePaint;
 
     public TimelineView(Context context) {
@@ -34,30 +34,26 @@ public class TimelineView extends ImageView {
 
     private void prepare(Context context, AttributeSet attrs){
         this.setFocusable(true);
-        this.setScaleType(ScaleType.CENTER_INSIDE);
         this.setClickable(true);
-
-        mBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBgPaint.setStyle(Paint.Style.FILL);
-        mBgPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDark));
 
         mLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLinePaint.setStyle(Paint.Style.STROKE);
+        mLinePaint.setStrokeWidth(20);
         mLinePaint.setColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
+
+        mTimeEvents = new ArrayList<>();
 
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawRect(0, 0, getWidth(), getHeight(), mBgPaint);
-        canvas.drawRect(getWidth()/2, 0, getWidth()/2, getHeight(), mLinePaint);
-
-        canvas.drawRect(getWidth()/2, 60, 50+getWidth()/2, 60, mLinePaint);
-        canvas.drawRect(-50+getWidth()/2, 100, getWidth()/2, 100, mLinePaint);
-        canvas.drawRect(-50+getWidth()/2, 260, getWidth()/2, 260, mLinePaint);
-        canvas.drawRect(getWidth()/2, 360, 50+getWidth()/2, 360, mLinePaint);
-
         super.onDraw(canvas);
+
+//        canvas.drawLine(0,0, getWidth(), getHeight(), mLinePaint);
+    }
+
+    private void render(Canvas canvas){
+
     }
 
     public class TimeEvent{

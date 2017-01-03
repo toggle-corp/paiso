@@ -213,10 +213,14 @@ public class Database {
                 while (cursor.moveToNext()) {
 
                     // Get details of each contact
-                    String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-                    String displayName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                    String email = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                    String photoUrl = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.PHOTO_URI));
+                    String id = cursor.getString(
+                            cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                    String displayName = cursor.getString(
+                            cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+                    String email = cursor.getString(
+                            cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+                    String photoUrl = cursor.getString(
+                            cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.PHOTO_URI));
 
                     // Check if a user with this email exists in server
                     // TODO: improve this to only check for those users that user selects to search for; or any other improvement possible.
