@@ -71,7 +71,7 @@ public class Database {
         if (mListeners.containsKey(ref))
             return;
 
-        Log.d(TAG, "Adding listener for: " + ref.toString());
+//        Log.d(TAG, "Adding listener for: " + ref.toString());
 
         ref.addValueEventListener(listener);
         mListeners.put(ref, listener);
@@ -212,6 +212,7 @@ public class Database {
             try {
                 while (cursor.moveToNext()) {
 
+
                     // Get details of each contact
                     String id = cursor.getString(
                             cursor.getColumnIndex(ContactsContract.Contacts._ID));
@@ -265,7 +266,7 @@ public class Database {
 
     public void stopSync() {
         for (Map.Entry<Query, ValueEventListener> listener: mListeners.entrySet()) {
-            Log.d(TAG, "Removing listener for: " + listener.getKey());
+//            Log.d(TAG, "Removing listener for: " + listener.getKey());
             listener.getKey().removeEventListener(listener.getValue());
         }
         mListeners.clear();

@@ -1,6 +1,7 @@
 package com.togglecorp.paiso;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,17 +25,24 @@ public class DashboardFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
 
         ArrayList<DashboardTransaction> transactions = new ArrayList<>();
-        transactions.add(new DashboardTransaction("Bibek", "bibek@toggle", 20000));
-        transactions.add(new DashboardTransaction("Bibek 2", "bibek2@toggle", 20000));
+        transactions.add(new DashboardTransaction("Khatri", "khatri@noob.com", 20000));
+        transactions.add(new DashboardTransaction("Ankit", "frozen@helium.com", 45000));
 
-        RecyclerView recyclerOweMe = (RecyclerView) container.findViewById(R.id.recycler_owe_me);
-        RecyclerView recyclerOweThem = (RecyclerView) container.findViewById(R.id.recycler_owe_them);
+        RecyclerView recyclerTransactions =
+                (RecyclerView) view.findViewById(R.id.recycler_transactions);
 
-        recyclerOweMe.setClickable(true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());;
-        recyclerOweMe.setLayoutManager(layoutManager);
+        recyclerTransactions.setClickable(true);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());;
+        recyclerTransactions.setLayoutManager(layoutManager);
         final DashboardTransactionAdapter adapter = new DashboardTransactionAdapter(transactions);
-        recyclerOweMe.setAdapter(adapter);
+        recyclerTransactions.setAdapter(adapter);
+
+        view.findViewById(R.id.add_transaction).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getActivity(), AddTransactionActivity.class));
+            }
+        });
 
         return view;
     }
