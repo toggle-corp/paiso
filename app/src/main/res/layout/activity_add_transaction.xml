@@ -44,15 +44,28 @@
                 android:inputType="numberDecimal"
                 android:hint="Amount" />
         </android.support.design.widget.TextInputLayout>
-        <TextView
+        <RadioGroup
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Select user"
-            android:textAllCaps="true"
-            android:labelFor="@+id/spinner_user"/>
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/radio_by"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:layout_height="wrap_content"
+                android:text="By"
+                android:checked="true"/>
+            <RadioButton
+                android:id="@+id/radio_to"
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:layout_height="wrap_content"
+                android:text="To"
+                android:checked="false"/>
+        </RadioGroup>
         <Spinner
             android:id="@+id/spinner_user"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" /> />
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 </LinearLayout>

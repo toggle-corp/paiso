@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 
 import com.google.firebase.database.ServerValue;
@@ -77,15 +78,20 @@ public class AddTransactionActivity extends AppCompatActivity {
         String amount = ((EditText)findViewById(R.id.input_amount)).getText().toString();
         int user = ((Spinner)findViewById(R.id.spinner_user)).getSelectedItemPosition();
 
-        if (user < 0 || title == "" || amount == "") {
+        if (user < 0 || title.equals("") || amount.equals("")) {
             return;
         }
 
         Transaction transaction = new Transaction();
         transaction.title = title;
         transaction.amount = Double.parseDouble(amount);
-        transaction.by = Database.get().selfId;
-        transaction.to = Database.get().contacts.get(mContactIds.get(user)).userId;
+        if (((RadioButton)findViewById(R.id.radio_by)).isChecked()) {
+            transaction.to = Database.get().selfId;
+            transaction.by = Database.get().contacts.get(mContactIds.get(user)).userId;
+        } else {
+            transaction.by = Database.get().selfId;
+            transaction.to = Database.get().contacts.get(mContactIds.get(user)).userId;
+        }
         transaction.added_by = Database.get().selfId;
 
         Database.get().addTransaction(transaction);

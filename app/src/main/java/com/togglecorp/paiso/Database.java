@@ -6,6 +6,7 @@ import android.provider.ContactsContract;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
@@ -71,6 +72,10 @@ public class Database {
 
         transactionIds.add(newTransaction.getKey());
         mRef.child("user_transactions").child(selfId).setValue(transactionIds);
+
+        if (!transaction.customUser) {
+            mRef.child("user_transactions").child(transaction.getOther(selfId)).setValue(transactionIds);
+        }
     }
 
 
@@ -101,14 +106,18 @@ public class Database {
                     return;
 
                 // dataSnapshot is a list of transaction ids
-                transactionIds =
-                        dataSnapshot.getValue(new GenericTypeIndicator<List<String>>() {});
+                try {
+                    transactionIds =
+                            dataSnapshot.getValue(new GenericTypeIndicator<List<String>>() {
+                            });
 
-                // listener for each transaction
-                for (String t: transactionIds)
-                    listenForTransaction(t);
+                    // listener for each transaction
+                    for (String t : transactionIds)
+                        listenForTransaction(t);
 
-                refresh();
+                    refresh();
+                }
+                catch (DatabaseException ignored) {}
             }
 
             @Override
@@ -148,6 +157,9 @@ public class Database {
     }
 
     private void listenForTransaction(String transactionId) {
+        if (transactionId == null)
+            return;
+
         ValueEventListener transactionListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -178,6 +190,9 @@ public class Database {
     }
 
     private void listenForUser(String userId) {
+        if (userId == null)
+            return;
+
         ValueEventListener userListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

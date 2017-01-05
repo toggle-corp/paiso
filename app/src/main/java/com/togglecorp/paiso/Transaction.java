@@ -23,4 +23,18 @@ public class Transaction {
         accepted_by = null;
         date = ServerValue.TIMESTAMP;
     }
+
+    public String getOther(String selfId) {
+        if (selfId.equals(by))
+            return to;
+        else
+            return by;
+    }
+
+    public Double getSignedAmount(String selfId) {
+        if (selfId.equals(by))
+            return -amount;
+        else
+            return amount;
+    }
 }
