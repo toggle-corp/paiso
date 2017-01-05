@@ -1,21 +1,26 @@
 package com.togglecorp.paiso;
 
+import com.google.firebase.database.ServerValue;
+
 public class Transaction {
+    public String title;
+
     public String by;
     public String to;
 
     public Boolean customUser;
 
-    public Long date;
+    public Object date;
     public Double amount;
 
     // Status
-    public Long added_by;
-    public Long accepted_by;
+    public String added_by;
+    public String accepted_by;
 
     Transaction() {
         customUser = false;
         added_by = null;
         accepted_by = null;
+        date = ServerValue.TIMESTAMP;
     }
 }

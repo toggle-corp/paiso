@@ -3,7 +3,6 @@ package com.togglecorp.paiso;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
-import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -39,14 +38,16 @@ public class Database {
     public HashMap<String, User> users = new HashMap<>();
     public HashMap<String, Contact> contacts = new HashMap<>();
 
+    public List<String> transactionIds = new ArrayList<>();
+
     public HashMap<String, String> customUsers = new HashMap<>();
-    public HashMap<String, Transaction> transactions;
+    public HashMap<String, Transaction> transactions = new HashMap<>();
 
     // Make sure every activity/fragment removes listener at or before onStop
-    public List<RefreshListener> mRefreshListeners = new ArrayList<>();
+    public List<RefreshListener> refreshListeners = new ArrayList<>();
 
     public void refresh() {
-        for (RefreshListener listener: mRefreshListeners)
+        for (RefreshListener listener: refreshListeners)
             if (listener != null)
                 listener.refresh();
     }
@@ -62,6 +63,14 @@ public class Database {
             mFbDb.setPersistenceEnabled(true);
         }
         return mFbDb.getReference();
+    }
+
+    public void addTransaction(Transaction transaction) {
+        DatabaseReference newTransaction = mRef.child("transactions").push();
+        newTransaction.setValue(transaction);
+
+        transactionIds.add(newTransaction.getKey());
+        mRef.child("user_transactions").child(selfId).setValue(transactionIds);
     }
 
 
@@ -92,11 +101,11 @@ public class Database {
                     return;
 
                 // dataSnapshot is a list of transaction ids
-                List<String> transactions =
+                transactionIds =
                         dataSnapshot.getValue(new GenericTypeIndicator<List<String>>() {});
 
                 // listener for each transaction
-                for (String t: transactions)
+                for (String t: transactionIds)
                     listenForTransaction(t);
 
                 refresh();
