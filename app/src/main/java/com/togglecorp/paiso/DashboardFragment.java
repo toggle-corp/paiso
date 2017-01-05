@@ -10,9 +10,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 
 public class DashboardFragment extends Fragment implements RefreshListener {
@@ -34,7 +37,7 @@ public class DashboardFragment extends Fragment implements RefreshListener {
         recyclerTransactions.setClickable(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());;
         recyclerTransactions.setLayoutManager(layoutManager);
-        mAdapter = new DashboardTransactionAdapter(mTransactions);
+        mAdapter = new DashboardTransactionAdapter(getActivity(), mTransactions);
         recyclerTransactions.setAdapter(mAdapter);
 
         // FAB button to add transaction
@@ -45,17 +48,13 @@ public class DashboardFragment extends Fragment implements RefreshListener {
             }
         });
 
-        // Add database refresh listener to populate the transactions
-        Database.get().refreshListeners.add(this);
-
-        // Refresh once
-        refresh();
-
         return view;
     }
 
     @Override
     public void refresh() {
+        double total = 0;
+
         // Get map of users and their summary info
         HashMap<String, Double> userSummary = new HashMap<>();
         HashMap<String, Double> customUserSummary = new HashMap<>();
@@ -73,6 +72,8 @@ public class DashboardFragment extends Fragment implements RefreshListener {
                     summary.put(user, summary.get(user) + amount);
                 else
                     summary.put(user, amount);
+
+                total += amount;
             }
         }
 
@@ -80,6 +81,8 @@ public class DashboardFragment extends Fragment implements RefreshListener {
         mTransactions.clear();
         for (HashMap.Entry<String, Double> summaryEntry: userSummary.entrySet()) {
             mTransactions.add(new DashboardTransaction(
+                    summaryEntry.getKey(),
+                    false,
                     Database.get().users.get(summaryEntry.getKey()).displayName,
                     Database.get().users.get(summaryEntry.getKey()).email,
                     summaryEntry.getValue()
@@ -88,10 +91,32 @@ public class DashboardFragment extends Fragment implements RefreshListener {
         for (HashMap.Entry<String, Double> summaryEntry: customUserSummary.entrySet()) {
             mTransactions.add(new DashboardTransaction(
                     summaryEntry.getKey(),
+                    true,
+                    Database.get().customUsers.get(summaryEntry.getKey()),
                     "",
                     summaryEntry.getValue()
             ));
         }
         mAdapter.notifyDataSetChanged();
+
+        // Sum total
+        ((TextView)getActivity().findViewById(R.id.amount))
+                .setText(Utils.formatCurrency(total));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Add database refresh listener to populate the transactions
+        Database.get().refreshListeners.add(this);
+        // Refresh once
+        refresh();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Remove the database refresh listener
+        Database.get().refreshListeners.remove(this);
     }
 }

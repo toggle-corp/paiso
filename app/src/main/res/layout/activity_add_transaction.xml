@@ -20,6 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="16dp">
+
         <android.support.design.widget.TextInputLayout
             android:id="@+id/input_layout_title"
             android:layout_width="match_parent"
@@ -32,6 +33,7 @@
                 android:inputType="textCapWords|textAutoComplete"
                 android:hint="Title" />
         </android.support.design.widget.TextInputLayout>
+
         <android.support.design.widget.TextInputLayout
             android:id="@+id/input_layout_amount"
             android:layout_width="match_parent"
@@ -44,6 +46,7 @@
                 android:inputType="numberDecimal"
                 android:hint="Amount" />
         </android.support.design.widget.TextInputLayout>
+
         <RadioGroup
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -63,9 +66,11 @@
                 android:text="To"
                 android:checked="false"/>
         </RadioGroup>
+
         <Spinner
             android:id="@+id/spinner_user"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
+
     </LinearLayout>
 </LinearLayout>
