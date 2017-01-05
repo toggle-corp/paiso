@@ -32,7 +32,6 @@ public class Transaction {
     }
 
     public Double getSignedAmount(String selfId) {
-        amount = Math.round(amount*100) / 100.0;
         if (selfId.equals(by))
             return -amount;
         else

@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,9 +59,8 @@ public class DashboardFragment extends Fragment implements RefreshListener {
         // Get map of users and their summary info
         HashMap<String, Double> userSummary = new HashMap<>();
         HashMap<String, Double> customUserSummary = new HashMap<>();
-        for (String transactionId: Database.get().transactionIds) {
+        for (Transaction transaction: Database.get().transactions.values()) {
             // Get each transaction
-            Transaction transaction = Database.get().transactions.get(transactionId);
             if (transaction != null) {
                 String user = transaction.getOther(Database.get().selfId);
                 Double amount = transaction.getSignedAmount(Database.get().selfId);
@@ -80,22 +80,26 @@ public class DashboardFragment extends Fragment implements RefreshListener {
         // Now fill up the array for recycler view
         mTransactions.clear();
         for (HashMap.Entry<String, Double> summaryEntry: userSummary.entrySet()) {
-            mTransactions.add(new DashboardTransaction(
-                    summaryEntry.getKey(),
-                    false,
-                    Database.get().users.get(summaryEntry.getKey()).displayName,
-                    Database.get().users.get(summaryEntry.getKey()).email,
-                    summaryEntry.getValue()
-            ));
+            if (Database.get().users.containsKey(summaryEntry.getKey())) {
+                mTransactions.add(new DashboardTransaction(
+                        summaryEntry.getKey(),
+                        false,
+                        Database.get().users.get(summaryEntry.getKey()).displayName,
+                        Database.get().users.get(summaryEntry.getKey()).email,
+                        summaryEntry.getValue()
+                ));
+            }
         }
         for (HashMap.Entry<String, Double> summaryEntry: customUserSummary.entrySet()) {
-            mTransactions.add(new DashboardTransaction(
-                    summaryEntry.getKey(),
-                    true,
-                    Database.get().customUsers.get(summaryEntry.getKey()),
-                    "",
-                    summaryEntry.getValue()
-            ));
+            if (Database.get().customUsers.containsKey(summaryEntry.getKey())) {
+                mTransactions.add(new DashboardTransaction(
+                        summaryEntry.getKey(),
+                        true,
+                        Database.get().customUsers.get(summaryEntry.getKey()),
+                        "",
+                        summaryEntry.getValue()
+                ));
+            }
         }
         mAdapter.notifyDataSetChanged();
 

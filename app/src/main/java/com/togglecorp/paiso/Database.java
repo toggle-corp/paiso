@@ -39,8 +39,6 @@ public class Database {
     public HashMap<String, User> users = new HashMap<>();
     public HashMap<String, Contact> contacts = new HashMap<>();
 
-    public List<String> transactionIds = new ArrayList<>();
-
     public HashMap<String, String> customUsers = new HashMap<>();
     public HashMap<String, Transaction> transactions = new HashMap<>();
 
@@ -70,11 +68,12 @@ public class Database {
         DatabaseReference newTransaction = mRef.child("transactions").push();
         newTransaction.setValue(transaction);
 
-        transactionIds.add(newTransaction.getKey());
-        mRef.child("user_transactions").child(selfId).setValue(transactionIds);
+        mRef.child("user_transactions").child(selfId)
+                .child(newTransaction.getKey()).setValue("true");
 
         if (!transaction.customUser) {
-            mRef.child("user_transactions").child(transaction.getOther(selfId)).setValue(transactionIds);
+            mRef.child("user_transactions").child(transaction.getOther(selfId))
+                    .child(newTransaction.getKey()).setValue("true");
         }
     }
 
@@ -107,13 +106,9 @@ public class Database {
 
                 // dataSnapshot is a list of transaction ids
                 try {
-                    transactionIds =
-                            dataSnapshot.getValue(new GenericTypeIndicator<List<String>>() {
-                            });
-
                     // listener for each transaction
-                    for (String t : transactionIds)
-                        listenForTransaction(t);
+                    for (DataSnapshot t : dataSnapshot.getChildren())
+                        listenForTransaction(t.getKey());
 
                     refresh();
                 }

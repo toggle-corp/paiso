@@ -11,14 +11,12 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Spinner;
 
-import com.google.firebase.database.ServerValue;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class AddTransactionActivity extends AppCompatActivity {
-    private List<String> mContactIds =  new ArrayList<>();
+    private List<String> mUserIds =  new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,13 +38,13 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         // Populate contact spinner
         Spinner spinner = (Spinner)findViewById(R.id.spinner_user);
-        List<String> contactList = new ArrayList<>();
-        for (HashMap.Entry<String, Contact> contact: Database.get().contacts.entrySet()) {
-            mContactIds.add(contact.getKey());
-            contactList.add(contact.getValue().displayName);
+        List<String> userList = new ArrayList<>();
+        for (HashMap.Entry<String, User> user: Database.get().users.entrySet()) {
+            mUserIds.add(user.getKey());
+            userList.add(user.getValue().displayName);
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, contactList);
+                android.R.layout.simple_list_item_1, userList);
         spinner.setAdapter(adapter);
     }
 
@@ -87,10 +85,10 @@ public class AddTransactionActivity extends AppCompatActivity {
         transaction.amount = Double.parseDouble(amount);
         if (((RadioButton)findViewById(R.id.radio_by)).isChecked()) {
             transaction.to = Database.get().selfId;
-            transaction.by = Database.get().contacts.get(mContactIds.get(user)).userId;
+            transaction.by = mUserIds.get(user);
         } else {
             transaction.by = Database.get().selfId;
-            transaction.to = Database.get().contacts.get(mContactIds.get(user)).userId;
+            transaction.to = mUserIds.get(user);
         }
         transaction.added_by = Database.get().selfId;
 
