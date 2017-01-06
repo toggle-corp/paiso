@@ -1,6 +1,7 @@
 package com.togglecorp.paiso;
 
 import android.os.Bundle;
+import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -24,7 +26,7 @@ public class UserDetailsActivity extends AppCompatActivity implements RefreshLis
     private String mUserId;
     private boolean mCustomUser = true;
 
-    private List<Transaction> mTransactions = new ArrayList<>();
+    private List<Pair<String, Transaction>> mTransactions = new ArrayList<>();
     private UserTransactionAdapter mAdapter;
 
     @Override
@@ -121,20 +123,21 @@ public class UserDetailsActivity extends AppCompatActivity implements RefreshLis
         mTransactions.clear();
 
         // And add transactions involving this this user
-        for (Transaction transaction: Database.get().transactions.values()) {
-            if (transaction.customUser == mCustomUser &&
-                    transaction.getOther(Database.get().selfId).equals(mUserId))
+        for (Map.Entry<String, Transaction> transaction: Database.get().transactions.entrySet()) {
+            if ((transaction.getValue().deleted == null || !transaction.getValue().deleted) &&
+                    transaction.getValue().customUser == mCustomUser &&
+                    transaction.getValue().getOther(Database.get().selfId).equals(mUserId))
             {
-                mTransactions.add(transaction);
-                total += transaction.getSignedAmount(Database.get().selfId);
+                mTransactions.add(new Pair<>(transaction.getKey(), transaction.getValue()));
+                total += transaction.getValue().getSignedAmount(Database.get().selfId);
             }
         }
 
         // Also sort by date: latest first
-        Collections.sort(mTransactions, new Comparator<Transaction>() {
+        Collections.sort(mTransactions, new Comparator<Pair<String, Transaction>>() {
             @Override
-            public int compare(Transaction t1, Transaction t2) {
-                return ((Long)t2.date).compareTo((Long)t1.date);
+            public int compare(Pair<String, Transaction> t1, Pair<String, Transaction> t2) {
+                return ((Long)t2.second.date).compareTo((Long)t1.second.date);
             }
         });
 

@@ -80,7 +80,7 @@ public class DashboardFragment extends Fragment implements RefreshListener {
         HashMap<String, Double> customUserSummary = new HashMap<>();
         for (Transaction transaction: Database.get().transactions.values()) {
             // Get each transaction
-            if (transaction != null) {
+            if (transaction != null && !(transaction.deleted != null && transaction.deleted)) {
                 String user = transaction.getOther(Database.get().selfId);
                 Double amount = transaction.getSignedAmount(Database.get().selfId);
 

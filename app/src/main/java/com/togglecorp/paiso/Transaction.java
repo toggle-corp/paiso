@@ -16,6 +16,7 @@ public class Transaction {
     // Status
     public String added_by;
     public String accepted_by;
+    public Boolean deleted;
 
     Transaction() {
         customUser = false;

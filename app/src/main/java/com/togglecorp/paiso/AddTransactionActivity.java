@@ -21,12 +21,18 @@ import java.util.List;
 
 public class AddTransactionActivity extends AppCompatActivity {
     private List<String> mUserIds =  new ArrayList<>();
+    private String mTransactionId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_add_transaction);
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            mTransactionId = bundle.getString("transaction-id", null);
+        }
 
         // The toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -59,6 +65,23 @@ public class AddTransactionActivity extends AppCompatActivity {
                 addTransaction();
             }
         });
+
+        // For editing, fill old values
+        if (mTransactionId != null) {
+            Transaction oldTransaction = Database.get().transactions.get(mTransactionId);
+
+            ((EditText)findViewById(R.id.input_title)).setText(oldTransaction.title);
+            ((EditText)findViewById(R.id.input_title)).setSelection(oldTransaction.title.length());
+            ((EditText)findViewById(R.id.input_amount)).setText(oldTransaction.amount+"");
+            ((Spinner)findViewById(R.id.spinner_user)).setSelection(
+                    mUserIds.indexOf(oldTransaction.getOther(Database.get().selfId))
+            );
+            ((ToggleButton)findViewById(R.id.toggle_whom)).setChecked(
+                    oldTransaction.to.equals(Database.get().selfId)
+            );
+        }
+
+        // Show fab
         fab.show();
     }
 
@@ -66,7 +89,8 @@ public class AddTransactionActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_add_transaction, menu);
-        menu.findItem(R.id.delete_transaction).setVisible(false);
+        menu.findItem(R.id.delete_transaction).setVisible(mTransactionId != null);
+
         return true;
     }
 
@@ -98,6 +122,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         Transaction transaction = new Transaction();
         transaction.title = title;
         transaction.amount = Double.parseDouble(amount);
+
         if (((ToggleButton)findViewById(R.id.toggle_whom)).isChecked()) {
             transaction.to = Database.get().selfId;
             transaction.by = mUserIds.get(user);
@@ -107,12 +132,21 @@ public class AddTransactionActivity extends AppCompatActivity {
         }
         transaction.added_by = Database.get().selfId;
 
-        Database.get().addTransaction(transaction);
+        if (mTransactionId == null)
+            Database.get().addTransaction(transaction);
+        else {
+            // Keep the creation time
+            transaction.date = Database.get().transactions.get(mTransactionId).date;
+            Database.get().editTransaction(mTransactionId, transaction);
+        }
 
         finish();
     }
 
     private void deleteTransaction() {
-
+        if (mTransactionId != null) {
+            Database.get().deleteTransaction(mTransactionId);
+        }
+        finish();
     }
 }

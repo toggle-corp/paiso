@@ -78,6 +78,26 @@ public class Database {
         }
     }
 
+    public void editTransaction(String key, Transaction transaction) {
+        mRef.child("transactions").child(key).setValue(transaction);
+    }
+
+    public void deleteTransaction(String key) {
+        Transaction transaction = transactions.get(key);
+        transaction.deleted = true;
+        editTransaction(key, transaction);
+
+        mRef.child("user_transactions").child(selfId)
+                .child(key).removeValue();
+
+        if (!transaction.customUser) {
+            mRef.child("user_transactions").child(transaction.getOther(selfId))
+                    .child(key).removeValue();
+        }
+
+        mRef.child("transactions").child(key).removeValue();
+    }
+
 
     // Firebase data listener
     private Map<Query, ValueEventListener> mListeners = new HashMap<>();
@@ -231,7 +251,6 @@ public class Database {
         if (cursor != null) {
             try {
                 while (cursor.moveToNext()) {
-
 
                     // Get details of each contact
                     String id = cursor.getString(

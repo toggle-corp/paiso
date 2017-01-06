@@ -1,8 +1,9 @@
 package com.togglecorp.paiso;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +13,10 @@ import java.util.List;
 
 public class UserTransactionAdapter extends RecyclerView.Adapter<UserTransactionAdapter.UserTransactionViewHolder> {
 
-    private List<Transaction> mTransactions;
+    private List<Pair<String, Transaction>> mTransactions;
     private Context mContext;
 
-    UserTransactionAdapter(Context context, List<Transaction> transactions){
+    UserTransactionAdapter(Context context, List<Pair<String, Transaction>> transactions){
         mContext = context;
         mTransactions = transactions;
     }
@@ -26,16 +27,25 @@ public class UserTransactionAdapter extends RecyclerView.Adapter<UserTransaction
     }
 
     @Override
-    public void onBindViewHolder(UserTransactionViewHolder holder, int position) {
-        holder.name.setText(mTransactions.get(position).title);
+    public void onBindViewHolder(final UserTransactionViewHolder holder, int position) {
+        holder.name.setText(mTransactions.get(position).second.title);
         holder.amount.setText(Utils.formatCurrency(
-                mTransactions.get(position).getSignedAmount(Database.get().selfId)));
-        holder.extra.setText(Utils.formatDate(mContext, (Long)mTransactions.get(position).date));
+                mTransactions.get(position).second.getSignedAmount(Database.get().selfId)));
+        holder.extra.setText(Utils.formatDate(mContext,
+                (Long)mTransactions.get(position).second.date));
 
         holder.root.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Ignore
+                // Only allow editing, if it was added by self
+                if (mTransactions.get(holder.getAdapterPosition())
+                        .second.added_by.equals(Database.get().selfId))
+                {
+                    Intent intent = new Intent(mContext, AddTransactionActivity.class);
+                    intent.putExtra("transaction-id",
+                            mTransactions.get(holder.getAdapterPosition()).first);
+                    mContext.startActivity(intent);
+                }
             }
         });
     }
