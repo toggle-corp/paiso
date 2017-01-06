@@ -1,9 +1,11 @@
 package com.togglecorp.paiso;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -76,6 +78,7 @@ public class AddTransactionActivity extends AppCompatActivity {
             ((Spinner)findViewById(R.id.spinner_user)).setSelection(
                     mUserIds.indexOf(oldTransaction.getOther(Database.get().selfId))
             );
+            findViewById(R.id.spinner_user).setEnabled(false);
             ((ToggleButton)findViewById(R.id.toggle_whom)).setChecked(
                     oldTransaction.to.equals(Database.get().selfId)
             );
@@ -144,9 +147,17 @@ public class AddTransactionActivity extends AppCompatActivity {
     }
 
     private void deleteTransaction() {
-        if (mTransactionId != null) {
-            Database.get().deleteTransaction(mTransactionId);
-        }
-        finish();
+        new AlertDialog.Builder(this)
+                .setMessage("Are you sure you want to delete this transaction?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        if (mTransactionId != null) {
+                            Database.get().deleteTransaction(mTransactionId);
+                        }
+                        AddTransactionActivity.this.finish();
+                    }})
+                .setNegativeButton(android.R.string.no, null).show();
     }
 }

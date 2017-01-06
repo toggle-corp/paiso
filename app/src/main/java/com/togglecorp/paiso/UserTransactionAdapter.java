@@ -31,8 +31,11 @@ public class UserTransactionAdapter extends RecyclerView.Adapter<UserTransaction
         holder.name.setText(mTransactions.get(position).second.title);
         holder.amount.setText(Utils.formatCurrency(
                 mTransactions.get(position).second.getSignedAmount(Database.get().selfId)));
-        holder.extra.setText(Utils.formatDate(mContext,
-                (Long)mTransactions.get(position).second.date));
+        holder.extra.setText(
+                Utils.formatDate(mContext,
+                        (Long)mTransactions.get(position).second.date)
+                + (mTransactions.get(position).second.added_by.equals(Database.get().selfId) ? ", by me" : ", by them")
+        );
 
         holder.root.setOnClickListener(new View.OnClickListener() {
             @Override
