@@ -16,6 +16,7 @@
             app:theme="@style/AppToolbarTheme"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:elevation="4dp"
             android:background="@color/colorPrimary"
             android:fitsSystemWindows="true">
         </android.support.v7.widget.Toolbar>
@@ -47,7 +48,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/divider"/>
+                android:background="@color/colorDivider"/>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/navigation_drawer_recycler_view"

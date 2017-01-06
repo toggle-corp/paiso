@@ -9,13 +9,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
-        android:elevation="4dp"
-        android:gravity="bottom|end"
+        android:gravity="bottom"
         android:orientation="horizontal">
 
         <TextView
@@ -23,21 +21,26 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:textColor="#fff"
             android:textAllCaps="true"
             android:fontFamily="sans-serif-light"
-            android:textSize="24sp"
+            android:textSize="18sp"
+            android:textColor="@color/colorLabel"
             android:text="Total"/>
         <TextView
             android:id="@+id/amount"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#fff"
+            android:textColor="#23CC71"
             android:fontFamily="sans-serif-condensed-light"
             android:textSize="48sp"
-            android:text="0"/>
+            android:text="0"
+            android:gravity="end"/>
 
     </LinearLayout>
+
+    <View android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorDivider"/>
 
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"

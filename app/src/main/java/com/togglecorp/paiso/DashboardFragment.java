@@ -124,8 +124,7 @@ public class DashboardFragment extends Fragment implements RefreshListener {
         mAdapter.notifyDataSetChanged();
 
         // Sum total
-        ((TextView)getActivity().findViewById(R.id.amount))
-                .setText(Utils.formatCurrency(total));
+        Utils.setBalance(getActivity(), (TextView)getActivity().findViewById(R.id.amount), total);
     }
 
     @Override

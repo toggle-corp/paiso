@@ -1,11 +1,14 @@
 package com.togglecorp.paiso;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -47,12 +50,23 @@ public class AddTransactionActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, userList);
         spinner.setAdapter(adapter);
+
+        // FAB button to add transaction
+        FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.add_transaction);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addTransaction();
+            }
+        });
+        fab.show();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_add_transaction, menu);
+        menu.findItem(R.id.delete_transaction).setVisible(false);
         return true;
     }
 
@@ -64,8 +78,8 @@ public class AddTransactionActivity extends AppCompatActivity {
                 onBackPressed();
                 return true;
             // Add transaction
-            case R.id.add_transaction:
-                addTransaction();
+            case R.id.delete_transaction:
+                deleteTransaction();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -96,5 +110,9 @@ public class AddTransactionActivity extends AppCompatActivity {
         Database.get().addTransaction(transaction);
 
         finish();
+    }
+
+    private void deleteTransaction() {
+
     }
 }

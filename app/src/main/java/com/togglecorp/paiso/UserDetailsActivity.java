@@ -141,7 +141,6 @@ public class UserDetailsActivity extends AppCompatActivity implements RefreshLis
         mAdapter.notifyDataSetChanged();
 
         // Sum total
-        ((TextView)findViewById(R.id.amount))
-                .setText(Utils.formatCurrency(total));
+        Utils.setBalance(this, (TextView)findViewById(R.id.amount), total);
     }
 }
