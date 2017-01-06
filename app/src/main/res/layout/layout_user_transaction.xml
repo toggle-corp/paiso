@@ -2,31 +2,35 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp">
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:background="?attr/selectableItemBackground">
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.7"
+        android:layout_weight="0.6"
         android:orientation="vertical">
         <TextView
             android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:text="Momo khayera bhageko"/>
+            android:textSize="18sp" />
         <TextView
             android:id="@+id/extra"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="256 BC"/>
+            android:textColor="@color/colorLabel" />
     </LinearLayout>
+
     <TextView
         android:id="@+id/amount"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="end|center_vertical"
-        android:text="10 Zillion"
+        android:fontFamily="sans-serif-condensed-light"
         android:textSize="24sp"
-        android:layout_weight="0.3"/>
+        android:layout_weight="0.4"/>
 </LinearLayout>

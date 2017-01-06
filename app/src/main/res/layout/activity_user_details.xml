@@ -8,7 +8,6 @@
         android:id="@+id/toolbar"
         app:theme="@style/AppToolbarTheme"
         android:layout_width="match_parent"
-        android:elevation="4dp"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
         android:fitsSystemWindows="true"/>
@@ -18,7 +17,7 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_alignParentEnd="true"
-        android:elevation="5dp"
+        android:elevation="1dp"
         android:layout_marginTop="12dp"
         android:layout_marginEnd="24dp"/>
 
@@ -30,10 +29,14 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="160dp"
+            android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
-            android:padding="16dp"
-            android:gravity="bottom"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:elevation="4dp"
+            android:gravity="bottom|end"
             android:orientation="horizontal">
 
             <TextView
@@ -42,21 +45,23 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:textColor="#fff"
-                android:textSize="32sp"
+                android:textAllCaps="true"
+                android:fontFamily="sans-serif-light"
+                android:textSize="24sp"
                 android:text="Total"/>
             <TextView
                 android:id="@+id/amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#fff"
-                android:textSize="56sp"
+                android:fontFamily="sans-serif-condensed-light"
+                android:textSize="48sp"
                 android:text="0"/>
 
         </LinearLayout>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler_transactions"
-            android:padding="24dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </LinearLayout>

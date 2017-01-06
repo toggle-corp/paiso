@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -62,10 +63,10 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<NavigationDrawerAdapter.Item> navItems = new ArrayList<>();
         navItems.add(new NavigationDrawerAdapter.Item("Dashboard",
                 ContextCompat.getDrawable(this, R.drawable.ic_home)));
-        navItems.add(new NavigationDrawerAdapter.Item("Transactions",
-                ContextCompat.getDrawable(this, R.drawable.ic_contents)));
-        navItems.add(new NavigationDrawerAdapter.Item("People",
-                ContextCompat.getDrawable(this, R.drawable.ic_people)));
+//        navItems.add(new NavigationDrawerAdapter.Item("Transactions",
+//                ContextCompat.getDrawable(this, R.drawable.ic_contents)));
+//        navItems.add(new NavigationDrawerAdapter.Item("People",
+//                ContextCompat.getDrawable(this, R.drawable.ic_people)));
 
         mNavigationAdapter = new NavigationDrawerAdapter(this, navItems, mNavigationListener);
         RecyclerView navigationRecyclerView =
@@ -127,12 +128,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
-
+            case R.id.add_transaction:
+                startActivity(new Intent(this, AddTransactionActivity.class));
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

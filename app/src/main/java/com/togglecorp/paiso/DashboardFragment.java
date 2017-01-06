@@ -3,6 +3,7 @@ package com.togglecorp.paiso;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
@@ -42,10 +43,28 @@ public class DashboardFragment extends Fragment implements RefreshListener {
         recyclerTransactions.setAdapter(mAdapter);
 
         // FAB button to add transaction
-        view.findViewById(R.id.add_transaction).setOnClickListener(new View.OnClickListener() {
+        final FloatingActionButton fab = (FloatingActionButton)view.findViewById(R.id.add_transaction);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(getActivity(), AddTransactionActivity.class));
+            }
+        });
+
+        // Show hide fab on scroll
+        recyclerTransactions.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0 ||dy<0 && fab.isShown()) {
+                    fab.hide();
+                }
+            }
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    fab.show();
+                }
+                super.onScrollStateChanged(recyclerView, newState);
             }
         });
 
@@ -101,6 +120,7 @@ public class DashboardFragment extends Fragment implements RefreshListener {
                 ));
             }
         }
+
         mAdapter.notifyDataSetChanged();
 
         // Sum total
