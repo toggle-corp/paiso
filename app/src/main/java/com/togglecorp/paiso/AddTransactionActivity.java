@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Spinner;
+import android.widget.ToggleButton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,7 +84,7 @@ public class AddTransactionActivity extends AppCompatActivity {
         Transaction transaction = new Transaction();
         transaction.title = title;
         transaction.amount = Double.parseDouble(amount);
-        if (((RadioButton)findViewById(R.id.radio_by)).isChecked()) {
+        if (((ToggleButton)findViewById(R.id.toggle_whom)).isChecked()) {
             transaction.to = Database.get().selfId;
             transaction.by = mUserIds.get(user);
         } else {

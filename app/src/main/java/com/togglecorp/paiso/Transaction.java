@@ -33,8 +33,8 @@ public class Transaction {
 
     public Double getSignedAmount(String selfId) {
         if (selfId.equals(by))
-            return -amount;
-        else
             return amount;
+        else
+            return -amount;
     }
 }
