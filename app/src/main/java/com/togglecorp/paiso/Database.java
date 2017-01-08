@@ -2,15 +2,14 @@ package com.togglecorp.paiso;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.provider.ContactsContract;
-import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -40,16 +39,41 @@ public class Database {
     public HashMap<String, User> users = new HashMap<>();
     public HashMap<String, Contact> contacts = new HashMap<>();
 
-    public HashMap<String, String> customUsers = new HashMap<>();
     public HashMap<String, Transaction> transactions = new HashMap<>();
 
     // Make sure every activity/fragment removes listener at or before onStop
     public List<RefreshListener> refreshListeners = new ArrayList<>();
 
-    public void refresh() {
+    private void refresh() {
         for (RefreshListener listener: refreshListeners)
             if (listener != null)
                 listener.refresh();
+
+        // TODO: Do this only once in a while
+        // Synchronize all transaction added by self to other users if they exist
+        for (Map.Entry<String, Transaction> transactionEntry: transactions.entrySet()) {
+            String key = transactionEntry.getKey();
+            Transaction transaction = transactionEntry.getValue();
+
+            if (transaction.added_by.equals(selfId)) {
+
+                // Is this transaction for custom user despite actual user already existing
+                String otherId = transaction.getOther(selfId);
+                if (transaction.customUser && contacts.get(otherId) != null) {
+                    if (contacts.get(otherId).userId != null) {
+                        transaction.customUser = false;
+                        transaction.setOther(selfId, contacts.get(otherId).userId);
+                        editTransaction(key, transaction);
+                    }
+                }
+
+                // Make sure this transaction is synchronized for other user
+                if (!transaction.customUser) {
+                    mRef.child("user_transactions").child(transaction.getOther(selfId))
+                            .child(key).setValue("true");
+                }
+            }
+        }
     }
 
 
@@ -111,7 +135,7 @@ public class Database {
         mListeners.put(ref, listener);
     }
 
-    public void startSync(Context context) {
+    public void startSync(final Context context) {
         // First store self information
         DatabaseReference selfRef = mRef.child("users").child(selfId);
         selfRef.child("displayName").setValue(self.displayName);
@@ -143,33 +167,20 @@ public class Database {
         };
         addListener(mRef.child("user_transactions").child(selfId), transactionsListener);
 
-        // Get custom added users
-        ValueEventListener customUsersListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot == null || !dataSnapshot.exists())
-                    return;
-
-                // Store each user
-                for (DataSnapshot user: dataSnapshot.getChildren()) {
-                    if (user == null || !user.exists())
-                        continue;
-
-                    customUsers.put(user.getKey(), user.getValue(String.class));
-                }
-
-                refresh();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-        addListener(mRef.child("custom_users").child(selfId), customUsersListener);
-
         // Get all contacts who are also in Paiso
-        fetchContactUsers(context);
+        // Reading transactions get hanged up due to this, so delay this to other thread
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                fetchContactUsers(context);
+                return null;
+            }
+        }.execute();
     }
 
     private void listenForTransaction(String transactionId) {
@@ -238,12 +249,12 @@ public class Database {
 
         // Fetch all contacts who have EMAIL
         Cursor cursor = context.getContentResolver().query(
-                ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+                ContactsContract.Data.CONTENT_URI,
                 new String[] {
                         ContactsContract.Contacts._ID,
                         ContactsContract.Contacts.DISPLAY_NAME,
                         ContactsContract.CommonDataKinds.Email.DATA,
-                        ContactsContract.CommonDataKinds.Email.PHOTO_URI
+                        ContactsContract.Contacts.PHOTO_URI
                 },
                 null, null, null
         );
@@ -260,11 +271,10 @@ public class Database {
                     String email = cursor.getString(
                             cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
                     String photoUrl = cursor.getString(
-                            cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.PHOTO_URI));
+                            cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_URI));
 
-                    // Check if a user with this email exists in server
-                    // TODO: improve this to only check for those users that user selects to search for; or any other improvement possible.
-                    checkAndFetchContact(id, new Contact(displayName, email, photoUrl));
+                    // Store the contact
+                    storeContact(id, new Contact(displayName, email, photoUrl));
                 }
             }
             finally {
@@ -274,8 +284,15 @@ public class Database {
         }
     }
 
-    private void checkAndFetchContact(final String id, final Contact contact) {
-        ValueEventListener userListener = new ValueEventListener() {
+    private void storeContact(final String id, final Contact contact) {
+        // First store the contact
+        contacts.put(id, contact);
+
+        if (contact.email == null)
+            return;
+
+        // Also see if user exists with email of this contact
+        final ValueEventListener userListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot == null || !dataSnapshot.exists())
@@ -284,9 +301,10 @@ public class Database {
                 if (dataSnapshot.getChildrenCount() > 0) {
                     DataSnapshot user = dataSnapshot.getChildren().iterator().next();
 
-                    // Store the contact
+//                    Log.d(TAG, "Got email for: " + contact.email);
+
+                    // Set userId of the contact
                     contact.userId = user.getKey();
-                    contacts.put(id, contact);
 
                     // Also store the user
                     users.put(user.getKey(), user.getValue(User.class));
@@ -299,6 +317,7 @@ public class Database {
 
             }
         };
+
         addListener(mRef.child("users").orderByChild("email").equalTo(contact.email), userListener);
     }
 

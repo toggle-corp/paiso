@@ -5,6 +5,7 @@ import com.google.firebase.database.ServerValue;
 public class Transaction {
     public String title;
 
+    // These are id of either actual user (customUser == false) or contact id (customUser == true)
     public String by;
     public String to;
 
@@ -30,6 +31,15 @@ public class Transaction {
             return to;
         else
             return by;
+    }
+
+    public void setOther(String selfId, String newId) {
+        if (selfId.equals(by)) {
+            to = newId;
+        }
+        else {
+            by = newId;
+        }
     }
 
     public Double getSignedAmount(String selfId) {

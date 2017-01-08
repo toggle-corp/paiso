@@ -60,7 +60,7 @@ public class UserDetailsActivity extends AppCompatActivity implements RefreshLis
 
         findViewById(R.id.avatar).setVisibility(View.INVISIBLE);
         if (mCustomUser) {
-            setTitle(Database.get().customUsers.get(mUserId));
+            setTitle(Database.get().contacts.get(mUserId).displayName);
         }
         else {
             User user = Database.get().users.get(mUserId);

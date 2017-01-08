@@ -17,13 +17,14 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 
 public class DashboardFragment extends Fragment implements RefreshListener {
     private static final String TAG = "Dashboard Fragment";
 
-    private ArrayList<DashboardTransaction> mTransactions = new ArrayList<>();
+    private List<DashboardTransaction> mTransactions = new ArrayList<>();
     private DashboardTransactionAdapter mAdapter;
 
     @Override
@@ -81,6 +82,7 @@ public class DashboardFragment extends Fragment implements RefreshListener {
         for (Transaction transaction: Database.get().transactions.values()) {
             // Get each transaction
             if (transaction != null && !(transaction.deleted != null && transaction.deleted)) {
+
                 String user = transaction.getOther(Database.get().selfId);
                 Double amount = transaction.getSignedAmount(Database.get().selfId);
 
@@ -110,12 +112,12 @@ public class DashboardFragment extends Fragment implements RefreshListener {
             }
         }
         for (HashMap.Entry<String, Double> summaryEntry: customUserSummary.entrySet()) {
-            if (Database.get().customUsers.containsKey(summaryEntry.getKey())) {
+            if (Database.get().contacts.containsKey(summaryEntry.getKey())) {
                 mTransactions.add(new DashboardTransaction(
                         summaryEntry.getKey(),
                         true,
-                        Database.get().customUsers.get(summaryEntry.getKey()),
-                        "",
+                        Database.get().contacts.get(summaryEntry.getKey()).displayName,
+                        Database.get().contacts.get(summaryEntry.getKey()).email,
                         summaryEntry.getValue()
                 ));
             }
