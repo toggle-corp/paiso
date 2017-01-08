@@ -48,7 +48,9 @@ public class DashboardFragment extends Fragment implements RefreshListener {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(), AddTransactionActivity.class));
+//                startActivity(new Intent(getActivity(), AddTransactionActivity.class));
+                startActivity(new Intent(getActivity(), SearchContactActivity.class));
+
             }
         });
 

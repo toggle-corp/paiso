@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private NavigationDrawerAdapter mNavigationAdapter;
 
-    DashboardFragment mDashboardFragment = new DashboardFragment();
+    private DashboardFragment mDashboardFragment = new DashboardFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
