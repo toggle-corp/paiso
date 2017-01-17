@@ -1,24 +1,21 @@
 package com.togglecorp.paiso;
 
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 
 public class DashboardFragment extends Fragment implements RefreshListener {
@@ -49,7 +46,7 @@ public class DashboardFragment extends Fragment implements RefreshListener {
             @Override
             public void onClick(View view) {
 //                startActivity(new Intent(getActivity(), AddTransactionActivity.class));
-                startActivity(new Intent(getActivity(), SearchContactActivity.class));
+                startActivityForResult(new Intent(getActivity(), SelectContactActivity.class), 1);
 
             }
         });
@@ -119,7 +116,7 @@ public class DashboardFragment extends Fragment implements RefreshListener {
                         summaryEntry.getKey(),
                         true,
                         Database.get().contacts.get(summaryEntry.getKey()).displayName,
-                        Database.get().contacts.get(summaryEntry.getKey()).email,
+                        Database.get().contacts.get(summaryEntry.getKey()).data,
                         summaryEntry.getValue()
                 ));
             }
@@ -145,5 +142,17 @@ public class DashboardFragment extends Fragment implements RefreshListener {
         super.onPause();
         // Remove the database refresh listener
         Database.get().refreshListeners.remove(this);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+
+            Intent intent = new Intent(getActivity(), AddTransactionActivity.class);
+            intent.putExtra("contact-id", data.getStringExtra("contact-id"));
+            startActivity(intent);
+        }
     }
 }

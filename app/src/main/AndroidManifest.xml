@@ -24,7 +24,7 @@
         <activity android:name=".AddTransactionActivity"
             android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".UserDetailsActivity"/>
-        <activity android:name=".SearchContactActivity"/>
+        <activity android:name=".SelectContactActivity"/>
 
     </application>
 

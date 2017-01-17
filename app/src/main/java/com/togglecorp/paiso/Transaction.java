@@ -2,6 +2,8 @@ package com.togglecorp.paiso;
 
 import com.google.firebase.database.ServerValue;
 
+import java.util.Map;
+
 public class Transaction {
     public String title;
 
@@ -47,5 +49,18 @@ public class Transaction {
             return amount;
         else
             return -amount;
+    }
+
+    public String getOtherContactId(String selfId) {
+        String otherId = getOther(selfId);
+        if (customUser)
+            return otherId;
+        else {
+            for (Map.Entry<String, Contact> contact: Database.get().contacts.entrySet()) {
+                if (contact.getValue().userId != null && contact.getValue().userId.equals(otherId))
+                    return contact.getKey();
+            }
+        }
+        return null;
     }
 }

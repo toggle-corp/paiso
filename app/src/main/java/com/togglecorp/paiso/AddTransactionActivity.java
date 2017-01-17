@@ -1,7 +1,6 @@
 package com.togglecorp.paiso;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
@@ -11,19 +10,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 public class AddTransactionActivity extends AppCompatActivity {
-    private List<String> mUserIds =  new ArrayList<>();
+
     private String mTransactionId = null;
+    private String mContactId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,9 +25,15 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_add_transaction);
 
+        // Get data passed to this activity
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             mTransactionId = bundle.getString("transaction-id", null);
+            mContactId = bundle.getString("contact-id", null);
+        }
+        if (mContactId == null) {
+            finish();
+            return;
         }
 
         // The toolbar
@@ -48,17 +48,6 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         setTitle("Add transaction");
 
-        // Populate contact spinner
-        Spinner spinner = (Spinner)findViewById(R.id.spinner_user);
-        List<String> contactList = new ArrayList<>();
-        for (HashMap.Entry<String, Contact> contact: Database.get().contacts.entrySet()) {
-            mUserIds.add(contact.getKey());
-            contactList.add(contact.getValue().displayName);
-        }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, contactList);
-        spinner.setAdapter(adapter);
-
         // FAB button to add transaction
         FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.add_transaction);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -68,6 +57,10 @@ public class AddTransactionActivity extends AppCompatActivity {
             }
         });
 
+        // Name of contact
+        ((TextView)findViewById(R.id.username)).setText(
+                Database.get().contacts.get(mContactId).displayName);
+
         // For editing, fill old values
         if (mTransactionId != null) {
             Transaction oldTransaction = Database.get().transactions.get(mTransactionId);
@@ -75,10 +68,6 @@ public class AddTransactionActivity extends AppCompatActivity {
             ((EditText)findViewById(R.id.input_title)).setText(oldTransaction.title);
             ((EditText)findViewById(R.id.input_title)).setSelection(oldTransaction.title.length());
             ((EditText)findViewById(R.id.input_amount)).setText(oldTransaction.amount+"");
-            ((Spinner)findViewById(R.id.spinner_user)).setSelection(
-                    mUserIds.indexOf(oldTransaction.getOther(Database.get().selfId))
-            );
-            findViewById(R.id.spinner_user).setEnabled(false);
             ((ToggleButton)findViewById(R.id.toggle_whom)).setChecked(
                     oldTransaction.to.equals(Database.get().selfId)
             );
@@ -116,20 +105,14 @@ public class AddTransactionActivity extends AppCompatActivity {
     private void addTransaction() {
         String title = ((EditText)findViewById(R.id.input_title)).getText().toString();
         String amount = ((EditText)findViewById(R.id.input_amount)).getText().toString();
-        int contact = ((Spinner)findViewById(R.id.spinner_user)).getSelectedItemPosition();
-
-        if (contact < 0 || title.equals("") || amount.equals("")) {
-            return;
-        }
 
         Transaction transaction = new Transaction();
         transaction.title = title;
         transaction.amount = Double.parseDouble(amount);
 
-        // Check if user with this contact exists for paiso
-        String userId = mUserIds.get(contact);
-        if (Database.get().contacts.get(userId).userId != null) {
-            userId = Database.get().contacts.get(userId).userId;
+        // Check if user with this contact exists in paiso
+        if (Database.get().contacts.get(mContactId).userId != null) {
+            mContactId = Database.get().contacts.get(mContactId).userId;
             transaction.customUser = false;
         }
         else {
@@ -138,10 +121,10 @@ public class AddTransactionActivity extends AppCompatActivity {
 
         if (((ToggleButton)findViewById(R.id.toggle_whom)).isChecked()) {
             transaction.to = Database.get().selfId;
-            transaction.by = userId;
+            transaction.by = mContactId;
         } else {
             transaction.by = Database.get().selfId;
-            transaction.to = userId;
+            transaction.to = mContactId;
         }
         transaction.added_by = Database.get().selfId;
 

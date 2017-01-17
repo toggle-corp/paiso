@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.provider.ContactsContract;
+import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -247,34 +248,48 @@ public class Database {
 
         contacts.clear();
 
-        // Fetch all contacts who have EMAIL
+        // Fetch all contacts with email or phone
         Cursor cursor = context.getContentResolver().query(
                 ContactsContract.Data.CONTENT_URI,
                 new String[] {
-                        ContactsContract.Contacts._ID,
+                        ContactsContract.CommonDataKinds.Email.CONTACT_ID,
                         ContactsContract.Contacts.DISPLAY_NAME,
                         ContactsContract.CommonDataKinds.Email.DATA,
                         ContactsContract.Contacts.PHOTO_URI
                 },
-                null, null, null
+                ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE + "' OR " +
+                ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE + "'",
+                null,
+                null
         );
 
         if (cursor != null) {
             try {
+
                 while (cursor.moveToNext()) {
 
                     // Get details of each contact
                     String id = cursor.getString(
-                            cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                            cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.CONTACT_ID));
                     String displayName = cursor.getString(
                             cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                    String email = cursor.getString(
+                    String data = cursor.getString(
                             cursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
                     String photoUrl = cursor.getString(
                             cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_URI));
 
+                    if (displayName == null || displayName.equals(""))
+                        continue;
+
+                    // If contact already added and had an email, then skip new contact
+                    if (contacts.containsKey(id)) {
+                        if (contacts.get(id).data.contains("@")) {    // TODO: Better email check
+                            continue;
+                        }
+                    }
+
                     // Store the contact
-                    storeContact(id, new Contact(displayName, email, photoUrl));
+                    storeContact(id, new Contact(displayName, data, photoUrl));
                 }
             }
             finally {
@@ -288,7 +303,7 @@ public class Database {
         // First store the contact
         contacts.put(id, contact);
 
-        if (contact.email == null)
+        if (contact.data == null)
             return;
 
         // Also see if user exists with email of this contact
@@ -318,7 +333,7 @@ public class Database {
             }
         };
 
-        addListener(mRef.child("users").orderByChild("email").equalTo(contact.email), userListener);
+        addListener(mRef.child("users").orderByChild("email").equalTo(contact.data), userListener);
     }
 
 

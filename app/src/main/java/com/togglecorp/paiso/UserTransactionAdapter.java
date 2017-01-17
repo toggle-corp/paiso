@@ -47,6 +47,8 @@ public class UserTransactionAdapter extends RecyclerView.Adapter<UserTransaction
                     Intent intent = new Intent(mContext, AddTransactionActivity.class);
                     intent.putExtra("transaction-id",
                             mTransactions.get(holder.getAdapterPosition()).first);
+                    intent.putExtra("contact-id",
+                            mTransactions.get(holder.getAdapterPosition()).second.getOtherContactId(Database.get().selfId));
                     mContext.startActivity(intent);
                 }
             }

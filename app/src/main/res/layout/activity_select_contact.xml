@@ -12,25 +12,10 @@
         android:layout_height="?attr/actionBarSize"
         android:elevation="4dp"
         android:background="@color/colorPrimary"
-        android:fitsSystemWindows="true">
-
-        <ImageView
-            android:contentDescription="Enter name"
-            android:layout_gravity="start"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_search"/>
-        <EditText
-            android:id="@+id/input_search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#fff"
-            android:textColorHint="@color/colorLabel"
-            android:hint="Search" />
-
-    </android.support.v7.widget.Toolbar>
+        android:fitsSystemWindows="true"/>
 
     <android.support.design.widget.TabLayout
+        android:id="@+id/contact_tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <android.support.design.widget.TabItem
@@ -41,10 +26,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="All"/>
-        <android.support.design.widget.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New"/>
+        <!--<android.support.design.widget.TabItem-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="New"/>-->
     </android.support.design.widget.TabLayout>
 
 
@@ -58,6 +43,7 @@
         android:paddingEnd="@dimen/activity_horizontal_margin">
 
         <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_contacts"
             android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
