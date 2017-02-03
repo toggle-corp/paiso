@@ -32,8 +32,9 @@ public class Database {
     private static Database mDatabase;
 
     public static Database get() {
-        if (mDatabase == null)
+        if (mDatabase == null) {
             mDatabase = new Database();
+        }
         return mDatabase;
     }
 
@@ -125,15 +126,17 @@ public class Database {
 
 
     // Firebase data listener
-    private Map<Query, ValueEventListener> mListeners = new HashMap<>();
+    private final Map<Query, ValueEventListener> mListeners = new HashMap<>();
     private void addListener(Query ref, ValueEventListener listener) {
-        if (mListeners.containsKey(ref))
-            return;
+        synchronized (mListeners) {
+            if (mListeners.containsKey(ref))
+                return;
 
 //        Log.d(TAG, "Adding listener for: " + ref.toString());
 
-        ref.addValueEventListener(listener);
-        mListeners.put(ref, listener);
+            ref.addValueEventListener(listener);
+            mListeners.put(ref, listener);
+        }
     }
 
     public void startSync(final Context context) {
@@ -157,8 +160,8 @@ public class Database {
                         listenForTransaction(t.getKey());
 
                     refresh();
+                } catch (DatabaseException ignored) {
                 }
-                catch (DatabaseException ignored) {}
             }
 
             @Override
@@ -246,8 +249,6 @@ public class Database {
                 .getBoolean("CAN_READ_CONTACTS", false))
             return;
 
-        contacts.clear();
-
         // Fetch all contacts with email or phone
         Cursor cursor = context.getContentResolver().query(
                 ContactsContract.Data.CONTENT_URI,
@@ -263,6 +264,7 @@ public class Database {
                 null
         );
 
+        ArrayList<String> idsWithEmails = new ArrayList<>();
         if (cursor != null) {
             try {
 
@@ -282,11 +284,10 @@ public class Database {
                         continue;
 
                     // If contact already added and had an email, then skip new contact
-                    if (contacts.containsKey(id)) {
-                        if (contacts.get(id).data.contains("@")) {    // TODO: Better email check
-                            continue;
-                        }
-                    }
+                    if (idsWithEmails.contains(id))
+                        continue;
+                    else if (data.contains("@"))
+                        idsWithEmails.add(id);
 
                     // Store the contact
                     storeContact(id, new Contact(displayName, data, photoUrl));
@@ -301,6 +302,8 @@ public class Database {
 
     private void storeContact(final String id, final Contact contact) {
         // First store the contact
+        if (contacts.containsKey(id))
+            contact.userId = contacts.get(id).userId;
         contacts.put(id, contact);
 
         if (contact.data == null)
@@ -338,12 +341,22 @@ public class Database {
 
 
     public void stopSync() {
-        for (Map.Entry<Query, ValueEventListener> listener: mListeners.entrySet()) {
+        synchronized (mListeners) {
+            for (Map.Entry<Query, ValueEventListener> listener : mListeners.entrySet()) {
 //            Log.d(TAG, "Removing listener for: " + listener.getKey());
-            listener.getKey().removeEventListener(listener.getValue());
+                listener.getKey().removeEventListener(listener.getValue());
+            }
+            mListeners.clear();
         }
-        mListeners.clear();
 
     }
 
+    public String getContactIdForUser(String userId) {
+        for (Map.Entry<String, Contact> contact: contacts.entrySet()) {
+            if (contact.getValue().userId != null && contact.getValue().userId.equals(userId)) {
+                return contact.getKey();
+            }
+        }
+        return null;
+    }
 }

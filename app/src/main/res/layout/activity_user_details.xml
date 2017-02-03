@@ -64,9 +64,24 @@
             android:layout_height="1dp"
             android:background="@color/colorDivider"/>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_transactions"
+
+        <android.support.design.widget.CoordinatorLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycler_transactions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/add_transaction"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_add"
+                app:layout_anchorGravity="bottom|end"/>
+        </android.support.design.widget.CoordinatorLayout>
     </LinearLayout>
 </RelativeLayout>

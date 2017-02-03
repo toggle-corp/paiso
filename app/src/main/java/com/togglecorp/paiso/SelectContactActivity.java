@@ -21,12 +21,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public class SelectContactActivity extends AppCompatActivity {
+public class SelectContactActivity extends AppCompatActivity implements RefreshListener {
 
     private ContactAdapter mAdapter;
-    private List<Pair<String, Contact>> mContacts = new ArrayList<>();
+    private final List<Pair<String, Contact>> mContacts = new ArrayList<>();
     private List<Pair<String, Contact>> mFilteredContacts = new ArrayList<>();
     private String mQueryString = "";
+
+    private boolean mRecentTab = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,18 +62,13 @@ public class SelectContactActivity extends AppCompatActivity {
         recyclerContacts.setLayoutManager(new LinearLayoutManager(this));
         recyclerContacts.setAdapter(mAdapter);
 
-        // Refresh contact list
-        showRecentContacts();
-
         // Set tab listeners
         ((TabLayout)findViewById(R.id.contact_tabs)).addOnTabSelectedListener(
                 new TabLayout.OnTabSelectedListener() {
                     @Override
                     public void onTabSelected(TabLayout.Tab tab) {
-                        if (tab.getPosition() == 0)
-                            showRecentContacts();
-                        else
-                            showAllContacts();
+                        mRecentTab = tab.getPosition() == 0;
+                        refresh();
                     }
 
                     @Override
@@ -127,13 +124,6 @@ public class SelectContactActivity extends AppCompatActivity {
             }
         }
 
-        Collections.sort(mContacts, new Comparator<Pair<String, Contact> >() {
-            @Override
-            public int compare(Pair<String, Contact> c1, Pair<String, Contact>  c2) {
-                return c1.second.displayName.compareTo(c2.second.displayName);
-            }
-        });
-
         filterContacts();
 
     }
@@ -185,6 +175,37 @@ public class SelectContactActivity extends AppCompatActivity {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Database.get().startSync(this);
+
+
+        // Add database refresh listener to populate the transactions
+        Database.get().refreshListeners.add(this);
+        // Refresh once
+        refresh();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        // Remove the database refresh listener
+        Database.get().refreshListeners.remove(this);
+        Database.get().stopSync();
+    }
+
+    @Override
+    public void refresh() {
+        synchronized (mContacts) {
+            if (mRecentTab)
+                showRecentContacts();
+            else
+                showAllContacts();
         }
     }
 }

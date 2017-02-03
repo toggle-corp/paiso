@@ -1,12 +1,16 @@
 package com.togglecorp.paiso;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -22,6 +26,7 @@ import java.util.Map;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class UserDetailsActivity extends AppCompatActivity implements RefreshListener {
+    private static final String TAG = "UserDetailsActivity";
 
     private String mUserId;
     private boolean mCustomUser = true;
@@ -85,6 +90,40 @@ public class UserDetailsActivity extends AppCompatActivity implements RefreshLis
         mAdapter = new UserTransactionAdapter(this, mTransactions);
         recyclerTransactions.setAdapter(mAdapter);
 
+        // FAB button to add transaction
+        final FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.add_transaction);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String contactId;
+                if (mCustomUser) {
+                    contactId = mUserId;
+                } else {
+                    contactId = Database.get().getContactIdForUser(mUserId);
+                }
+
+                Intent intent = new Intent(UserDetailsActivity.this, AddTransactionActivity.class);
+                intent.putExtra("contact-id", contactId);
+                startActivity(intent);
+            }
+        });
+
+        // Show hide fab on scroll
+        recyclerTransactions.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0 ||dy<0 && fab.isShown()) {
+                    fab.hide();
+                }
+            }
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    fab.show();
+                }
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
     }
 
     @Override
