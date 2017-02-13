@@ -40,7 +40,6 @@ public class Database {
 
     public HashMap<String, User> users = new HashMap<>();
     public HashMap<String, Contact> contacts = new HashMap<>();
-
     public HashMap<String, Transaction> transactions = new HashMap<>();
 
     // Make sure every activity/fragment removes listener at or before onStop
