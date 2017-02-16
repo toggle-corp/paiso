@@ -18,4 +18,11 @@ class JsonResult(JsonResponse):
 
 
 def get_json_request(request):
-    return json.loads(request.body.decode('utf-8'))
+    try:
+        return json.loads(request.body.decode('utf-8'))
+    except:
+        return None
+
+
+# Standard responses
+INVALID_JSON_REQUEST = JsonError("Not a valid json data")
