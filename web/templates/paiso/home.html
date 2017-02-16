@@ -1,1 +1,50 @@
-<h1>Paiso</h1>
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Paiso</title>
+
+    <script src="{% static 'js/angular.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:300,400,500|Roboto:300,400,500" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+{% verbatim %}
+<body ng-app="paiso" ng-controller="mainController">
+    <header>
+        <h1>Paiso</h1>
+        <a><span>{{ firstName }}</span><i class="fa fa-chevron-down"></i></a>
+    </header>
+    <aside>
+        <div id="search-box">
+            <i class="fa fa-search"></i>
+            <input type="search" placeholder="Search">
+        </div>
+        <div id="users">
+            <div ng-repeat="user in users" class="user">
+                <img class="avatar" src="{{ user.avatarUrl }}">
+                <div class="user-info">
+                    <div class="name">{{ user.name }}</div>
+                    <div class="extra">{{ user.extra }}</div>
+                </div>
+                <div class="amount">{{ user.amount }}</div>
+            </div>
+        </div>
+    </aside>
+    <main>
+        <div ng-repeat="x in users" class="user-detail">
+            <header></header>
+        </div>
+    </main>
+</body>
+{% endverbatim %}
+</html>
