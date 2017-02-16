@@ -5,7 +5,7 @@ class User(models.Model):
     user_id = models.CharField(max_length=300, unique=True)
     display_name = models.CharField(max_length=300)
     email = models.CharField(max_length=300, default=None, null=True, blank=True, unique=True)
-    phone = models.CharField(max_length=48, default=None, null=True, blank=True, unique=True)
+    # phone = models.CharField(max_length=48, default=None, null=True, blank=True, unique=True)
     photo_url = models.TextField(default=None, null=True, blank=True)
 
     def __str__(self):
@@ -18,7 +18,7 @@ class Contact(models.Model):
     contact_id = models.CharField(max_length=300, unique=True)
     display_name = models.CharField(max_length=300)
     email = models.CharField(max_length=300, default=None, null=True, blank=True)
-    phone = models.CharField(max_length=48, default=None, null=True, blank=True)
+    # phone = models.CharField(max_length=48, default=None, null=True, blank=True)
     photo_url = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -40,7 +40,6 @@ class TransactionInformation(models.Model):
 
     title = models.CharField(max_length=300)
     amount = models.FloatField()
-    deleted = models.BooleanField(default=False)
     approved = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
