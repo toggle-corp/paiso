@@ -17,8 +17,6 @@ class User(models.Model):
 
 class Contact(models.Model):
     belongs_to = models.ForeignKey(User)
-
-    contact_id = models.CharField(max_length=300, unique=True)
     display_name = models.CharField(max_length=300)
     email = models.CharField(max_length=300, default=None, null=True, blank=True)
     # phone = models.CharField(max_length=48, default=None, null=True, blank=True)
@@ -28,7 +26,7 @@ class Contact(models.Model):
         return '{} ({})'.format(self.display_name, str(self.belongs_to))
 
     def get_id(self):
-        return self.contact_id
+        return self.pk
 
 
 class Transaction(models.Model):
@@ -63,7 +61,7 @@ class Transaction(models.Model):
             return 0
 
     def get_history(self):
-        return TransactionInformation.objects.filter(transaction=self)
+        return self.transactioninformation_set.all()
 
 
 class TransactionInformation(models.Model):

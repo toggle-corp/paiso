@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
 
 import json
 
@@ -26,3 +27,18 @@ def get_json_request(request):
 
 # Standard responses
 INVALID_JSON_REQUEST = JsonError("Not a valid json data")
+
+
+from transactions.models import *
+
+def get_user(data):
+    user_id = data.get('userId')
+    if not user_id:
+        return None, JsonError('userId parameter not sent')
+
+    try:
+        user = User.objects.get(user_id=user_id)
+    except ObjectDoesNotExist:
+        return None, JsonError('User with userId "{}" does not exist'.format(user_id))
+
+    return user, None

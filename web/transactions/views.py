@@ -5,8 +5,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import dateformat
 
 import json
-from paiso.utils import *
+import datetime
 
+from paiso.utils import *
 from transactions.models import *
 
 
@@ -19,14 +20,28 @@ class HomeView(View):
 # User
 class UserView(View):
     def get(self, request):
-        return JsonError('API not implemented yet')
+        users = User.objects.all()
+
+        user_id = request.GET.get('userId')
+        if user_id:
+            users = users.filter(user_id=user_id)
+
+        data = []
+        for user in users:
+            data.append({
+                'userId': user.user_id,
+                'displayName': user.display_name,
+                'email': user.email,
+                'photoUrl': user.photo_url,
+            })
+
+        return JsonResult(data=data)
 
     def post(self, request):
         data_in = get_json_request(request)
         if data_in is None:
             return INVALID_JSON_REQUEST
 
-        # Create or update user with given userId
         user, created = User.objects.update_or_create(
             user_id=data_in['userId'],
             defaults={
@@ -38,23 +53,213 @@ class UserView(View):
         )
 
         return JsonResult({
-            'created': created, 'userPk': user.pk
+            'created': created, 'userId': user.user_id if created else None
         })
 
 
+# /api/v1/contact/
+# Contacts for a user
+class ContactView(View):
+    def get(self, request):
+        user, error = get_user(request.GET)
+        if error:
+            return error
+
+        contacts = Contact.objects.filter(belongs_to=user)
+
+        contact_id = request.GET.get('contactId')
+        if contact_id:
+            contacts = contacts.filter(pk=contact_id)
+
+        data = []
+        for contact in contacts:
+            data.append({
+                'contactId': contact.pk,
+                'displayName': contact.display_name,
+                'email': contact.email,
+                'photoUrl': contact.photo_url
+            })
+
+        return JsonResult(data=data)
+
+    def post(self, request):
+        data_in = get_json_request(request)
+        if data_in is None:
+            return INVALID_JSON_REQUEST
+
+        user, error = get_user(data_in)
+        if error:
+            return error
+
+        contact, created = Contact.objects.update_or_create(
+            pk=data_in['contactId'],
+            defaults={
+                'pk': data_in['contactId'],
+                'belongs_to': user,
+                'display_name': data_in['displayName'],
+                'email': data_in['email'],
+                'photo_url': data_in['photoUrl']
+            }
+        )
+
+        return JsonResult({
+            'created': created, 'contactId': contact.pk if created else None
+        })
+
+
+# /api/v1/transaction/
+# Transactions for a user
+class TransactionView(View):
+    def get(self, request):
+        user, error = get_user(request.GET)
+        if error:
+            return error
+
+        transactions = Transaction.objects.filter(Q(to=user)|Q(by=user))
+
+        transaction_id = request.GET.get('transactionId')
+        if transaction_id:
+            transactions = transactions.filter(pk=transaction_id)
+
+        data = []
+        for transaction in transactions:
+            transactionData = {
+                'transactionId': transaction.pk,
+                'to': transaction.to.user_id if transaction.to else None,
+                'by': transaction.by.user_id if transaction.by else None,
+                'addedBy': transaction.added_by.user_id,
+                'unregisteredContact': transaction.unregistered_contact.pk if transaction.unregistered_contact else None,
+            }
+
+            if request.GET.get('data') == '1':
+                transactionData['data'] = [
+                    {
+                        'dataId': info.pk,
+                        'title': info.title,
+                        'amount': info.amount,
+                        'approved': info.approved,
+                        'timestamp':  dateformat.format(info.timestamp, 'U'),
+                    } for info in transaction.get_history()
+                ]
+
+            data.append(transactionData)
+
+        return JsonResult(data=data)
+
+    def post(self, request):
+        data_in = get_json_request(request)
+        if data_in is None:
+            return INVALID_JSON_REQUEST
+
+        user, error = get_user(data_in)
+        if error:
+            return error
+
+        transaction, created = Transaction.objects.update_or_create(
+            pk=data_in['transactionId'],
+            defaults={
+                'pk': data_in['transactionId'],
+                'to': User.objects.get(user_id=data_in['to']) if data_in.get('to') else None,
+                'by': User.objects.get(user_id=data_in['by']) if data_in.get('by') else None,
+                'unregistered_contact': Contact.objects.get(pk=data_in['unregisteredContact']) if data_in.get('unregisteredContact') else None,
+                'added_by': user,
+            }
+        )
+
+        if created and 'data' in data_in:
+            for dataItem in data_in['data']:
+                TransactionInformation.objects.update_or_create(
+                    pk=dataItem['dataId'],
+                    defaults={
+                        'pk': dataItem['dataId'],
+                        'transaction': transaction,
+                        'title': dataItem['title'],
+                        'amount': dataItem['amount'],
+                        'approved': dataItem['approved'],
+                        'timestamp': datetime.fromtimestamp(dataItem['timestamp'])
+                    }
+                )
+
+        return JsonResult({
+            'created': created, 'transactionId': transaction.pk if created else None
+        })
+
+
+
+# /api/v1/transaction-data/
+# Transaction history for a transaction
+class TransactionDataView(View):
+    def get(self, request):
+        user, error = get_user(request.GET)
+        if error:
+            return error
+
+        transaction_id = request.GET.get('transactionId')
+        if not transaction_id:
+            return JsonError('transactionId parameter not sent')
+
+        try:
+            transaction = Transaction.objects.get(pk=transaction_id)
+        except ObjectDoesNotExist:
+            return JsonError('Transaction with transactionId "{}" does not exist'.format(transaction_id))
+
+        data = []
+        for info in transaction.get_history():
+            data.append({
+                'dataId': info.pk,
+                'title': info.title,
+                'amount': info.amount,
+                'approved': info.approved,
+                'timestamp':  dateformat.format(info.timestamp, 'U'),
+            })
+
+        return JsonResult(data=data)
+
+    def post(self, request):
+        data_in = get_json_request(request)
+        if data_in is None:
+            return INVALID_JSON_REQUEST
+
+        user, error = get_user(data_in)
+        if error:
+            return error
+
+        transaction_id = request.GET.get('transactionId')
+        if not transaction_id:
+            return JsonError('transactionId parameter not sent')
+
+        try:
+            transaction = Transaction.objects.get(pk=transaction_id)
+        except ObjectDoesNotExist:
+            return JsonError('Transaction with transactionId "{}" does not exist'.format(transaction_id))
+
+        info, created = TransactionInformation.objects.update_or_create(
+            pk=data_in['transactionId'],
+            defaults={
+                'pk': data_in['dataId'],
+                'transaction': transaction,
+                'title': data_in['title'],
+                'amount': data_in['amount'],
+                'approved': data_in['approved'],
+                'timestamp': datetime.fromtimestamp(data_in['timestamp'])
+            }
+        )
+
+        return JsonResult({
+            'created': created, 'transactionDataId': info.pk if created else None
+        })
+
+
+
+# TODO: Remove this in favor of all of the above
 # /api/v1/party/
 # Transaction party
 class PartyView(View):
     def get(self, request):
         # First get the active user
-        if 'userId' not in request.GET:
-            return JsonError('userId parameter not sent')
-        user_id = request.GET['userId']
-
-        try:
-            user = User.objects.get(user_id=user_id)
-        except ObjectDoesNotExist:
-            return JsonError('user with userId "{}" does not exist'.format(user_id))
+        user, error = get_user(request.GET)
+        if error:
+            return error
 
         # Get all parties involved in transactions with the user
         parties = {}

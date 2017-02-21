@@ -24,7 +24,7 @@ let auth = {
                             resolve();
                 		},
                         function error(response) {
-                            reject("Cannot save user info to database\n" + JSON.stringify({data: error}))
+                            reject("Cannot save user info to database\n" + JSON.stringify({data: response}))
                 		}
                     );
                 }
