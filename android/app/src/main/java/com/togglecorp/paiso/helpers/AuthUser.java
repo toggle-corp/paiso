@@ -1,4 +1,4 @@
-package com.togglecorp.paiso;
+package com.togglecorp.paiso.helpers;
 
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
@@ -41,7 +41,7 @@ public class AuthUser implements GoogleApiClient.OnConnectionFailedListener {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
 
-    public FirebaseUser getFbUser() {
+    public FirebaseUser getUser() {
         return mFirebaseUser;
     }
 
@@ -49,14 +49,5 @@ public class AuthUser implements GoogleApiClient.OnConnectionFailedListener {
         mFirebaseAuth.signOut();
         Auth.GoogleSignInApi.signOut(mGoogleApiClient);
         mFirebaseUser = null;
-    }
-
-    public User getUser() {
-        if (mFirebaseUser.getPhotoUrl() != null)
-            return new User(mFirebaseUser.getDisplayName(),
-                    mFirebaseUser.getEmail(), mFirebaseUser.getPhotoUrl().toString());
-        else
-            return new User(mFirebaseUser.getDisplayName(),
-                    mFirebaseUser.getEmail(), "");
     }
 }

@@ -32,6 +32,7 @@ class UserView(View):
                 'userId': user.user_id,
                 'displayName': user.display_name,
                 'email': user.email,
+                'phone': user.phone,
                 'photoUrl': user.photo_url,
             })
 
@@ -48,6 +49,7 @@ class UserView(View):
                 'user_id': data_in['userId'],
                 'display_name': data_in['displayName'],
                 'email': data_in['email'],
+                'phone': data_in['phone'],
                 'photo_url': data_in['photoUrl']
             }
         )
@@ -77,6 +79,7 @@ class ContactView(View):
                 'contactId': contact.pk,
                 'displayName': contact.display_name,
                 'email': contact.email,
+                'phone': contact.phone,
                 'photoUrl': contact.photo_url
             })
 
@@ -98,6 +101,7 @@ class ContactView(View):
                 'belongs_to': user,
                 'display_name': data_in['displayName'],
                 'email': data_in['email'],
+                'phone': data_in['phone'],
                 'photo_url': data_in['photoUrl']
             }
         )
@@ -201,7 +205,7 @@ class TransactionDataView(View):
         try:
             transaction = Transaction.objects.get(pk=transaction_id)
         except ObjectDoesNotExist:
-            return JsonError('Transaction with transactionId "{}" does not exist'.format(transaction_id))
+            return JsonError('Transaction with transaction id "{}" does not exist'.format(transaction_id))
 
         data = []
         for info in transaction.get_history():
@@ -224,14 +228,14 @@ class TransactionDataView(View):
         if error:
             return error
 
-        transaction_id = request.GET.get('transactionId')
+        transaction_id = data_in.get('transaction')
         if not transaction_id:
-            return JsonError('transactionId parameter not sent')
+            return JsonError('transaction parameter not sent')
 
         try:
             transaction = Transaction.objects.get(pk=transaction_id)
         except ObjectDoesNotExist:
-            return JsonError('Transaction with transactionId "{}" does not exist'.format(transaction_id))
+            return JsonError('Transaction with transaction id "{}" does not exist'.format(transaction_id))
 
         info, created = TransactionInformation.objects.update_or_create(
             pk=data_in['transactionId'],
@@ -251,9 +255,10 @@ class TransactionDataView(View):
 
 
 
-# TODO: Remove this in favor of all of the above
 # /api/v1/party/
 # Transaction party
+# Get all parties, contacts and otherwise and their transactions
+# for a given user
 class PartyView(View):
     def get(self, request):
         # First get the active user
@@ -270,9 +275,10 @@ class PartyView(View):
             unique_key = str(other.pk) + ':' + str(unregistered)
             if unique_key not in parties:
                 parties[unique_key] = {
-                    'user_id': other.get_id(),
+                    'id': other.get_id(),
                     'displayName': other.display_name,
                     'email': other.email,
+                    'phone': other.phone,
                     'photoUrl': other.photo_url,
                     'amount': 0,
                     'unregistered': unregistered,
@@ -284,6 +290,7 @@ class PartyView(View):
             transaction_object = {
                 'transactionId': transaction.pk,
                 'isOwner': transaction.added_by == user,
+                'isBy': transaction.by == user,
                 'history': []
             }
             parties[unique_key]['transactions'].append(transaction_object)
@@ -291,6 +298,7 @@ class PartyView(View):
             # History of the transaction
             for info in transaction.get_history():
                 transaction_object['history'].append({
+                    'dataId': info.pk,
                     'title': info.title,
                     'timestamp': dateformat.format(info.timestamp, 'U'),
                     'amount': info.amount,

@@ -32,13 +32,13 @@ INVALID_JSON_REQUEST = JsonError("Not a valid json data")
 from transactions.models import *
 
 def get_user(data):
-    user_id = data.get('userId')
-    if not user_id:
+    userId = data.get('userId')
+    if not userId:
         return None, JsonError('userId parameter not sent')
 
     try:
-        user = User.objects.get(user_id=user_id)
+        user = User.objects.get(user_id=userId)
     except ObjectDoesNotExist:
-        return None, JsonError('User with userId "{}" does not exist'.format(user_id))
+        return None, JsonError('User with user id "{}" does not exist'.format(user_id))
 
     return user, None

@@ -5,7 +5,7 @@ class User(models.Model):
     user_id = models.CharField(max_length=300, unique=True)
     display_name = models.CharField(max_length=300)
     email = models.CharField(max_length=300, default=None, null=True, blank=True, unique=True)
-    # phone = models.CharField(max_length=48, default=None, null=True, blank=True, unique=True)
+    phone = models.CharField(max_length=48, default=None, null=True, blank=True, unique=True)
     photo_url = models.TextField(default=None, null=True, blank=True)
 
     def __str__(self):
@@ -19,7 +19,7 @@ class Contact(models.Model):
     belongs_to = models.ForeignKey(User)
     display_name = models.CharField(max_length=300)
     email = models.CharField(max_length=300, default=None, null=True, blank=True)
-    # phone = models.CharField(max_length=48, default=None, null=True, blank=True)
+    phone = models.CharField(max_length=48, default=None, null=True, blank=True)
     photo_url = models.TextField(null=True, blank=True)
 
     def __str__(self):

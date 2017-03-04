@@ -15,7 +15,8 @@ let auth = {
                         userId: user.uid,
                         displayName: user.displayName,
                         photoUrl: user.photoURL,
-                        email: user.email
+                        email: user.email,
+                        phone: null,
                     };
 
                     $http.post(userApi, userData).then(
