@@ -1,4 +1,4 @@
-package com.togglecorp.paiso.ui;
+package com.togglecorp.paiso.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -13,14 +13,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.togglecorp.paiso.R;
-import com.togglecorp.paiso.common.ChangeListener;
 
 import java.util.List;
 
 public class NavigationDrawerAdapter extends RecyclerView.Adapter<NavigationDrawerAdapter.ItemViewHolder> {
     private Context mContext;
     private int mSelectedItem = 0;
-    private ChangeListener mChangeListener;
+    private NavigationChangeListener mChangeListener;
 
     public static class Item {
         public String name;
@@ -35,7 +34,7 @@ public class NavigationDrawerAdapter extends RecyclerView.Adapter<NavigationDraw
 
     private List<Item> mItems;
 
-    public NavigationDrawerAdapter(Context context, List<Item> items, ChangeListener changeListener) {
+    public NavigationDrawerAdapter(Context context, List<Item> items, NavigationChangeListener changeListener) {
         mContext = context;
         mItems = items;
         mChangeListener = changeListener;

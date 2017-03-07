@@ -1,31 +1,26 @@
 package com.togglecorp.paiso.ui;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.PhoneNumberUtils;
-import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.togglecorp.paiso.R;
-import com.togglecorp.paiso.adapters.CountryCodeAdapter;
 import com.togglecorp.paiso.helpers.PermissionListener;
 import com.togglecorp.paiso.helpers.PermissionsManager;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
+import com.togglecorp.paiso.helpers.PhoneUtils;
 
 public class PhoneVerificationActivity extends AppCompatActivity {
-    private final static String TAG = "PhoneVerificationActivity";
+    private final static String TAG = "PhoneVerifyActivity";
+    public static final int REQUEST_CODE = 9841;
 
     /*private Spinner mCountryCode;
     private EditText mPhoneNumber;
@@ -71,14 +66,17 @@ public class PhoneVerificationActivity extends AppCompatActivity {
 
     private void readPhoneNumber() {
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-        String phoneNumber = telephonyManager.getLine1Number();
-
-        phoneNumber = PhoneNumberUtils.stripSeparators("+977" + phoneNumber);
-
+        String phoneNumber = PhoneUtils.getNormalizedPhone(this, telephonyManager.getLine1Number());
+        if (phoneNumber == null) {
+            phoneNumber = "";
+        }
         ((TextView)findViewById(R.id.phone_number)).setText(phoneNumber);
     }
 
     public void verify(View view) {
+        Intent data = new Intent();
+        data.putExtra("phone", ((TextView)findViewById(R.id.phone_number)).getText());
+        setResult(Activity.RESULT_OK, data);
         finish();
     }
 

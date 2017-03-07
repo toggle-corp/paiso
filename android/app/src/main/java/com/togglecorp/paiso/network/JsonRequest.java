@@ -2,6 +2,7 @@ package com.togglecorp.paiso.network;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.togglecorp.paiso.R;
 
@@ -19,6 +20,8 @@ import java.net.URL;
 import java.util.Scanner;
 
 public class JsonRequest {
+    private static final String TAG = "JsonRequest";
+
     private JSONObject mData;
     private String mBaseAddress;
 
@@ -49,7 +52,7 @@ public class JsonRequest {
                 String data = mData.toString();
                 connection.setDoOutput(true);
 
-                connection.setFixedLengthStreamingMode(data.length());
+                connection.setFixedLengthStreamingMode(data.getBytes().length);
                 //connection.setChunkedStreamingMode(0);
 
                 OutputStream out = new BufferedOutputStream(connection.getOutputStream());
@@ -85,18 +88,17 @@ public class JsonRequest {
     }
 
     public JSONObject getSuccessDataObject() {
-        if (!isSuccess() || !getResult().optBoolean("success") || !getResult().has("data"))
+        if (!isSuccess() || !getResult().optBoolean("status") || !getResult().has("data"))
             return null;
         return getResult().optJSONObject("data");
     }
 
     public JSONArray getSuccessDataArray() {
-        if (!isSuccess() || !getResult().optBoolean("success") || !getResult().has("data"))
+        if (!isSuccess() || !getResult().optBoolean("status") || !getResult().has("data"))
             return null;
         return getResult().optJSONArray("data");
     }
 
-    // Convert above method into
     private class AsyncRequest extends AsyncTask<Void, Void, Void> {
         private String mMethod;
         private String mPath;

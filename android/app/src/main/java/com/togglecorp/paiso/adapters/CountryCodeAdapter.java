@@ -18,13 +18,13 @@ public class CountryCodeAdapter extends BaseAdapter {
     private List<Pair<Integer, String>> mCodes;
 
     public CountryCodeAdapter(Context context) {
-        String[] codes = context.getResources().getStringArray(R.array.country_codes);
+//        String[] codes = context.getResources().getStringArray(R.array.country_codes);
 
         mCodes = new ArrayList<>();
-        for (String code: codes) {
-            String[] codeParts = code.split(",");
-            mCodes.add(new Pair<>(Integer.parseInt(codeParts[0]), codeParts[1]));
-        }
+//        for (String code: codes) {
+//            String[] codeParts = code.split(",");
+//            mCodes.add(new Pair<>(Integer.parseInt(codeParts[0]), codeParts[1]));
+//        }
     }
 
     @Override

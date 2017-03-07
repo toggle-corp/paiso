@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:gravity="center"
-            android:text="Add and verify your phone number to continue"/>
+            android:text="Add and verify your phone number transactionTo continue"/>
 
         <LinearLayout
             android:layout_marginTop="64dp"
@@ -87,7 +87,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:gravity="center"
-            android:text="We will send a verification code to this number."/>
+            android:text="We will send a verification code transactionTo this number."/>
     </LinearLayout>
 
     <LinearLayout
@@ -125,7 +125,7 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:gravity="center"
-            android:text="Enter the code sent to your phone:"/>
+            android:text="Enter the code sent transactionTo your phone:"/>
 
         <EditText
             android:id="@+id/code"

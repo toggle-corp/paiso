@@ -9,6 +9,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.togglecorp.paiso.db.DbHelper;
+import com.togglecorp.paiso.db.User;
 
 public class AuthUser implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -41,7 +43,7 @@ public class AuthUser implements GoogleApiClient.OnConnectionFailedListener {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
 
-    public FirebaseUser getUser() {
+    public FirebaseUser getFbUser() {
         return mFirebaseUser;
     }
 
@@ -49,5 +51,24 @@ public class AuthUser implements GoogleApiClient.OnConnectionFailedListener {
         mFirebaseAuth.signOut();
         Auth.GoogleSignInApi.signOut(mGoogleApiClient);
         mFirebaseUser = null;
+    }
+
+    public User getUser(DbHelper dbHelper) {
+        User user;
+        user = User.get(User.class, dbHelper, "email=?", new String[]{getFbUser().getEmail()});
+        if (user == null) {
+            Log.d(TAG, "creating new user: " + getFbUser().getEmail());
+            user = new User();
+        }
+        user.displayName = getFbUser().getDisplayName();
+        user.email = getFbUser().getEmail();
+
+        if (getFbUser().getPhotoUrl() != null) {
+            user.photoUrl = getFbUser().getPhotoUrl().toString();
+        }
+
+        user.modified = true;
+        user.save(dbHelper);
+        return user;
     }
 }

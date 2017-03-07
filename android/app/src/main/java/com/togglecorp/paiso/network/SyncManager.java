@@ -1,11 +1,13 @@
 package com.togglecorp.paiso.network;
 
-import android.content.Context;
 
+import android.util.Log;
+
+import com.google.firebase.database.Transaction;
 import com.togglecorp.paiso.db.Contact;
 import com.togglecorp.paiso.db.DbHelper;
-import com.togglecorp.paiso.db.SerializableModel;
-import com.togglecorp.paiso.db.Transaction;
+import com.togglecorp.paiso.db.PaisoTransaction;
+import com.togglecorp.paiso.db.SerializableRemoteModel;
 import com.togglecorp.paiso.db.TransactionData;
 import com.togglecorp.paiso.db.User;
 
@@ -17,33 +19,47 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
-* Central class to handle all synchronization between local and server data.
+* Central class transactionTo handle all synchronization between local and server data.
 *
-* The idea is to start by collecting all items that are modified by the app.
+* The idea is transactionTo start transactionBy collecting all items that are modified transactionBy the app.
 * Then postSerializable each modifications and mark them unmodified.
-* On completion of all posts, start to fetch all data from server and update local.
+* On completion of all posts, start transactionTo fetch all data from server and update local.
 * Since some earlier postSerializable may fail, replace local data only if it isn't modified.
 *
 * */
 public class SyncManager {
+    private static final String TAG = "SyncManager";
 
 
-    private Context mContext;
     private DbHelper mDbHelper;
     private List<SyncListener> mListeners = new ArrayList<>();
 
-    private String mUserId;
+    private User mUser;
 
-    public SyncManager(Context context) {
-        mContext = context;
-        mDbHelper = new DbHelper(context);
+    public SyncManager(DbHelper dbHelper, User user) {
+        mDbHelper = dbHelper;
+        mUser = user;
     }
 
-    // Request synchronization to be performed
+    // Request synchronization transactionTo be performed
     public void requestSync() {
         // Making sure two sync requests are handled one after another
         synchronized (SyncManager.class) {
-            sync();
+            new JsonRequest(mDbHelper.getContext())
+                    .setData(mUser.toJson())
+                    .post("api/v1/user/", new JsonRequestListener() {
+                                @Override
+                                public void onRequestComplete(JsonRequest request) {
+                                    JSONObject data = request.getSuccessDataObject();
+                                    if (data != null && data.has("user")) {
+                                        mUser.fromJson(data.optJSONObject("user"));
+                                        mUser.modified = false;
+                                        mUser.save(mDbHelper);
+
+                                        sync();
+                                    }
+                                }
+                            });
         }
 
         // Sync complete, handle the listeners
@@ -66,163 +82,144 @@ public class SyncManager {
 
     private void sync() {
         // Step 1: Post modified objects
-        postSerializable(User.class, "/api/v1/user", "userId");
-
-        // Step 2: Post modified contacts
-        postSerializable(Contact.class, "/api/v1/contact", "contactId");
-
-        // Step 3: Post modified transactions
-        postSerializable(Transaction.class, "/api/v1/transaction", "transactionId");
-        postSerializable(TransactionData.class, "/api/v1/transaction-data", "dataId");
-
-        // Step 4: Get from server, but only keep objects if they are unmodified locally
-        getParties();
-    }
-
-    private <T extends SerializableModel> void postSerializable(final Class<T> c, final String apiUrl, final String idField) {
-        // Set to unmodified on successful postSerializable
-        JsonRequestListener callback = new JsonRequestListener() {
+        postSerializable(User.class, "api/v1/user/", new PostListener<User>() {
             @Override
-            public void onRequestComplete(JsonRequest request) {
-                JSONObject data = request.getSuccessDataObject();
-                if (data != null && data.has("userId")) {
-                    T object = T.get(c, mDbHelper, idField + " = ?",
-                            new String[] {request.getResult().optString(idField, "")});
-
-                    if (object != null) {
-                        object.modified = false;
-                        object.save(mDbHelper);
-                    }
+            public void onSuccess(JSONObject data, User object) {
+                if (data.has("user")){
+                    object.fromJson(data.optJSONObject("user"));
+                    object.modified = false;
+                    object.save(mDbHelper);
                 }
             }
-        };
+        });
 
+        // Step 2: Post modified contacts
+        postSerializable(Contact.class, "api/v1/contact/", new PostListener<Contact>() {
+            @Override
+            public void onSuccess(JSONObject data, Contact object) {
+                if (data.has("contact")) {
+                    object.fromJson(data.optJSONObject("contact"));
+                    object.modified = false;
+                    object.save(mDbHelper);
+                }
+            }
+        });
+
+        // Step 3: Post modified transactions
+        postSerializable(PaisoTransaction.class, "api/v1/transaction/", new PostListener<PaisoTransaction>() {
+            @Override
+            public void onSuccess(JSONObject data, PaisoTransaction object) {
+                if (data.has("transaction")) {
+                    object.fromJson(data.optJSONObject("transaction"));
+                    object.modified = false;
+                    object.save(mDbHelper);
+                }
+            }
+        });
+        postSerializable(TransactionData.class, "/api/v1/transaction-data/", new PostListener<TransactionData>() {
+            @Override
+            public void onSuccess(JSONObject data, TransactionData object) {
+                if (data.has("data")) {
+                    object.fromJson(data.optJSONObject("data"));
+                    object.modified = false;
+                    object.save(mDbHelper);
+                }
+            }
+        });
+
+        // Step 4: Get from server, but only keep objects if they are unmodified locally
+        getTransactions();
+    }
+
+    private interface PostListener<T> {
+        void onSuccess(JSONObject data, T object);
+    }
+    private <T extends SerializableRemoteModel> void postSerializable(final Class<T> c, final String apiUrl, final PostListener<T> postListener) {
         // Now the actual postSerializable for all modified data
         List<T> objects = T.query(c, mDbHelper, "modified = 1", null);
         for (T object: objects) {
             try {
+                final T that = object;
                 JSONObject jsObj = object.toJson();
-                jsObj.put("userId", mUserId);
-                new JsonRequest(mContext)
+                jsObj.put("userId", mUser.userId);
+                new JsonRequest(mDbHelper.getContext())
                         .setData(jsObj)
-                        .post(apiUrl,  callback);
+                        .post(apiUrl, new JsonRequestListener() {
+                            @Override
+                            public void onRequestComplete(JsonRequest request) {
+                                JSONObject data = request.getSuccessDataObject();
+                                if (data != null) {
+                                    postListener.onSuccess(data, that);
+                                }
+                            }
+                        });
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private void getParties() {
-        // Get all parties (user/contact) we are involved in and their transactions
-        // Note to delete all unmodified data before reading new values
-        // and not to override unmodified data
+    private <T extends SerializableRemoteModel> T saveOrUpdate(Class<T> c, JSONObject json, String idKey, T defaultObject) {
+        try {
+            Integer id = json.optInt(idKey);
+            T t = T.get(c, mDbHelper, idKey + " = ?", new String[]{id+""});
+            if (t != null) {
+                if (t.modified) {
+                    return t;
+                }
+            } else {
+                t = defaultObject;
+            }
+            t.fromJson(json);
+            t.save(mDbHelper);
+            return t;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-        new JsonRequest(mContext).get("/api/v1/party/?userId=" + mUserId, new JsonRequestListener() {
-            @Override
-            public void onRequestComplete(JsonRequest request) {
-                JSONArray data = request.getSuccessDataArray();
-                if (data != null) {
+    private void getTransactions() {
+        new JsonRequest(mDbHelper.getContext())
+                .get("api/v1/transaction/" + "?userId=" + mUser.userId + "&users=1&data=1", new JsonRequestListener() {
+                    @Override
+                    public void onRequestComplete(JsonRequest request) {
+                        JSONObject data = request.getSuccessDataObject();
+                        if (data != null) {
+                            JSONArray users = data.optJSONArray("users");
+                            for (int i=0; i<users.length(); i++) {
 
-                    // Successful response
-                    // Delete all unmodified transactions and all users except us
-                    // We keep the contacts
-                    TransactionData.delete(Transaction.class, mDbHelper, "modified = 0", null);
-                    Transaction.delete(Transaction.class, mDbHelper, "modified = 0", null);
-                    User.delete(User.class, mDbHelper, "userId != ?", new String[]{mUserId});
+                                saveOrUpdate(User.class,
+                                        users.optJSONObject(i),
+                                        "userId", new User());
 
-                    // Now go through each user and save their transactions
-                    for (int i=0; i<data.length(); i++) {
-                        JSONObject dataObj = data.optJSONObject(i);
-                        if (dataObj != null) {
-
-                            // First save the user/contact just in case it's not in our local db
-                            String userId = null;
-                            Long contactId = null;
-
-                            if (dataObj.optBoolean("unregistered")) {
-                                contactId = dataObj.optLong("id", -1);
-                                Contact contact = Contact.get(Contact.class, mDbHelper, "contactId = ?", new String[]{contactId+""});
-
-                                boolean create = true;
-                                if (contact != null) {
-                                    if (!contact.modified) {
-                                        contact.delete(mDbHelper);
-                                    } else {
-                                        create = false;
-                                    }
-                                }
-
-                                if (create) {
-                                    new Contact(contactId,
-                                            dataObj.optString("displayName"),
-                                            (String)dataObj.opt("email"),
-                                            (String)dataObj.opt("phone"),
-                                            (String)dataObj.opt("photoUrl")).save(mDbHelper);
-                                }
-                            }
-                            else {
-                                userId = dataObj.optString("id", "");
-                                User user = User.get(User.class, mDbHelper, "userId = ?", new String[]{userId});
-
-                                if (user == null) {
-                                    new User(userId,
-                                            dataObj.optString("displayName"),
-                                            (String)dataObj.opt("email"),
-                                            (String)dataObj.opt("phone"),
-                                            (String)dataObj.opt("photoUrl")).save(mDbHelper);
-                                }
                             }
 
+                            JSONArray transactions = data.optJSONArray("transactions");
+                            for (int i=0; i<transactions.length(); i++) {
 
-                            // Next save the transactions
-                            JSONArray transactions = dataObj.optJSONArray("transactions");
-                            if (transactions != null) {
-                                for (int j=0; j<transactions.length(); j++) {
+                                JSONObject transactionJson = transactions.optJSONObject(i);
+                                PaisoTransaction transaction = saveOrUpdate(PaisoTransaction.class,
+                                        transactionJson,
+                                        "transactionId", new PaisoTransaction());
 
-                                    JSONObject transactionObj = transactions.optJSONObject(j);
-                                    if (transactionObj != null) {
-                                        Long tid = transactionObj.optLong("transactionId", -1);
-                                        Transaction transaction = Transaction.get(Transaction.class, mDbHelper, "transactionId = ?", new String[]{tid+""});
-                                        boolean byMe = transactionObj.optBoolean("by");
+                                if (transaction != null) {
 
-                                        if (transaction == null) {
-                                            new Transaction(
-                                                    tid,
-                                                    byMe ? mUserId : userId,
-                                                    byMe ? userId : mUserId,
-                                                    contactId,
-                                                    transactionObj.optBoolean("isOwner") ? mUserId : userId
-                                            ).save(mDbHelper);
-                                        }
+                                    JSONArray datas = transactionJson.optJSONArray("data");
+                                    for (int j=0; j<datas.length(); j++) {
 
-                                        // The history of this transaction
-                                        JSONArray history = transactionObj.optJSONArray("history");
-                                        if (history != null) {
-                                            for (int k=0; k<history.length(); k++) {
-                                                JSONObject item = history.optJSONObject(j);
-                                                if (item != null) {
-                                                    Long dataId = item.optLong("dataId", -1);
-                                                    TransactionData td = TransactionData.get(TransactionData.class, mDbHelper, "dataId = ?", new String[]{dataId+""});
+                                        saveOrUpdate(TransactionData.class,
+                                                datas.optJSONObject(j),
+                                                "dataId", new TransactionData());
 
-                                                    if (td == null) {
-                                                        new TransactionData(
-                                                                dataId,
-                                                                item.optString("title"),
-                                                                (float)item.optDouble("amount"),
-                                                                item.optBoolean("approved"),
-                                                                tid
-                                                        ).save(mDbHelper);
-                                                    }
-                                                }
-                                            }
-                                        }
                                     }
+
                                 }
+
                             }
                         }
                     }
-                }
-            }
-        });
+                });
     }
 }

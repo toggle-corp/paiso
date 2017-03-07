@@ -1,8 +1,10 @@
 from django.db import models
+from django.utils import dateformat
+
+import datetime
 
 
 class User(models.Model):
-    user_id = models.CharField(max_length=300, unique=True)
     display_name = models.CharField(max_length=300)
     email = models.CharField(max_length=300, default=None, null=True, blank=True, unique=True)
     phone = models.CharField(max_length=48, default=None, null=True, blank=True, unique=True)
@@ -11,60 +13,141 @@ class User(models.Model):
     def __str__(self):
         return self.display_name
 
-    def get_id(self):
-        return self.user_id
+    def serialize(self):
+        return {
+            'userId': self.pk,
+            'displayName': self.display_name,
+            'email': self.email,
+            'phone': self.phone,
+            'photoUrl': self.photo_url,
+        }
+
+    @staticmethod
+    def deserialize(data):
+        if data.get('userId') and User.objects.filter(pk=data['userId']).count() > 0:
+            user = User.objects.get(pk=data['userId'])
+        elif data.get('email') and data.get('email') != '' and User.objects.filter(email=data['email']).count() > 0:
+            user = User.objects.get(email=data['email'])
+        elif data.get('phone') and data.get('phone') != '' and User.objects.filter(phone=data['phone']).count() > 0:
+            user = User.objects.get(phone=data['phone'])
+        else:
+            user = User()
+
+        user.display_name = data.get('displayName')
+        user.email = data.get('email')
+        user.phone = data.get('phone')
+        user.photo_url = data.get('photoUrl')
+        user.save()
+
+        return user
 
 
 class Contact(models.Model):
-    belongs_to = models.ForeignKey(User)
+    user = models.ForeignKey(User)
+    linked_user = models.ForeignKey(User, default=None, null=True, blank=True, related_name='linked_contacts')
+
     display_name = models.CharField(max_length=300)
     email = models.CharField(max_length=300, default=None, null=True, blank=True)
     phone = models.CharField(max_length=48, default=None, null=True, blank=True)
     photo_url = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return '{} ({})'.format(self.display_name, str(self.belongs_to))
+        return '{} (contact of {})'.format(self.display_name, str(self.user))
 
-    def get_id(self):
-        return self.pk
+    def serialize(self):
+        return {
+            'contactId': self.pk,
+            'userId': self.user.pk,
+            'linkedUserId': self.linked_user.pk if self.linked_user else None,
+            'displayName': self.display_name,
+            'email': self.email,
+            'phone': self.phone,
+            'photoUrl': self.photo_url,
+        }
+
+    @staticmethod
+    def deserialize(data):
+        user = User.objects.get(pk=data.get('userId'))
+
+        if data.get('contactId') and Contact.objects.filter(pk=data['contactId']).count() > 0:
+            contact = Contact.objects.get(pk=data['contactId'])
+        elif data.get('email') and data.get('email') != '' and Contact.objects.filter(email=data['email']).count() > 0:
+            contact = Contact.objects.filter(email=data['email'])[0]
+        elif data.get('phone') and data.get('phone') != '' and Contact.objects.filter(phone=data['phone']).count() > 0:
+            contact = Contact.objects.filter(phone=data['phone'])[0]
+        else:
+            contact = Contact()
+
+        contact.user = User.objects.get(pk=data.get('userId'))
+        contact.linked_user = User.objects.get(pk=data['linkedUserId']) if data.get('linkedUserId') else None
+
+        contact.display_name = data.get('displayName')
+        contact.email = data.get('email')
+        contact.phone = data.get('phone')
+        contact.photo_url = data.get('photoUrl')
+        contact.save()
+
+        return contact
+
+    def refresh_linked_users(self):
+        if self.email and self.email != '' and User.objects.filter(email=self.email).count() > 0:
+            self.linked_user = User.objects.get(email=self.email)
+            self.save()
+        elif self.phone and self.phone != '' and User.objects.filter(phone=self.phone).count() > 0:
+            self.phone = User.objects.get(phone=self.phone)
+            self.save()
 
 
 class Transaction(models.Model):
-    to = models.ForeignKey(User, default=None, null=True, blank=True, related_name='incoming_transactions')
-    by = models.ForeignKey(User, default=None, null=True, blank=True, related_name='outgoing_transactions')
-    added_by = models.ForeignKey(User, related_name='created_transactions')
-    unregistered_contact = models.ForeignKey(Contact, default=None, null=True, blank=True)
+
+    TRANSACTION_TYPES = (
+        ('to', 'to'),
+        ('by', 'by'),
+    )
+
+    user = models.ForeignKey(User)
+    contact = models.ForeignKey(Contact)
+    transaction_type = models.CharField(max_length=2, choices=TRANSACTION_TYPES, default='to')
 
     def __str__(self):
         return "By {} to {}".format(
-            str(self.to) if self.to is not None else str(self.unregistered_contact),
-            str(self.by) if self.by is not None else str(self.unregistered_contact)
+            str(self.user) if self.transaction_type == 'to' else str(self.contact),
+            str(self.contact) if self.transaction_type == 'to' else str(self.user)
         )
-
-    def get_other(self, one):
-        if one == self.to:
-            if self.by is None:
-                return self.unregistered_contact, True
-            else:
-                return self.by, False
-        elif one == self.by:
-            if self.to is None:
-                return self.unregistered_contact, True
-            else:
-                return self.to, False
-        return None
 
     def get_amount(self):
         try:
-            return TransactionInformation.objects.get(transaction=self).amount
+            return TransactionData.objects.get(transaction=self).amount
         except:
             return 0
 
     def get_history(self):
-        return self.transactioninformation_set.all()
+        return self.transactiondata_set.all()
+
+    def serialize(self):
+        return {
+            'transactionId': self.pk,
+            'userId': self.user.pk,
+            'contactId': self.contact.pk,
+            'transactionType': self.transaction_type,
+        }
+
+    @staticmethod
+    def deserialize(data):
+        if data.get('transactionId') and Transaction.objects.filter(pk=data['transactionId']).count() > 0:
+            transaction = Transaction.objects.get(pk=data['transactionId'])
+        else:
+            transaction = Transaction()
+
+        transaction.user = User.objects.get(pk=data.get('userId'))
+        transaction.contact = Contact.objects.get(pk=data.get('contactId'))
+        transaction.transaction_type = data.get('transactionType')
+        transaction.save()
+
+        return transaction
 
 
-class TransactionInformation(models.Model):
+class TransactionData(models.Model):
     transaction = models.ForeignKey(Transaction)
 
     title = models.CharField(max_length=300)
@@ -73,7 +156,33 @@ class TransactionInformation(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.amount)
+        return '{} ({})'.format(str(self.amount), str(self.transaction))
 
     class Meta:
         ordering = ['-timestamp']
+
+    def serialize(self):
+        return {
+            'dataId': self.pk,
+            'transactionId': self.transaction.pk,
+            'title': self.title,
+            'amount': self.amount,
+            'approved': self.approved,
+            'timestamp': dateformat.format(self.timestamp, 'U'),
+        }
+
+    @staticmethod
+    def deserialize(data):
+        if data.get('dataId') and TransactionData.objects.filter(pk=data['dataId']).count() > 0:
+            transData = TransactionData.objects.get(pk=data['dataId'])
+        else:
+            transData = TransactionData()
+
+        transData.transaction = Transaction.objects.get(pk=data['transactionId'])
+        transData.title = data.get('title')
+        transData.amount = data.get('amount')
+        transData.approved = data.get('approved')
+        transData.timestamp = datetime.fromtimestamp(data.get('timestamp'))
+        transData.save()
+
+        return transData

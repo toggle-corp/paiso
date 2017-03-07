@@ -2,12 +2,12 @@ from django.contrib import admin
 from transactions.models import *
 
 
-class TransactionInformationInline(admin.TabularInline):
-    model = TransactionInformation
+class TransactionDataInline(admin.TabularInline):
+    model = TransactionData
 
 
 class TransactionAdmin(admin.ModelAdmin):
-    inlines = [TransactionInformationInline,]
+    inlines = [TransactionDataInline,]
 
 
 admin.site.register(User)

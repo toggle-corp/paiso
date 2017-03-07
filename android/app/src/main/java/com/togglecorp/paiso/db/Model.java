@@ -24,7 +24,7 @@ public class Model {
             String sqlType = "";
             String typeName = field.getType().getSimpleName();
 
-            // String maps to TEXT; long, int and boolean to INTEGER; float and double to REAL
+            // String maps transactionTo TEXT; long, int and boolean transactionTo INTEGER; float and double transactionTo REAL
             switch (typeName) {
                 case "String":
                     sqlType = "TEXT";
@@ -51,7 +51,7 @@ public class Model {
             }
 
             if (!sqlType.equals("")) {
-                // separate column names by comma
+                // separate column names transactionBy comma
                 if (!cols.equals(""))
                     cols += ", ";
                 // add the column
@@ -108,7 +108,8 @@ public class Model {
                             values.put(field.getName(), field.getBoolean(this) ? 1 : 0);
                             break;
                         case "Boolean":
-                            values.put(field.getName(), (Boolean)field.get(this));
+                            values.put(field.getName(), (Boolean)field.get(this) ? 1: 0);
+                            break;
                         case "float":
                             values.put(field.getName(), field.getFloat(this));
                             break;
@@ -169,24 +170,34 @@ public class Model {
                             field.set(object, c.getString(c.getColumnIndex(field.getName())));
                             break;
                         case "int":
-                        case "Integer":
                             field.setInt(object, c.getInt(c.getColumnIndex(field.getName())));
                             break;
+                        case "Integer":
+                            field.set(object, c.getInt(c.getColumnIndex(field.getName())));
+                            break;
                         case "long":
-                        case "Long":
                             field.setLong(object, c.getLong(c.getColumnIndex(field.getName())));
                             break;
+                        case "Long":
+                            field.set(object, c.getLong(c.getColumnIndex(field.getName())));
+                            break;
                         case "boolean":
-                        case "Boolean":
                             field.setBoolean(object, c.getInt(c.getColumnIndex(field.getName())) != 0);
                             break;
+                        case "Boolean":
+                            field.set(object, c.getInt(c.getColumnIndex(field.getName())) != 0);
+                            break;
                         case "float":
-                        case "Float":
                             field.setFloat(object, c.getFloat(c.getColumnIndex(field.getName())));
                             break;
+                        case "Float":
+                            field.set(object, c.getFloat(c.getColumnIndex(field.getName())));
+                            break;
                         case "double":
-                        case "Double":
                             field.setDouble(object, c.getDouble(c.getColumnIndex(field.getName())));
+                            break;
+                        case "Double":
+                            field.set(object, c.getDouble(c.getColumnIndex(field.getName())));
                             break;
                         case "byte[]":
                             field.set(object, c.getBlob(c.getColumnIndex(field.getName())));
@@ -238,24 +249,34 @@ public class Model {
                             field.set(object, c.getString(c.getColumnIndex(field.getName())));
                             break;
                         case "int":
-                        case "Integer":
                             field.setInt(object, c.getInt(c.getColumnIndex(field.getName())));
                             break;
+                        case "Integer":
+                            field.set(object, c.getInt(c.getColumnIndex(field.getName())));
+                            break;
                         case "long":
-                        case "Long":
                             field.setLong(object, c.getLong(c.getColumnIndex(field.getName())));
                             break;
+                        case "Long":
+                            field.set(object, c.getLong(c.getColumnIndex(field.getName())));
+                            break;
                         case "boolean":
-                        case "Boolean":
                             field.setBoolean(object, c.getInt(c.getColumnIndex(field.getName())) != 0);
                             break;
+                        case "Boolean":
+                            field.set(object, c.getInt(c.getColumnIndex(field.getName())) != 0);
+                            break;
                         case "float":
-                        case "Float":
                             field.setFloat(object, c.getFloat(c.getColumnIndex(field.getName())));
                             break;
+                        case "Float":
+                            field.set(object, c.getFloat(c.getColumnIndex(field.getName())));
+                            break;
                         case "double":
-                        case "Double":
                             field.setDouble(object, c.getDouble(c.getColumnIndex(field.getName())));
+                            break;
+                        case "Double":
+                            field.set(object, c.getDouble(c.getColumnIndex(field.getName())));
                             break;
                         case "byte[]":
                             field.set(object, c.getBlob(c.getColumnIndex(field.getName())));

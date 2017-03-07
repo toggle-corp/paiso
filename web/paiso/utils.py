@@ -37,8 +37,8 @@ def get_user(data):
         return None, JsonError('userId parameter not sent')
 
     try:
-        user = User.objects.get(user_id=userId)
+        user = User.objects.get(pk=userId)
     except ObjectDoesNotExist:
-        return None, JsonError('User with user id "{}" does not exist'.format(user_id))
+        return None, JsonError('User with user id "{}" does not exist'.format(userId))
 
     return user, None

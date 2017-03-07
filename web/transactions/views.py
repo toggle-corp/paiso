@@ -3,6 +3,8 @@ from django.views.generic import View, TemplateView
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import dateformat
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 import json
 import datetime
@@ -19,71 +21,45 @@ class HomeView(View):
 # /api/v1/user/
 # User
 class UserView(View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(UserView, self).dispatch(request, *args, **kwargs)
+
     def get(self, request):
         users = User.objects.all()
 
-        user_id = request.GET.get('userId')
-        if user_id:
-            users = users.filter(user_id=user_id)
+        userId = request.GET.get('userId')
+        if userId:
+            users = users.filter(pk=userId)
 
-        data = []
-        for user in users:
-            data.append({
-                'userId': user.user_id,
-                'displayName': user.display_name,
-                'email': user.email,
-                'phone': user.phone,
-                'photoUrl': user.photo_url,
-            })
-
-        return JsonResult(data=data)
+        return JsonResult(data={'users': [user.serialize() for user in users]})
 
     def post(self, request):
         data_in = get_json_request(request)
         if data_in is None:
             return INVALID_JSON_REQUEST
-
-        user, created = User.objects.update_or_create(
-            user_id=data_in['userId'],
-            defaults={
-                'user_id': data_in['userId'],
-                'display_name': data_in['displayName'],
-                'email': data_in['email'],
-                'phone': data_in['phone'],
-                'photo_url': data_in['photoUrl']
-            }
-        )
-
-        return JsonResult({
-            'created': created, 'userId': user.user_id if created else None
-        })
+        return JsonResult({'user': User.deserialize(data_in).serialize()})
 
 
 # /api/v1/contact/
 # Contacts for a user
 class ContactView(View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ContactView, self).dispatch(request, *args, **kwargs)
+
     def get(self, request):
         user, error = get_user(request.GET)
         if error:
             return error
 
-        contacts = Contact.objects.filter(belongs_to=user)
+        contacts = Contact.objects.filter(user=user)
 
         contact_id = request.GET.get('contactId')
         if contact_id:
             contacts = contacts.filter(pk=contact_id)
 
-        data = []
-        for contact in contacts:
-            data.append({
-                'contactId': contact.pk,
-                'displayName': contact.display_name,
-                'email': contact.email,
-                'phone': contact.phone,
-                'photoUrl': contact.photo_url
-            })
-
-        return JsonResult(data=data)
+        return JsonResult(data={'contacts': [contact.serialize() for contact in contacts]})
 
     def post(self, request):
         data_in = get_json_request(request)
@@ -93,60 +69,42 @@ class ContactView(View):
         user, error = get_user(data_in)
         if error:
             return error
-
-        contact, created = Contact.objects.update_or_create(
-            pk=data_in['contactId'],
-            defaults={
-                'pk': data_in['contactId'],
-                'belongs_to': user,
-                'display_name': data_in['displayName'],
-                'email': data_in['email'],
-                'phone': data_in['phone'],
-                'photo_url': data_in['photoUrl']
-            }
-        )
-
-        return JsonResult({
-            'created': created, 'contactId': contact.pk if created else None
-        })
+        return JsonResult({'contact': Contact.deserialize(data_in).serialize()})
 
 
 # /api/v1/transaction/
 # Transactions for a user
 class TransactionView(View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(TransactionView, self).dispatch(request, *args, **kwargs)
+
     def get(self, request):
         user, error = get_user(request.GET)
         if error:
             return error
 
-        transactions = Transaction.objects.filter(Q(to=user)|Q(by=user))
+        transactions = Transaction.objects.filter(Q(user=user)|Q(contact__linked_user=user))
 
         transaction_id = request.GET.get('transactionId')
         if transaction_id:
             transactions = transactions.filter(pk=transaction_id)
 
-        data = []
+        data = {'transactions': []}
+        users = []
         for transaction in transactions:
-            transactionData = {
-                'transactionId': transaction.pk,
-                'to': transaction.to.user_id if transaction.to else None,
-                'by': transaction.by.user_id if transaction.by else None,
-                'addedBy': transaction.added_by.user_id,
-                'unregisteredContact': transaction.unregistered_contact.pk if transaction.unregistered_contact else None,
-            }
+            transactionData = transaction.serialize()
 
             if request.GET.get('data') == '1':
-                transactionData['data'] = [
-                    {
-                        'dataId': info.pk,
-                        'title': info.title,
-                        'amount': info.amount,
-                        'approved': info.approved,
-                        'timestamp':  dateformat.format(info.timestamp, 'U'),
-                    } for info in transaction.get_history()
-                ]
+                transactionData['data'] = [dt.serialize() for dt in transaction.get_history()]
 
-            data.append(transactionData)
+            data['transactions'].append(transactionData)
+            if transaction.user != user:
+                users.append(transaction.user)
+
+        if request.GET.get('users') == '1':
+            users = list(set(users))
+            data['users'] = [user.serialize() for user in users]
 
         return JsonResult(data=data)
 
@@ -159,40 +117,23 @@ class TransactionView(View):
         if error:
             return error
 
-        transaction, created = Transaction.objects.update_or_create(
-            pk=data_in['transactionId'],
-            defaults={
-                'pk': data_in['transactionId'],
-                'to': User.objects.get(user_id=data_in['to']) if data_in.get('to') else None,
-                'by': User.objects.get(user_id=data_in['by']) if data_in.get('by') else None,
-                'unregistered_contact': Contact.objects.get(pk=data_in['unregisteredContact']) if data_in.get('unregisteredContact') else None,
-                'added_by': user,
-            }
-        )
-
-        if created and 'data' in data_in:
+        transaction = Transaction.deserialize(data_in)
+        if transaction and data_in.get('data'):
             for dataItem in data_in['data']:
-                TransactionInformation.objects.update_or_create(
-                    pk=dataItem['dataId'],
-                    defaults={
-                        'pk': dataItem['dataId'],
-                        'transaction': transaction,
-                        'title': dataItem['title'],
-                        'amount': dataItem['amount'],
-                        'approved': dataItem['approved'],
-                        'timestamp': datetime.fromtimestamp(dataItem['timestamp'])
-                    }
-                )
+                dataItem['transactionId'] = transaction.pk
+                TransactionData.deserialize(dataItem)
 
-        return JsonResult({
-            'created': created, 'transactionId': transaction.pk if created else None
-        })
+        return JsonResult({'transaction': Transaction.serialize()})
 
 
 
 # /api/v1/transaction-data/
 # Transaction history for a transaction
 class TransactionDataView(View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(TransactionDataView, self).dispatch(request, *args, **kwargs)
+
     def get(self, request):
         user, error = get_user(request.GET)
         if error:
@@ -207,17 +148,7 @@ class TransactionDataView(View):
         except ObjectDoesNotExist:
             return JsonError('Transaction with transaction id "{}" does not exist'.format(transaction_id))
 
-        data = []
-        for info in transaction.get_history():
-            data.append({
-                'dataId': info.pk,
-                'title': info.title,
-                'amount': info.amount,
-                'approved': info.approved,
-                'timestamp':  dateformat.format(info.timestamp, 'U'),
-            })
-
-        return JsonResult(data=data)
+        return JsonResult(data={'data': [dt.serialize() for dt in transaction.get_history()]})
 
     def post(self, request):
         data_in = get_json_request(request)
@@ -237,72 +168,4 @@ class TransactionDataView(View):
         except ObjectDoesNotExist:
             return JsonError('Transaction with transaction id "{}" does not exist'.format(transaction_id))
 
-        info, created = TransactionInformation.objects.update_or_create(
-            pk=data_in['transactionId'],
-            defaults={
-                'pk': data_in['dataId'],
-                'transaction': transaction,
-                'title': data_in['title'],
-                'amount': data_in['amount'],
-                'approved': data_in['approved'],
-                'timestamp': datetime.fromtimestamp(data_in['timestamp'])
-            }
-        )
-
-        return JsonResult({
-            'created': created, 'transactionDataId': info.pk if created else None
-        })
-
-
-
-# /api/v1/party/
-# Transaction party
-# Get all parties, contacts and otherwise and their transactions
-# for a given user
-class PartyView(View):
-    def get(self, request):
-        # First get the active user
-        user, error = get_user(request.GET)
-        if error:
-            return error
-
-        # Get all parties involved in transactions with the user
-        parties = {}
-        for transaction in Transaction.objects.filter(Q(to=user)|Q(by=user)):
-            other, unregistered = transaction.get_other(user)
-
-            # Add a party
-            unique_key = str(other.pk) + ':' + str(unregistered)
-            if unique_key not in parties:
-                parties[unique_key] = {
-                    'id': other.get_id(),
-                    'displayName': other.display_name,
-                    'email': other.email,
-                    'phone': other.phone,
-                    'photoUrl': other.photo_url,
-                    'amount': 0,
-                    'unregistered': unregistered,
-                    'transactions': []
-                }
-
-            # Add transaction for the party
-            parties[unique_key]['amount'] += transaction.get_amount()
-            transaction_object = {
-                'transactionId': transaction.pk,
-                'isOwner': transaction.added_by == user,
-                'isBy': transaction.by == user,
-                'history': []
-            }
-            parties[unique_key]['transactions'].append(transaction_object)
-
-            # History of the transaction
-            for info in transaction.get_history():
-                transaction_object['history'].append({
-                    'dataId': info.pk,
-                    'title': info.title,
-                    'timestamp': dateformat.format(info.timestamp, 'U'),
-                    'amount': info.amount,
-                    'approved': info.approved
-                })
-
-        return JsonResult(list(parties.values()))
+        return JsonResult({'data': TransactionData.deserialize(data_in).serialize()})

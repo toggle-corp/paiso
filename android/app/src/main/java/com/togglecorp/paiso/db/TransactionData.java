@@ -3,24 +3,24 @@ package com.togglecorp.paiso.db;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class TransactionData extends SerializableModel {
-    public Long dataId = null;
-    public Long transaction;
+public class TransactionData extends SerializableRemoteModel {
+    public Integer dataId = null;
+    public Integer paisoTransaction;
 
     public String title;
-    public Float amount;
+    public float amount;
     public boolean approved;
     public long timestamp;
 
 
     public TransactionData() {}
 
-    public TransactionData(Long dataId, String title, float amount, boolean approved, Long transaction) {
+    public TransactionData(Integer dataId, String title, float amount, boolean approved, Integer transaction) {
         this.dataId = dataId;
         this.title = title;
         this.amount = amount;
         this.approved = approved;
-        this.transaction = transaction;
+        this.paisoTransaction = transaction;
     }
 
 
@@ -29,8 +29,8 @@ public class TransactionData extends SerializableModel {
         JSONObject object = new JSONObject();
 
         try {
-            object.put("dataId", dataId);
-            object.put("transaction", transaction);
+            object.put("dataId", dataId==null?JSONObject.NULL:dataId);
+            object.put("transaction", paisoTransaction);
             object.put("title", title);
             object.put("amount", amount);
             object.put("approved", approved);
@@ -40,5 +40,18 @@ public class TransactionData extends SerializableModel {
         }
 
         return object;
+    }
+
+    @Override
+    public void fromJson(JSONObject json) {
+        if (json == null) {
+            return;
+        }
+
+        dataId = (Integer)json.opt("dataId");
+        paisoTransaction = (Integer)json.opt("transaction");
+        amount = (float)json.optDouble("amount");
+        approved = json.optBoolean("approved");
+        timestamp = json.optLong("timestamp");
     }
 }

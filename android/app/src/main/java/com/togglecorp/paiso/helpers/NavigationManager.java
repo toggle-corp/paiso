@@ -13,8 +13,8 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.togglecorp.paiso.R;
-import com.togglecorp.paiso.common.ChangeListener;
-import com.togglecorp.paiso.ui.NavigationDrawerAdapter;
+import com.togglecorp.paiso.adapters.NavigationChangeListener;
+import com.togglecorp.paiso.adapters.NavigationDrawerAdapter;
 
 import java.util.ArrayList;
 
@@ -43,11 +43,11 @@ public class NavigationManager {
         mDrawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
         View header = mDrawerLayout.findViewById(R.id.navigation_drawer_header);
         ((TextView)header.findViewById(R.id.display_name))
-                .setText(authUser.getUser().getDisplayName());
+                .setText(authUser.getFbUser().getDisplayName());
         ((TextView)header.findViewById(R.id.email))
-                .setText(authUser.getUser().getEmail());
+                .setText(authUser.getFbUser().getEmail());
         Picasso.with(activity)
-                .load(authUser.getUser().getPhotoUrl())
+                .load(authUser.getFbUser().getPhotoUrl())
                 .into((CircleImageView)header.findViewById(R.id.avatar));
 
 
@@ -61,7 +61,7 @@ public class NavigationManager {
     }
 
 
-    public ChangeListener mNavigationListener = new ChangeListener() {
+    public NavigationChangeListener mNavigationListener = new NavigationChangeListener() {
         @Override
         public void onChange(int index) {
             switch (index) {
