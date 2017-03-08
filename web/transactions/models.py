@@ -168,7 +168,7 @@ class TransactionData(models.Model):
             'title': self.title,
             'amount': self.amount,
             'approved': self.approved,
-            'timestamp': dateformat.format(self.timestamp, 'U'),
+            'timestamp': int(dateformat.format(self.timestamp, 'U'))*1000,
         }
 
     @staticmethod
@@ -182,7 +182,7 @@ class TransactionData(models.Model):
         transData.title = data.get('title')
         transData.amount = data.get('amount')
         transData.approved = data.get('approved')
-        transData.timestamp = datetime.fromtimestamp(data.get('timestamp'))
+        transData.timestamp = datetime.fromtimestamp(int(data.get('timestamp'))/1000)
         transData.save()
 
         return transData

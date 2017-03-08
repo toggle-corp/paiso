@@ -34,13 +34,18 @@ public class Contact extends SerializableRemoteModel {
         this.photoUrl = photoUrl;
     }
 
+    public List<PaisoTransaction> getAllTransactions(DbHelper dbHelper) {
+        return PaisoTransaction.query(PaisoTransaction.class, dbHelper, "contact = ?",
+                new String[]{contactId+""});
+    }
+
     @Override
     public JSONObject toJson() {
         JSONObject object = new JSONObject();
 
         try {
             object.put("contactId", contactId==null?JSONObject.NULL:contactId);
-            object.put("linkedUser", linkedUser==null?JSONObject.NULL:linkedUser);
+            object.put("linkedUserId", linkedUser==null?JSONObject.NULL:linkedUser);
 
             object.put("displayName", displayName);
             object.put("email", email==null?JSONObject.NULL:email);
@@ -60,7 +65,7 @@ public class Contact extends SerializableRemoteModel {
         }
 
         contactId = (Integer)json.opt("contactId");
-        linkedUser = (Integer)json.opt("linkedUser");
+        linkedUser = (Integer)json.opt("linkedUserId");
         displayName = json.optString("displayName");
         email = optString(json, "email");
         phone = optString(json, "phone");

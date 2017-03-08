@@ -330,4 +330,19 @@ public class Model {
     public void delete(SQLiteOpenHelper helper) {
         delete(getClass(), helper, "_id=?", new String[]{_id+""});
     }
+
+
+    // Hash
+    @Override
+    public int hashCode() {
+        return (int)_id;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof Model) {
+            return _id == ((Model)object)._id;
+        }
+        return super.equals(object);
+    }
 }

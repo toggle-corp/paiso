@@ -16,10 +16,8 @@
             app:theme="@style/AppToolbarTheme"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:elevation="4dp"
-            android:background="@color/colorPrimary"
-            android:fitsSystemWindows="true">
-        </android.support.v7.widget.Toolbar>
+            android:fitsSystemWindows="true"
+            android:background="@color/colorPrimary"/>
 
         <FrameLayout
             android:id="@+id/frame"
@@ -32,15 +30,14 @@
     <android.support.design.widget.NavigationView
         android:id="@+id/navigation_view"
         android:layout_height="match_parent"
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_gravity="start"
         android:background="@android:color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingTop="10dp">
+            android:orientation="vertical">
 
             <include layout="@layout/layout_navigation_drawer_header"
                 android:id="@+id/navigation_drawer_header"/>

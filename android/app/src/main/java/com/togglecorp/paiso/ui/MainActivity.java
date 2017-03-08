@@ -50,7 +50,8 @@ public class MainActivity extends AppCompatActivity implements SyncListener {
 
         mDbHelper = new DbHelper(this);
         mUser = mAuthUser.getUser(mDbHelper);
-        mSyncManager = new SyncManager(mDbHelper, mUser);
+        SyncManager.setUser(mUser);
+        mSyncManager = new SyncManager(mDbHelper);
 
         // Check for contacts-read permission and read the contacts
         new AsyncTask<Void, Void, Void>() {
@@ -84,19 +85,10 @@ public class MainActivity extends AppCompatActivity implements SyncListener {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items transactionTo the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 mNavigationManager.openDrawer();
-                return true;
-            case R.id.add_transaction:
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -113,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements SyncListener {
     @Override
     public void onStart() {
         super.onStart();
-
 
         if (!mPhoneVerificationShown && (mUser.phone == null || mUser.phone.length() == 0)) {
             mPhoneVerificationShown = true;

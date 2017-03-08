@@ -1,5 +1,7 @@
 package com.togglecorp.paiso.db;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,7 +32,7 @@ public class TransactionData extends SerializableRemoteModel {
 
         try {
             object.put("dataId", dataId==null?JSONObject.NULL:dataId);
-            object.put("transaction", paisoTransaction);
+            object.put("transactionId", paisoTransaction);
             object.put("title", title);
             object.put("amount", amount);
             object.put("approved", approved);
@@ -49,7 +51,8 @@ public class TransactionData extends SerializableRemoteModel {
         }
 
         dataId = (Integer)json.opt("dataId");
-        paisoTransaction = (Integer)json.opt("transaction");
+        paisoTransaction = (Integer)json.opt("transactionId");
+        title = json.optString("title");
         amount = (float)json.optDouble("amount");
         approved = json.optBoolean("approved");
         timestamp = json.optLong("timestamp");

@@ -34,15 +34,22 @@ public class SyncManager {
     private DbHelper mDbHelper;
     private List<SyncListener> mListeners = new ArrayList<>();
 
-    private User mUser;
+    private static User mUser;
 
-    public SyncManager(DbHelper dbHelper, User user) {
+    public SyncManager(DbHelper dbHelper) {
         mDbHelper = dbHelper;
+    }
+
+    public static void setUser(User user) {
         mUser = user;
     }
 
     // Request synchronization transactionTo be performed
     public void requestSync() {
+        if (mUser == null) {
+            return;
+        }
+
         // Making sure two sync requests are handled one after another
         synchronized (SyncManager.class) {
             new JsonRequest(mDbHelper.getContext())

@@ -57,7 +57,6 @@ public class AuthUser implements GoogleApiClient.OnConnectionFailedListener {
         User user;
         user = User.get(User.class, dbHelper, "email=?", new String[]{getFbUser().getEmail()});
         if (user == null) {
-            Log.d(TAG, "creating new user: " + getFbUser().getEmail());
             user = new User();
         }
         user.displayName = getFbUser().getDisplayName();

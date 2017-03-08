@@ -2,8 +2,6 @@
     <string name="app_name">Paiso</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="sign_in">Sign in</string>
     <string name="navigation_drawer_open">Open</string>
     <string name="navigation_drawer_close">Close</string>
     <string name="base_url">http://192.168.100.56:8000/</string>

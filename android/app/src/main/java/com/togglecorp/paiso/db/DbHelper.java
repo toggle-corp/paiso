@@ -31,7 +31,7 @@ public class DbHelper extends SQLiteOpenHelper {
         resetAll(db);
     }
 
-    private void resetAll(SQLiteDatabase db) {
+    public void resetAll(SQLiteDatabase db) {
         db.execSQL(new User().getDestroyTableSql());
         db.execSQL(new Contact().getDestroyTableSql());
         db.execSQL(new PaisoTransaction().getDestroyTableSql());
@@ -43,5 +43,6 @@ public class DbHelper extends SQLiteOpenHelper {
     public Context getContext() {
         return mContext;
     }
+
 
 }

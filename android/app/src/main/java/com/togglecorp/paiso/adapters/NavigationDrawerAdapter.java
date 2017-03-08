@@ -51,13 +51,12 @@ public class NavigationDrawerAdapter extends RecyclerView.Adapter<NavigationDraw
         Item item = mItems.get(position);
 
         if (mSelectedItem == position) {
-            DrawableCompat.setTint(item.icon, Color.WHITE);
-            holder.itemNameView.setTextColor(Color.WHITE);
-            holder.rootView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
+            holder.rootView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorSelection));
         } else {
-            DrawableCompat.setTint(item.icon, Color.BLACK);
-            holder.itemNameView.setTextColor(Color.BLACK);
             holder.rootView.setBackgroundColor(Color.TRANSPARENT);
+        }
+        if (item.icon != null) {
+            DrawableCompat.setTint(item.icon, ContextCompat.getColor(mContext, R.color.colorPrimary));
         }
 
         holder.iconView.setImageDrawable(item.icon);
