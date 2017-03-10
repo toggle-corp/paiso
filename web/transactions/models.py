@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import dateformat
 
-import datetime
+from datetime import datetime
 
 
 class User(models.Model):
@@ -153,7 +153,7 @@ class TransactionData(models.Model):
     title = models.CharField(max_length=300)
     amount = models.FloatField()
     approved = models.BooleanField(default=False)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField()
 
     def __str__(self):
         return '{} ({})'.format(str(self.amount), str(self.transaction))

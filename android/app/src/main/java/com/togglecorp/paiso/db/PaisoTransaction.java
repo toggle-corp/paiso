@@ -2,6 +2,8 @@ package com.togglecorp.paiso.db;
 
 import android.util.Log;
 
+import com.togglecorp.paiso.network.SyncManager;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,6 +15,11 @@ public class PaisoTransaction extends SerializableRemoteModel {
     public Integer user;
     public Integer contact;
     public String transactionType;
+    public boolean deleted = false;
+
+    private String getTransactionId() {
+        return (transactionId == null) ? "-99" : transactionId+"";
+    }
 
     public PaisoTransaction() {}
 
@@ -24,22 +31,35 @@ public class PaisoTransaction extends SerializableRemoteModel {
     }
 
     public List<TransactionData> getAllData(DbHelper dbHelper) {
-        return TransactionData.query(TransactionData.class, dbHelper, "paisoTransaction = ?",
-                new String[]{transactionId+""}, null, null, "-timestamp");
+        return TransactionData.query(TransactionData.class, dbHelper, "(localTransaction = ? OR paisoTransaction = ?)",
+                new String[]{_id+"", getTransactionId()}, null, null, "-timestamp");
     }
 
     public List<TransactionData> getApprovedData(DbHelper dbHelper) {
-        return TransactionData.query(TransactionData.class, dbHelper, "paisoTransaction = ? AND approved = 1",
-                new String[]{transactionId+""}, null, null, "-timestamp");
+        if (user.equals(SyncManager.getUser().userId)) {
+            return getAllData(dbHelper);
+        }
+
+        return TransactionData.query(TransactionData.class, dbHelper, "(localTransaction = ? OR paisoTransaction = ?) AND approved = 1",
+                new String[]{_id+"", getTransactionId()}, null, null, "-timestamp");
     }
 
     public List<TransactionData> getPendingData(DbHelper dbHelper) {
-        return TransactionData.query(TransactionData.class, dbHelper, "paisoTransaction = ? AND approved = 0",
-                new String[]{transactionId+""}, null, null, "-timestamp");
+        return TransactionData.query(TransactionData.class, dbHelper, "(localTransaction = ? OR paisoTransaction = ?) AND approved = 0",
+                new String[]{_id+"", getTransactionId()}, null, null, "-timestamp");
     }
 
     public TransactionData getLatestApproved(DbHelper dbHelper) {
         List<TransactionData> data = getApprovedData(dbHelper);
+        if (data.size() > 0) {
+            return data.get(0);
+        }
+        return null;
+    }
+
+
+    public TransactionData getLatest(DbHelper dbHelper) {
+        List<TransactionData> data = getAllData(dbHelper);
         if (data.size() > 0) {
             return data.get(0);
         }
@@ -51,6 +71,7 @@ public class PaisoTransaction extends SerializableRemoteModel {
     }
 
     // Pass in dbHelper transactionTo also get taransaction data in json
+    @Override
     public JSONObject toJson(DbHelper dbHelper) {
         JSONObject object = new JSONObject();
 
@@ -58,11 +79,13 @@ public class PaisoTransaction extends SerializableRemoteModel {
             object.put("transactionId", transactionId==null?JSONObject.NULL:transactionId);
             object.put("contactId", contact);
             object.put("transactionType", transactionType);
+            object.put("deleted", deleted);
 
             if (dbHelper != null) {
                 JSONArray dataArray = new JSONArray();
 
                 List<TransactionData> dataList = getAllData(dbHelper);
+                Log.d("Paiso Transaction", getTransactionId());
                 for (TransactionData data: dataList) {
                     dataArray.put(data.toJson());
                 }
@@ -89,8 +112,9 @@ public class PaisoTransaction extends SerializableRemoteModel {
             return;
         }
 
-        transactionId = (Integer)json.opt("transactionId");
-        contact = (Integer)json.opt("contactId");
+        transactionId = optInteger(json, "transactionId");
+        user = optInteger(json, "userId");
+        contact = optInteger(json, "contactId");
         transactionType = json.optString("transactionType");
     }
 }

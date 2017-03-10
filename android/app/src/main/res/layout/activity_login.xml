@@ -36,7 +36,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Corp"
-                android:textColor="@color/colorAccent"
+                android:textColor="#FF6E40"
                 android:textAllCaps="true"
                 android:fontFamily="sans-serif"
                 android:textSize="30sp"/>
@@ -51,9 +51,9 @@
             android:textAllCaps="true"
             android:paddingTop="5dp"
             android:layout_marginBottom="40dp"
-            android:fontFamily="sans-serif"
+            android:fontFamily="sans-serif-condensed"
             android:textSize="56sp"
-            android:textColor="@android:color/white"/>
+            android:textColor="#F0FFFFFF"/>
     </LinearLayout>
 
     <LinearLayout

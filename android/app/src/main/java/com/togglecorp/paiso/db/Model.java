@@ -135,7 +135,7 @@ public class Model {
         // finally insert and in case unique fields (e.g. _id) conflicts, replace the row in the table
         SQLiteDatabase db = helper.getWritableDatabase();
         _id = db.insertWithOnConflict(myClass.getSimpleName(), null, values, SQLiteDatabase.CONFLICT_REPLACE);
-        db.close();
+        // db.close();
     }
 
     public static <T extends Model> List<T> getAll(Class<T> myClass, SQLiteOpenHelper helper) {
@@ -163,41 +163,41 @@ public class Model {
                 T object = myClass.newInstance();
 
                 // For each field, set the value from the cursor
-                for (Field field : fields) {
+                for (Field field: fields) {
                     String typeName = field.getType().getSimpleName();
                     switch (typeName) {
                         case "String":
-                            field.set(object, c.getString(c.getColumnIndex(field.getName())));
+                            field.set(object, c.isNull(c.getColumnIndex(field.getName())) ? null : c.getString(c.getColumnIndex(field.getName())));
                             break;
                         case "int":
                             field.setInt(object, c.getInt(c.getColumnIndex(field.getName())));
                             break;
                         case "Integer":
-                            field.set(object, c.getInt(c.getColumnIndex(field.getName())));
+                            field.set(object, c.isNull(c.getColumnIndex(field.getName())) ? null : c.getInt(c.getColumnIndex(field.getName())));
                             break;
                         case "long":
                             field.setLong(object, c.getLong(c.getColumnIndex(field.getName())));
                             break;
                         case "Long":
-                            field.set(object, c.getLong(c.getColumnIndex(field.getName())));
+                            field.set(object, c.isNull(c.getColumnIndex(field.getName())) ? null : c.getLong(c.getColumnIndex(field.getName())));
                             break;
                         case "boolean":
                             field.setBoolean(object, c.getInt(c.getColumnIndex(field.getName())) != 0);
                             break;
                         case "Boolean":
-                            field.set(object, c.getInt(c.getColumnIndex(field.getName())) != 0);
+                            field.set(object, c.isNull(c.getColumnIndex(field.getName())) ? null : c.getInt(c.getColumnIndex(field.getName())) != 0);
                             break;
                         case "float":
                             field.setFloat(object, c.getFloat(c.getColumnIndex(field.getName())));
                             break;
                         case "Float":
-                            field.set(object, c.getFloat(c.getColumnIndex(field.getName())));
+                            field.set(object, c.isNull(c.getColumnIndex(field.getName())) ? null : c.getFloat(c.getColumnIndex(field.getName())));
                             break;
                         case "double":
                             field.setDouble(object, c.getDouble(c.getColumnIndex(field.getName())));
                             break;
                         case "Double":
-                            field.set(object, c.getDouble(c.getColumnIndex(field.getName())));
+                            field.set(object, c.isNull(c.getColumnIndex(field.getName())) ? null : c.getDouble(c.getColumnIndex(field.getName())));
                             break;
                         case "byte[]":
                             field.set(object, c.getBlob(c.getColumnIndex(field.getName())));
@@ -212,7 +212,7 @@ public class Model {
         }
 
         c.close();
-        db.close();
+        // db.close();
         return list;
     }
 
@@ -246,37 +246,37 @@ public class Model {
                     String typeName = field.getType().getSimpleName();
                     switch (typeName) {
                         case "String":
-                            field.set(object, c.getString(c.getColumnIndex(field.getName())));
+                            field.set(object, c.isNull(c.getColumnIndex(field.getName())) ? null : c.getString(c.getColumnIndex(field.getName())));
                             break;
                         case "int":
                             field.setInt(object, c.getInt(c.getColumnIndex(field.getName())));
                             break;
                         case "Integer":
-                            field.set(object, c.getInt(c.getColumnIndex(field.getName())));
+                            field.set(object, c.isNull(c.getColumnIndex(field.getName())) ? null : c.getInt(c.getColumnIndex(field.getName())));
                             break;
                         case "long":
                             field.setLong(object, c.getLong(c.getColumnIndex(field.getName())));
                             break;
                         case "Long":
-                            field.set(object, c.getLong(c.getColumnIndex(field.getName())));
+                            field.set(object, c.isNull(c.getColumnIndex(field.getName())) ? null : c.getLong(c.getColumnIndex(field.getName())));
                             break;
                         case "boolean":
                             field.setBoolean(object, c.getInt(c.getColumnIndex(field.getName())) != 0);
                             break;
                         case "Boolean":
-                            field.set(object, c.getInt(c.getColumnIndex(field.getName())) != 0);
+                            field.set(object, c.isNull(c.getColumnIndex(field.getName())) ? null : c.getInt(c.getColumnIndex(field.getName())) != 0);
                             break;
                         case "float":
                             field.setFloat(object, c.getFloat(c.getColumnIndex(field.getName())));
                             break;
                         case "Float":
-                            field.set(object, c.getFloat(c.getColumnIndex(field.getName())));
+                            field.set(object, c.isNull(c.getColumnIndex(field.getName())) ? null : c.getFloat(c.getColumnIndex(field.getName())));
                             break;
                         case "double":
                             field.setDouble(object, c.getDouble(c.getColumnIndex(field.getName())));
                             break;
                         case "Double":
-                            field.set(object, c.getDouble(c.getColumnIndex(field.getName())));
+                            field.set(object, c.isNull(c.getColumnIndex(field.getName())) ? null : c.getDouble(c.getColumnIndex(field.getName())));
                             break;
                         case "byte[]":
                             field.set(object, c.getBlob(c.getColumnIndex(field.getName())));
@@ -289,7 +289,7 @@ public class Model {
         }
 
         c.close();
-        db.close();
+        // db.close();
         return object;
     }
 
@@ -308,7 +308,7 @@ public class Model {
         cursor.moveToFirst();
         int size = cursor.getInt(0);
         cursor.close();
-        db.close();
+        // db.close();
         return size;
     }
 
@@ -316,14 +316,14 @@ public class Model {
     public static void deleteAll(Class myClass, SQLiteOpenHelper helper) {
         SQLiteDatabase db = helper.getWritableDatabase();
         db.delete(myClass.getSimpleName(), null, null);
-        db.close();
+        // db.close();
     }
 
     // Delete with query
     public static void delete(Class myClass, SQLiteOpenHelper helper, String selection, String[] args) {
         SQLiteDatabase db = helper.getWritableDatabase();
         db.delete(myClass.getSimpleName(), selection, args);
-        db.close();
+        // db.close();
     }
 
     // Delete seld

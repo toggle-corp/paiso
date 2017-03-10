@@ -1,6 +1,7 @@
 package com.togglecorp.paiso.network;
 
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.firebase.database.Transaction;
@@ -43,6 +44,9 @@ public class SyncManager {
     public static void setUser(User user) {
         mUser = user;
     }
+    public static User getUser() {
+        return mUser;
+    }
 
     // Request synchronization transactionTo be performed
     public void requestSync() {
@@ -62,16 +66,36 @@ public class SyncManager {
                                         mUser.fromJson(data.optJSONObject("user"));
                                         mUser.modified = false;
                                         mUser.save(mDbHelper);
-
-                                        sync();
                                     }
+
+                                    // Get rest of the stuffs
+                                    new AsyncTask<Void, Void, Void>() {
+                                        @Override
+                                        protected Void doInBackground(Void... params) {
+                                            try {
+                                                sync();
+                                            } catch (Exception exception) {
+                                                exception.printStackTrace();
+                                            }
+                                            return null;
+                                        }
+
+                                        @Override
+                                        protected void onPostExecute(Void nothing) {
+                                            // Sync actual complete, handle the listeners
+                                            for (SyncListener listener: mListeners) {
+                                                listener.onSync(true);
+                                            }
+                                        }
+
+                                    }.execute();
                                 }
                             });
         }
 
         // Sync complete, handle the listeners
         for (SyncListener listener: mListeners) {
-            listener.onSync();
+            listener.onSync(false);
         }
     }
 
@@ -88,54 +112,68 @@ public class SyncManager {
     // Actual synchronization logic begins here
 
     private void sync() {
-        // Step 1: Post modified objects
-        postSerializable(User.class, "api/v1/user/", new PostListener<User>() {
-            @Override
-            public void onSuccess(JSONObject data, User object) {
-                if (data.has("user")){
-                    object.fromJson(data.optJSONObject("user"));
-                    object.modified = false;
-                    object.save(mDbHelper);
-                }
-            }
-        });
 
-        // Step 2: Post modified contacts
-        postSerializable(Contact.class, "api/v1/contact/", new PostListener<Contact>() {
-            @Override
-            public void onSuccess(JSONObject data, Contact object) {
-                if (data.has("contact")) {
-                    object.fromJson(data.optJSONObject("contact"));
-                    object.modified = false;
-                    object.save(mDbHelper);
+        synchronized (SyncManager.class) {
+            // Step 1: Post modified objects
+            postSerializable(User.class, "api/v1/user/", new PostListener<User>() {
+                @Override
+                public void onSuccess(JSONObject data, User object) {
+                    if (data.has("user")) {
+                        object.fromJson(data.optJSONObject("user"));
+                        object.modified = false;
+                        object.save(mDbHelper);
+                    }
                 }
-            }
-        });
+            });
 
-        // Step 3: Post modified transactions
-        postSerializable(PaisoTransaction.class, "api/v1/transaction/", new PostListener<PaisoTransaction>() {
-            @Override
-            public void onSuccess(JSONObject data, PaisoTransaction object) {
-                if (data.has("transaction")) {
-                    object.fromJson(data.optJSONObject("transaction"));
-                    object.modified = false;
-                    object.save(mDbHelper);
+            // Step 2: Post modified contacts
+            postSerializable(Contact.class, "api/v1/contact/", new PostListener<Contact>() {
+                @Override
+                public void onSuccess(JSONObject data, Contact object) {
+                    if (data.has("contact")) {
+                        object.fromJson(data.optJSONObject("contact"));
+                        object.modified = false;
+                        object.save(mDbHelper);
+                    }
                 }
-            }
-        });
-        postSerializable(TransactionData.class, "/api/v1/transaction-data/", new PostListener<TransactionData>() {
-            @Override
-            public void onSuccess(JSONObject data, TransactionData object) {
-                if (data.has("data")) {
-                    object.fromJson(data.optJSONObject("data"));
-                    object.modified = false;
-                    object.save(mDbHelper);
-                }
-            }
-        });
+            });
 
-        // Step 4: Get from server, but only keep objects if they are unmodified locally
-        getTransactions();
+            // Step 3: Post modified transactions
+            postSerializable(PaisoTransaction.class, "api/v1/transaction/", new PostListener<PaisoTransaction>() {
+                @Override
+                public void onSuccess(JSONObject data, PaisoTransaction object) {
+                    if (data.has("transaction")) {
+                        object.fromJson(data.optJSONObject("transaction"));
+                        object.modified = false;
+                        object.save(mDbHelper);
+
+                        for (TransactionData tdata : object.getAllData(mDbHelper)) {
+                            tdata.modified = false;
+                            tdata.save(mDbHelper);
+                        }
+                    } else if (data.has("deleted")) {
+                        for (TransactionData tdata : object.getAllData(mDbHelper)) {
+                            tdata.delete(mDbHelper);
+                        }
+                        object.delete(mDbHelper);
+                    }
+                }
+            });
+
+            postSerializable(TransactionData.class, "api/v1/transaction-data/", new PostListener<TransactionData>() {
+                @Override
+                public void onSuccess(JSONObject data, TransactionData object) {
+                    if (data.has("data")) {
+                        object.fromJson(data.optJSONObject("data"));
+                        object.modified = false;
+                        object.save(mDbHelper);
+                    }
+                }
+            });
+
+            // Step 4: Get from server, but only keep objects if they are unmodified locally
+            getTransactions();
+        }
     }
 
     private interface PostListener<T> {
@@ -145,24 +183,27 @@ public class SyncManager {
         // Now the actual postSerializable for all modified data
         List<T> objects = T.query(c, mDbHelper, "modified = 1", null);
         for (T object: objects) {
-            try {
-                final T that = object;
-                JSONObject jsObj = object.toJson();
-                jsObj.put("userId", mUser.userId);
-                new JsonRequest(mDbHelper.getContext())
-                        .setData(jsObj)
-                        .post(apiUrl, new JsonRequestListener() {
-                            @Override
-                            public void onRequestComplete(JsonRequest request) {
-                                JSONObject data = request.getSuccessDataObject();
-                                if (data != null) {
-                                    postListener.onSuccess(data, that);
-                                }
+            postSerializable(c, object, apiUrl, postListener);
+        }
+    }
+    private <T extends SerializableRemoteModel> void postSerializable(final Class<T> c, T object, final String apiUrl, final PostListener<T> postListener) {
+        try {
+            final T that = object;
+            JSONObject jsObj = object.toJson(mDbHelper);
+            jsObj.put("userId", mUser.userId);
+            new JsonRequest(mDbHelper.getContext())
+                    .setData(jsObj)
+                    .postSync(apiUrl, new JsonRequestListener() {
+                        @Override
+                        public void onRequestComplete(JsonRequest request) {
+                            JSONObject data = request.getSuccessDataObject();
+                            if (data != null) {
+                                postListener.onSuccess(data, that);
                             }
-                        });
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+                        }
+                    });
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -189,11 +230,12 @@ public class SyncManager {
 
     private void getTransactions() {
         new JsonRequest(mDbHelper.getContext())
-                .get("api/v1/transaction/" + "?userId=" + mUser.userId + "&users=1&data=1", new JsonRequestListener() {
+                .getSync("api/v1/transaction/" + "?userId=" + mUser.userId + "&users=1&data=1", new JsonRequestListener() {
                     @Override
                     public void onRequestComplete(JsonRequest request) {
                         JSONObject data = request.getSuccessDataObject();
                         if (data != null) {
+
                             JSONArray users = data.optJSONArray("users");
                             for (int i=0; i<users.length(); i++) {
 

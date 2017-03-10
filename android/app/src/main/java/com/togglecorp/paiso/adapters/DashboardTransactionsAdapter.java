@@ -20,11 +20,12 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class DashboardTransactionsAdapter extends RecyclerView.Adapter<DashboardTransactionsAdapter.ViewHolder>{
     public static class Item {
-        public long id;
+        public long contactId;
         public String username;
         public String userextra;
         public String photoUrl;
         public float amount;
+        public long timestamp;
     }
 
     private final Context mContext;
@@ -80,8 +81,8 @@ public class DashboardTransactionsAdapter extends RecyclerView.Adapter<Dashboard
             super(itemView);
 
             avatar = (CircleImageView) itemView.findViewById(R.id.avatar);
-            username = (TextView) itemView.findViewById(R.id.username);
-            userextra = (TextView) itemView.findViewById(R.id.userextra);
+            username = (TextView) itemView.findViewById(R.id.contact_name);
+            userextra = (TextView) itemView.findViewById(R.id.contact_extra);
             amount = (TextView) itemView.findViewById(R.id.amount);
 
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -89,7 +90,7 @@ public class DashboardTransactionsAdapter extends RecyclerView.Adapter<Dashboard
                 public void onClick(View v) {
                     Item item = mItems.get(getAdapterPosition());
                     Intent intent = new Intent(mContext, ContactDetailsActivity.class);
-                    intent.putExtra("id", item.id);
+                    intent.putExtra("contactId", item.contactId);
                     mContext.startActivity(intent);
                 }
             });

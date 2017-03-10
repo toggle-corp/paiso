@@ -1,4 +1,4 @@
-package com.togglecorp.paiso.helpers;
+package com.togglecorp.paiso.ui;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -18,6 +18,7 @@ import com.squareup.picasso.Picasso;
 import com.togglecorp.paiso.R;
 import com.togglecorp.paiso.adapters.NavigationChangeListener;
 import com.togglecorp.paiso.adapters.NavigationDrawerAdapter;
+import com.togglecorp.paiso.helpers.AuthUser;
 import com.togglecorp.paiso.ui.DashboardFragment;
 import com.togglecorp.paiso.ui.LoginActivity;
 
@@ -30,6 +31,8 @@ public class NavigationManager {
     private DrawerLayout mDrawerLayout;
     private NavigationDrawerAdapter mNavigationAdapter;
     private AppCompatActivity mActivity;
+
+    private DashboardFragment mDashboardFragment = new DashboardFragment();
 
     public void init(AppCompatActivity activity, Toolbar toolbar, AuthUser authUser) {
         mActivity = activity;
@@ -68,7 +71,7 @@ public class NavigationManager {
         drawerListener.syncState();
 
         mActivity.getSupportFragmentManager().beginTransaction()
-                .replace(R.id.frame, new DashboardFragment()).commit();
+                .replace(R.id.frame, mDashboardFragment).commit();
     }
 
 
@@ -89,5 +92,14 @@ public class NavigationManager {
 
     public void openDrawer() {
         mDrawerLayout.openDrawer(GravityCompat.START);
+    }
+
+    public void refresh() {
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mDashboardFragment.refresh();
+            }
+        });
     }
 }

@@ -8,6 +8,7 @@ import org.json.JSONObject;
 public class TransactionData extends SerializableRemoteModel {
     public Integer dataId = null;
     public Integer paisoTransaction;
+    public Integer localTransaction;
 
     public String title;
     public float amount;
@@ -50,8 +51,8 @@ public class TransactionData extends SerializableRemoteModel {
             return;
         }
 
-        dataId = (Integer)json.opt("dataId");
-        paisoTransaction = (Integer)json.opt("transactionId");
+        dataId = optInteger(json, "dataId");
+        paisoTransaction = optInteger(json, "transactionId");
         title = json.optString("title");
         amount = (float)json.optDouble("amount");
         approved = json.optBoolean("approved");

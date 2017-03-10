@@ -34,7 +34,7 @@
             android:layout_gravity="center"
             android:text="Yes, this is my number"
             android:onClick="verify"
-            android:textColor="@color/colorPrimaryDark"
+            android:textColor="?attr/colorPrimary"
             android:background="@android:color/transparent"/>
 
         <Button
@@ -43,13 +43,13 @@
             android:layout_gravity="center"
             android:text="Skip"
             android:onClick="skip"
-            android:textColor="@color/colorAccent"
+            android:textColor="?attr/colorAccent"
             android:background="@android:color/transparent"/>
 
     </LinearLayout>
 
     <!--<LinearLayout
-        android:id="@+id/page1"
+        android:contactId="@+contactId/page1"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -72,12 +72,12 @@
             android:orientation="horizontal">
 
             <Spinner
-                android:id="@+id/country_code"
+                android:contactId="@+contactId/country_code"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
             <EditText
-                android:id="@+id/phone_number"
+                android:contactId="@+contactId/phone_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
@@ -96,7 +96,7 @@
         android:layout_alignParentBottom="true">
 
         <Button
-            android:id="@+id/back"
+            android:contactId="@+contactId/back"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -104,7 +104,7 @@
             android:onClick="onBack"/>
 
         <Button
-            android:id="@+id/next"
+            android:contactId="@+contactId/next"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -113,7 +113,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/page2"
+        android:contactId="@+contactId/page2"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -128,7 +128,7 @@
             android:text="Enter the code sent transactionTo your phone:"/>
 
         <EditText
-            android:id="@+id/code"
+            android:contactId="@+contactId/code"
             android:layout_margin="64dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

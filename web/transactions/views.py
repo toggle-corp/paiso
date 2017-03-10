@@ -117,13 +117,17 @@ class TransactionView(View):
         if error:
             return error
 
-        transaction = Transaction.deserialize(data_in)
-        if transaction and data_in.get('data'):
-            for dataItem in data_in['data']:
-                dataItem['transactionId'] = transaction.pk
-                TransactionData.deserialize(dataItem)
+        if data_in.get('deleted') and data_in.get('transactionId'):
+            Transaction.objects.filter(pk=data_in['transactionId']).delete()
+            return JsonResult({'deleted': True})
+        else:
+            transaction = Transaction.deserialize(data_in)
+            if transaction and data_in.get('data'):
+                for dataItem in data_in['data']:
+                    dataItem['transactionId'] = transaction.pk
+                    TransactionData.deserialize(dataItem)
 
-        return JsonResult({'transaction': Transaction.serialize()})
+            return JsonResult({'transaction': transaction.serialize()})
 
 
 

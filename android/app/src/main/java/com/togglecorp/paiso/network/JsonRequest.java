@@ -157,7 +157,13 @@ public class JsonRequest {
         new AsyncRequest("POST", path, listener).execute();
     }
 
-    public void delete(String path, JsonRequestListener listener) {
-        new AsyncRequest("DELETE", path, listener).execute();
+    public void getSync(String path, JsonRequestListener listener) {
+        request("GET", path);
+        listener.onRequestComplete(this);
+    }
+
+    public void postSync(String path, JsonRequestListener listener) {
+        request("POST", path);
+        listener.onRequestComplete(this);
     }
 }

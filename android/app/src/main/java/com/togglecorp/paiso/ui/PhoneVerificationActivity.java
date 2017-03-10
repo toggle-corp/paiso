@@ -35,6 +35,7 @@ public class PhoneVerificationActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.GreenTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_phone_verification);
 
@@ -47,19 +48,19 @@ public class PhoneVerificationActivity extends AppCompatActivity {
                 });
 
 
-        /*mPage1 = findViewById(R.id.page1);
+        /*mPage1 = findViewById(R.contactId.page1);
 
-        mCountryCode = (Spinner) findViewById(R.id.country_code);
-        mPhoneNumber = (EditText) findViewById(R.id.phone_number);
-        mCode = (EditText) findViewById(R.id.code);
-        mBackButton = (Button) findViewById(R.id.back);
-        mNextButton = (Button) findViewById(R.id.next);
+        mCountryCode = (Spinner) findViewById(R.contactId.country_code);
+        mPhoneNumber = (EditText) findViewById(R.contactId.phone_number);
+        mCode = (EditText) findViewById(R.contactId.code);
+        mBackButton = (Button) findViewById(R.contactId.back);
+        mNextButton = (Button) findViewById(R.contactId.next);
         mNextButton.setEnabled(false);
 
         mPhoneNumber.addTextChangedListener(this);
 
         mCountryCode.setAdapter(new CountryCodeAdapter(this));
-        mPage2 = findViewById(R.id.page2);
+        mPage2 = findViewById(R.contactId.page2);
 
         showPage1();*/
     }

@@ -1,6 +1,8 @@
 package com.togglecorp.paiso.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -21,7 +24,6 @@ import com.togglecorp.paiso.network.SyncListener;
 import com.togglecorp.paiso.network.SyncManager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -44,39 +46,48 @@ public class ContactDetailsActivity extends AppCompatActivity implements SyncLis
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Theme
+        String theme = getIntent().getStringExtra("theme");
+        if (theme == null || theme.equals("green")) {
+            setTheme(R.style.GreenTheme);
+        } else {
+            setTheme(R.style.RedTheme);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_details);
 
-        // Get contact id to display details for
+        // Get contact contactId to display details for
         Bundle bundle = getIntent().getExtras();
         if (bundle == null) {
             finish();
             return;
         }
 
-        long id = bundle.getLong("id", -1);
+        long id = bundle.getLong("contactId", -1);
         if (id < 0) {
+            finish();
+            return;
+        }
+
+        mDbHelper = new DbHelper(this);
+        mContact = Contact.get(Contact.class, mDbHelper, id);
+        if (mContact == null) {
             finish();
             return;
         }
 
         mRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh_layout);
 
-        mTransactionsAdapter = new ContactTransactionsAdapter(this);
+        mTransactionsAdapter = new ContactTransactionsAdapter(this, mContact);
         mTransactionsRecyclerView = (RecyclerView) findViewById(R.id.transactions_recyclerview);
         mTransactionsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mTransactionsRecyclerView.setAdapter(mTransactionsAdapter);
 
         mTotalTextView = (TextView) findViewById(R.id.total);
 
-        mDbHelper = new DbHelper(this);
         mSyncManager = new SyncManager(mDbHelper);
 
-        mContact = Contact.get(Contact.class, mDbHelper, id);
-        if (mContact == null) {
-            finish();
-            return;
-        }
 
         // The toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -104,6 +115,24 @@ public class ContactDetailsActivity extends AppCompatActivity implements SyncLis
                 mSyncManager.requestSync();
             }
         });
+
+        // Show hide fab on scroll
+        final FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.add_transaction);
+        mTransactionsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0 ||dy<0 && fab.isShown()) {
+                    fab.hide();
+                }
+            }
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    fab.show();
+                }
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
     }
 
     private void refresh() {
@@ -119,6 +148,8 @@ public class ContactDetailsActivity extends AppCompatActivity implements SyncLis
                 item.title = data.title;
                 item.amount = (paisoTransaction.transactionType.equals("to")) ? data.amount : -data.amount;
                 item.timestamp = data.timestamp;
+                item.transactionId = paisoTransaction._id;
+                item.editable = paisoTransaction.user.equals(SyncManager.getUser().userId);
                 mItems.add(item);
 
                 total += item.amount;
@@ -137,6 +168,18 @@ public class ContactDetailsActivity extends AppCompatActivity implements SyncLis
         mTotalTextView.setText(total+"");
 
         mRefreshLayout.setRefreshing(false);
+
+        // Change theme to render positive/negative total
+        String currentTheme = getIntent().getStringExtra("theme");
+        if (currentTheme == null || currentTheme.equals("green")) {
+            if (total < 0) {
+                getIntent().putExtra("theme", "red");
+                recreate();
+            }
+        } else if (total >= 0) {
+            getIntent().putExtra("theme", "green");
+            recreate();
+        }
     }
 
     @Override
@@ -154,12 +197,12 @@ public class ContactDetailsActivity extends AppCompatActivity implements SyncLis
     public void onResume() {
         super.onResume();
 
+        refresh();
         if (mSyncManager != null) {
             mSyncManager.addListener(this);
             mRefreshLayout.setRefreshing(true);
             mSyncManager.requestSync();
         }
-        refresh();
     }
 
     @Override
@@ -173,7 +216,15 @@ public class ContactDetailsActivity extends AppCompatActivity implements SyncLis
 
 
     @Override
-    public void onSync() {
-        refresh();
+    public void onSync(boolean complete) {
+        if (complete) {
+            refresh();
+        }
+    }
+
+    public void addTransaction(View view) {
+        Intent intent = new Intent(this, AddTransactionActivity.class);
+        intent.putExtra("contactId", mContact._id);
+        startActivity(intent);
     }
 }

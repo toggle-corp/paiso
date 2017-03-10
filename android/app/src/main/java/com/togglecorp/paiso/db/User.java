@@ -45,7 +45,7 @@ public class User extends SerializableRemoteModel {
             return;
         }
 
-        userId = (Integer)json.opt("userId");
+        userId = optInteger(json, "userId");
         displayName = json.optString("displayName");
         email = optString(json, "email");
         phone = optString(json, "phone");

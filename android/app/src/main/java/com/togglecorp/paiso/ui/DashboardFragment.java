@@ -1,10 +1,14 @@
 package com.togglecorp.paiso.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +24,8 @@ import com.togglecorp.paiso.network.SyncListener;
 import com.togglecorp.paiso.network.SyncManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -34,6 +40,7 @@ public class DashboardFragment extends Fragment implements SyncListener {
     private DashboardTransactionsAdapter mTransactionsAdapter;
     private RecyclerView mTransactionsRecyclerView;
     private SwipeRefreshLayout mRefreshLayout;
+    private FloatingActionButton mFab;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,65 +65,129 @@ public class DashboardFragment extends Fragment implements SyncListener {
             }
         });
 
+        mSyncManager.addListener(this);
+        mRefreshLayout.setRefreshing(true);
+        mSyncManager.requestSync();
+
+
+        // Floating action button
+
+        // Show hide fab on scroll
+        mFab = (FloatingActionButton) view.findViewById(R.id.add_transaction);
+        mTransactionsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0 ||dy<0 && mFab.isShown()) {
+                    mFab.hide();
+                }
+            }
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    mFab.show();
+                }
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
+        mFab.hide();
+
+        // Select contact to add transaction on click
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getActivity(), SelectContactActivity.class));
+            }
+        });
+
         return view;
     }
 
-
     public void refresh() {
+        mFab.show();
 
         List<PaisoTransaction> transactions = PaisoTransaction.getAll(PaisoTransaction.class, mDbHelper);
-        HashMap<Contact, Float> contactTransactions = new HashMap<>();
+        HashMap<Contact, Pair<Long, Float>> contactTransactions = new HashMap<>();
 
         for (PaisoTransaction transaction: transactions) {
             Contact contact = transaction.getContact(mDbHelper);
             TransactionData transactionData = transaction.getLatestApproved(mDbHelper);
 
             if (contact != null && transactionData != null) {
+                float amount = transaction.transactionType.equals("to") ? transactionData.amount : -transactionData.amount;
+
                 if (!contactTransactions.containsKey(contact)) {
-                    contactTransactions.put(contact, transactionData.amount);
+                    contactTransactions.put(contact, new Pair<>(transactionData.timestamp, amount));
                 } else {
-                    contactTransactions.put(contact, contactTransactions.get(contact) + transactionData.amount);
+                    contactTransactions.put(contact, new Pair<>(
+                            contactTransactions.get(contact).first > transactionData.timestamp ? contactTransactions.get(contact).first : transactionData.timestamp,
+                            contactTransactions.get(contact).second + amount)
+                    );
                 }
             }
         }
 
         float total = 0;
         mItems.clear();
-        for (HashMap.Entry<Contact, Float> entry: contactTransactions.entrySet()) {
+        for (HashMap.Entry<Contact, Pair<Long, Float>> entry: contactTransactions.entrySet()) {
             Contact contact = entry.getKey();
 
             DashboardTransactionsAdapter.Item item = new DashboardTransactionsAdapter.Item();
 
-            item.id = contact._id;
+            item.contactId = contact._id;
             item.username = contact.displayName;
             item.userextra = "";
+
             if (contact.email != null) { item.userextra = contact.email; }
             else if (contact.phone != null) { item.userextra = contact.phone; }
+
             item.photoUrl = contact.photoUrl;
-            item.amount = entry.getValue();
+            item.amount = entry.getValue().second;
+            item.timestamp = entry.getValue().first;
 
             total += item.amount;
 
             mItems.add(item);
         }
 
+        // Sort by date
+        Collections.sort(mItems, new Comparator<DashboardTransactionsAdapter.Item>() {
+            @Override
+            public int compare(DashboardTransactionsAdapter.Item item1, DashboardTransactionsAdapter.Item item2) {
+                return (int)(item2.timestamp - item1.timestamp);
+            }
+        });
+
         mTransactionsAdapter.setItems(mItems);
         mTransactionsAdapter.notifyDataSetChanged();
         mTotalTextView.setText(total+"");
 
         mRefreshLayout.setRefreshing(false);
+
+        // Change theme to render positive/negative total
+        if (getActivity() != null && !getActivity().isFinishing()) {
+            String currentTheme = getActivity().getIntent().getStringExtra("theme");
+            if (currentTheme == null || currentTheme.equals("green")) {
+                if (total < 0) {
+                    getActivity().getIntent().putExtra("theme", "red");
+                    getActivity().recreate();
+                }
+            } else if (total >= 0) {
+                getActivity().getIntent().putExtra("theme", "green");
+                getActivity().recreate();
+            }
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
+        refresh();
         if (mSyncManager != null) {
             mSyncManager.addListener(this);
             mRefreshLayout.setRefreshing(true);
             mSyncManager.requestSync();
         }
-        refresh();
     }
 
     @Override
@@ -130,7 +201,9 @@ public class DashboardFragment extends Fragment implements SyncListener {
 
 
     @Override
-    public void onSync() {
-        refresh();
+    public void onSync(boolean complete) {
+        if (complete) {
+            refresh();
+        }
     }
 }

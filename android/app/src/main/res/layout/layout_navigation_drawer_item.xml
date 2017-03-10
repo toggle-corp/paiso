@@ -9,7 +9,8 @@
     <ImageView
         android:id="@+id/icon"
         android:layout_width="24dp"
-        android:layout_height="24dp" />
+        android:layout_height="24dp"
+        android:tint="?attr/colorPrimary"/>
     
     <TextView
         android:id="@+id/item_name"

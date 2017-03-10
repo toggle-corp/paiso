@@ -35,8 +35,25 @@ public class Contact extends SerializableRemoteModel {
     }
 
     public List<PaisoTransaction> getAllTransactions(DbHelper dbHelper) {
-        return PaisoTransaction.query(PaisoTransaction.class, dbHelper, "contact = ?",
+        return PaisoTransaction.query(PaisoTransaction.class, dbHelper, "contact = ? and deleted = 0",
                 new String[]{contactId+""});
+    }
+
+    public long getLatestTransactionTime(DbHelper dbHelper) {
+        List<PaisoTransaction> transactions = getAllTransactions(dbHelper);
+        if (transactions.size() == 0) {
+            return -1;
+        }
+
+        long maxTime = -1;
+        for (int i=0; i<transactions.size(); i++) {
+            TransactionData data = transactions.get(i).getLatest(dbHelper);
+            if (data != null && data.timestamp > maxTime) {
+                maxTime = data.timestamp;
+            }
+        }
+
+        return maxTime;
     }
 
     @Override
@@ -64,8 +81,8 @@ public class Contact extends SerializableRemoteModel {
             return;
         }
 
-        contactId = (Integer)json.opt("contactId");
-        linkedUser = (Integer)json.opt("linkedUserId");
+        contactId = optInteger(json, "contactId");
+        linkedUser = optInteger(json, "linkedUserId");
         displayName = json.optString("displayName");
         email = optString(json, "email");
         phone = optString(json, "phone");
@@ -133,21 +150,17 @@ public class Contact extends SerializableRemoteModel {
                     continue;
                 }
 
-
                 contact.displayName = displayName;
                 contact.phone = phone;
                 contact.email = email;
                 contact.photoUrl = photoUrl;
                 contact.modified = true;
                 contact.save(dbHelper);
-//                mAllContacts.add(contact);
             }
 
             cursor.close();
         }
     }
-
-    public static List<Contact> mAllContacts = new ArrayList<>();
 
     private static boolean isSame(String a, String b) {
         return a == null && b == null || !(a == null || b == null) && a.equals(b);
