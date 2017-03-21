@@ -163,7 +163,7 @@ class TransactionDataView(View):
         if error:
             return error
 
-        transaction_id = data_in.get('transaction')
+        transaction_id = data_in.get('transactionId')
         if not transaction_id:
             return JsonError('transaction parameter not sent')
 

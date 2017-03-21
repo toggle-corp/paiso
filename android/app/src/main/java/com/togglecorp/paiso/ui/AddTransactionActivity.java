@@ -66,6 +66,10 @@ public class AddTransactionActivity extends AppCompatActivity implements TextWat
         long tid = bundle.getLong("transactionId", -1);
         if (tid >= 0) {
             mTransaction = PaisoTransaction.get(PaisoTransaction.class, mDbHelper, tid);
+            if (mTransaction == null) {
+                finish();
+                return;
+            }
             mTransactionData = mTransaction.getLatest(mDbHelper);
         }
 

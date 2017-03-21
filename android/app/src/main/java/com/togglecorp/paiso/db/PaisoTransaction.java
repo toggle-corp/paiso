@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PaisoTransaction extends SerializableRemoteModel {
@@ -16,10 +17,6 @@ public class PaisoTransaction extends SerializableRemoteModel {
     public Integer contact;
     public String transactionType;
     public boolean deleted = false;
-
-    private String getTransactionId() {
-        return (transactionId == null) ? "-99" : transactionId+"";
-    }
 
     public PaisoTransaction() {}
 
@@ -32,7 +29,7 @@ public class PaisoTransaction extends SerializableRemoteModel {
 
     public List<TransactionData> getAllData(DbHelper dbHelper) {
         return TransactionData.query(TransactionData.class, dbHelper, "(localTransaction = ? OR paisoTransaction = ?)",
-                new String[]{_id+"", getTransactionId()}, null, null, "-timestamp");
+                new String[]{_id+"", transactionId+""}, null, null, "-timestamp");
     }
 
     public List<TransactionData> getApprovedData(DbHelper dbHelper) {
@@ -41,12 +38,15 @@ public class PaisoTransaction extends SerializableRemoteModel {
         }
 
         return TransactionData.query(TransactionData.class, dbHelper, "(localTransaction = ? OR paisoTransaction = ?) AND approved = 1",
-                new String[]{_id+"", getTransactionId()}, null, null, "-timestamp");
+                new String[]{_id+"", transactionId+""}, null, null, "-timestamp");
     }
 
     public List<TransactionData> getPendingData(DbHelper dbHelper) {
+        if (user.equals(SyncManager.getUser().userId)) {
+            return new ArrayList<>();
+        }
         return TransactionData.query(TransactionData.class, dbHelper, "(localTransaction = ? OR paisoTransaction = ?) AND approved = 0",
-                new String[]{_id+"", getTransactionId()}, null, null, "-timestamp");
+                new String[]{_id+"", transactionId+""}, null, null, "-timestamp");
     }
 
     public TransactionData getLatestApproved(DbHelper dbHelper) {
@@ -85,7 +85,6 @@ public class PaisoTransaction extends SerializableRemoteModel {
                 JSONArray dataArray = new JSONArray();
 
                 List<TransactionData> dataList = getAllData(dbHelper);
-                Log.d("Paiso Transaction", getTransactionId());
                 for (TransactionData data: dataList) {
                     dataArray.put(data.toJson());
                 }

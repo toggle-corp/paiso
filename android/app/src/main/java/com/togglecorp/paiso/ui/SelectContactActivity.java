@@ -115,7 +115,7 @@ public class SelectContactActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_search_contact, menu);
+        getMenuInflater().inflate(R.menu.menu_select_contact, menu);
 
         MenuItem searchItem = menu.findItem(R.id.action_search);
         ((SearchView) MenuItemCompat.getActionView(searchItem)).setOnQueryTextListener(

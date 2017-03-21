@@ -25,6 +25,7 @@
         <activity android:name=".ui.PhoneVerificationActivity"
             android:windowSoftInputMode="adjustResize"/>
 
+        <activity android:name=".ui.NotificationsActivity"/>
         <activity android:name=".ui.ContactDetailsActivity"/>
         <activity android:name=".ui.SelectContactActivity"/>
         <activity android:name=".ui.AddTransactionActivity"

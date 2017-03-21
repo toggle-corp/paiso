@@ -55,7 +55,7 @@ public class SyncManager {
         }
 
         // Making sure two sync requests are handled one after another
-        synchronized (SyncManager.class) {
+//        synchronized (SyncManager.class) {
             new JsonRequest(mDbHelper.getContext())
                     .setData(mUser.toJson())
                     .post("api/v1/user/", new JsonRequestListener() {
@@ -91,7 +91,7 @@ public class SyncManager {
                                     }.execute();
                                 }
                             });
-        }
+//        }
 
         // Sync complete, handle the listeners
         for (SyncListener listener: mListeners) {
@@ -219,6 +219,7 @@ public class SyncManager {
                 t = defaultObject;
             }
             t.fromJson(json);
+            t.modified = false;
             t.save(mDbHelper);
             return t;
         }
@@ -235,6 +236,12 @@ public class SyncManager {
                     public void onRequestComplete(JsonRequest request) {
                         JSONObject data = request.getSuccessDataObject();
                         if (data != null) {
+
+                            // Assuming that we are going to get new data for every bloody transaction and users that are not modified
+                            // Delete the existing ones.
+                            User.delete(User.class, mDbHelper, "userId != ? AND modified = 0", new String[]{mUser.userId+""});
+                            PaisoTransaction.delete(PaisoTransaction.class, mDbHelper, "modified = 0", null);
+                            TransactionData.delete(PaisoTransaction.class, mDbHelper, "modified = 0", null);
 
                             JSONArray users = data.optJSONArray("users");
                             for (int i=0; i<users.length(); i++) {
@@ -253,7 +260,32 @@ public class SyncManager {
                                         transactionJson,
                                         "transactionId", new PaisoTransaction());
 
+
                                 if (transaction != null) {
+                                    if (!(transaction.user.equals(mUser.userId))) {
+
+                                        User user = User.get(User.class, mDbHelper, "userId=?", new String[] {transaction.user+""});
+                                        Contact contact = ((user.email == null || user.email.length() == 0) && (user.phone == null || user.phone.length() == 0)) ? null :
+                                                Contact.get(Contact.class, mDbHelper, "(email != '' AND email=?) OR (phone != '' AND phone=?)", new String[]{ user.email, user.phone });
+                                        if (contact == null) {
+//                                            contact = new Contact();
+//                                            contact.displayName = mUser.displayName;
+//                                            contact.email = mUser.email;
+//                                            contact.phone = mUser.phone;
+//                                            contact.photoUrl = mUser.photoUrl;
+//                                            contact.linkedUser = mUser.userId;
+//                                            contact.modified = true;
+//                                            contact.save(mDbHelper);
+                                            transaction.delete(mDbHelper);
+                                            continue;
+                                        }
+
+//                                        transaction.user = mUser.userId;
+                                        transaction.contact = contact.contactId;
+                                        transaction.transactionType = (transaction.transactionType.equals("to")) ? "by" : "to";
+                                        transaction.save(mDbHelper);
+
+                                    }
 
                                     JSONArray datas = transactionJson.optJSONArray("data");
                                     for (int j=0; j<datas.length(); j++) {

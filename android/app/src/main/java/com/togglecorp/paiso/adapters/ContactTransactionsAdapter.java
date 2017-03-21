@@ -2,11 +2,13 @@ package com.togglecorp.paiso.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.togglecorp.paiso.R;
@@ -80,6 +82,7 @@ public class ContactTransactionsAdapter extends RecyclerView.Adapter<ContactTran
                 @Override
                 public void onClick(View v) {
                     if (!mItems.get(getAdapterPosition()).editable) {
+                        Snackbar.make(v, "You are not authorised to edit this transaction", Snackbar.LENGTH_SHORT).show();
                         return;
                     }
 
