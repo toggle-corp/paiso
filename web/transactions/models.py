@@ -39,6 +39,10 @@ class User(models.Model):
         user.photo_url = data.get('photoUrl')
         user.save()
 
+        unlinked_contacts = Contact.objects.filter(linked_user=None)
+        for contact in unlinked_contacts:
+            contact.refresh_linked_users()
+
         return user
 
 
@@ -55,6 +59,7 @@ class Contact(models.Model):
         return '{} (contact of {})'.format(self.display_name, str(self.user))
 
     def serialize(self):
+        self.refresh_linked_users()
         return {
             'contactId': self.pk,
             'userId': self.user.pk,
