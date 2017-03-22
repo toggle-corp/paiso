@@ -31,7 +31,7 @@ import java.util.List;
 
 public class DashboardFragment extends Fragment implements SyncListener {
     private static final String TAG = "DashboardFragment";
-    
+
     private DbHelper mDbHelper;
     private SyncManager mSyncManager;
     private List<DashboardTransactionsAdapter.Item> mItems = new ArrayList<>();
@@ -54,9 +54,9 @@ public class DashboardFragment extends Fragment implements SyncListener {
 
         mRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
         mTotalTextView = (TextView) view.findViewById(R.id.total);
-        
+
         mDbHelper = new DbHelper(getActivity());
-        mSyncManager = new SyncManager(mDbHelper);
+        mSyncManager = SyncManager.get(mDbHelper);
 
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -153,7 +153,7 @@ public class DashboardFragment extends Fragment implements SyncListener {
         Collections.sort(mItems, new Comparator<DashboardTransactionsAdapter.Item>() {
             @Override
             public int compare(DashboardTransactionsAdapter.Item item1, DashboardTransactionsAdapter.Item item2) {
-                return (int)(item2.timestamp - item1.timestamp);
+                return (int)(item1.timestamp - item2.timestamp);
             }
         });
 
@@ -185,8 +185,6 @@ public class DashboardFragment extends Fragment implements SyncListener {
         refresh();
         if (mSyncManager != null) {
             mSyncManager.addListener(this);
-            mRefreshLayout.setRefreshing(true);
-            mSyncManager.requestSync();
         }
     }
 
@@ -202,8 +200,13 @@ public class DashboardFragment extends Fragment implements SyncListener {
 
     @Override
     public void onSync(boolean complete) {
-        if (complete) {
-            refresh();
+        try {
+            if (complete) {
+                mRefreshLayout.setRefreshing(false);
+                refresh();
+            }
+        } catch (Exception ignored) {
+
         }
     }
 }

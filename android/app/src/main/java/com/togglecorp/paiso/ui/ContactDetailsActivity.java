@@ -86,7 +86,9 @@ public class ContactDetailsActivity extends AppCompatActivity implements SyncLis
 
         mTotalTextView = (TextView) findViewById(R.id.total);
 
-        mSyncManager = new SyncManager(mDbHelper);
+        mSyncManager = SyncManager.get(mDbHelper);
+//        mRefreshLayout.setRefreshing(true);
+//        mSyncManager.requestSync();
 
 
         // The toolbar
@@ -200,8 +202,8 @@ public class ContactDetailsActivity extends AppCompatActivity implements SyncLis
         refresh();
         if (mSyncManager != null) {
             mSyncManager.addListener(this);
-            mRefreshLayout.setRefreshing(true);
-            mSyncManager.requestSync();
+//            mRefreshLayout.setRefreshing(true);
+//            mSyncManager.requestSync();
         }
     }
 
@@ -217,8 +219,12 @@ public class ContactDetailsActivity extends AppCompatActivity implements SyncLis
 
     @Override
     public void onSync(boolean complete) {
-        if (complete) {
-            refresh();
+        try {
+            if (complete) {
+                refresh();
+            }
+        } catch (Exception ignored) {
+
         }
     }
 

@@ -4,7 +4,6 @@ package com.togglecorp.paiso.network;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.google.firebase.database.Transaction;
 import com.togglecorp.paiso.db.Contact;
 import com.togglecorp.paiso.db.DbHelper;
 import com.togglecorp.paiso.db.PaisoTransaction;
@@ -36,6 +35,13 @@ public class SyncManager {
     private List<SyncListener> mListeners = new ArrayList<>();
 
     private static User mUser;
+    private static SyncManager mSyncManager;
+    public static SyncManager get(DbHelper dbHelper) {
+        if (mSyncManager == null) {
+            mSyncManager = new SyncManager(dbHelper);
+        }
+        return mSyncManager;
+    }
 
     public SyncManager(DbHelper dbHelper) {
         mDbHelper = dbHelper;
@@ -101,7 +107,9 @@ public class SyncManager {
 
 
     public void addListener(SyncListener listener) {
-        mListeners.add(listener);
+        if (mListeners.indexOf(listener) < 0) {
+            mListeners.add(listener);
+        }
     }
 
     public void removeListener(SyncListener listener) {
@@ -127,7 +135,7 @@ public class SyncManager {
             });
 
             // Step 2: Post modified contacts
-            postSerializable(Contact.class, "api/v1/contact/", new PostListener<Contact>() {
+            postSerializableList(Contact.class, "api/v1/contact/", new PostListener<Contact>() {
                 @Override
                 public void onSuccess(JSONObject data, Contact object) {
                     if (data.has("contact")) {
@@ -179,6 +187,7 @@ public class SyncManager {
     private interface PostListener<T> {
         void onSuccess(JSONObject data, T object);
     }
+
     private <T extends SerializableRemoteModel> void postSerializable(final Class<T> c, final String apiUrl, final PostListener<T> postListener) {
         // Now the actual postSerializable for all modified data
         List<T> objects = T.query(c, mDbHelper, "modified = 1", null);
@@ -186,6 +195,13 @@ public class SyncManager {
             postSerializable(c, object, apiUrl, postListener);
         }
     }
+
+    private <T extends SerializableRemoteModel> void postSerializableList(final Class<T> c, final String apiUrl, final PostListener<T> postListener) {
+        // Now the actual postSerializable for all modified data
+        List<T> objects = T.query(c, mDbHelper, "modified = 1", null);
+        postSerializable(c, objects, apiUrl, postListener);
+    }
+
     private <T extends SerializableRemoteModel> void postSerializable(final Class<T> c, T object, final String apiUrl, final PostListener<T> postListener) {
         try {
             final T that = object;
@@ -199,6 +215,42 @@ public class SyncManager {
                             JSONObject data = request.getSuccessDataObject();
                             if (data != null) {
                                 postListener.onSuccess(data, that);
+                            }
+                        }
+                    });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private <T extends SerializableRemoteModel> void postSerializable(final Class<T> c, final List<T> objects, final String apiUrl, final PostListener<T> postListener) {
+        try {
+            JSONObject jsObj = new JSONObject();
+            JSONArray jsArr = new JSONArray();
+            jsObj.put("items", jsArr);
+            for (T object: objects) {
+                JSONObject temp = object.toJson(mDbHelper);
+                temp.put("userId", mUser.userId);
+                jsArr.put(temp);
+            }
+            jsObj.put("userId", mUser.userId);
+
+            new JsonRequest(mDbHelper.getContext())
+                    .setData(jsObj)
+                    .postSync(apiUrl, new JsonRequestListener() {
+                        @Override
+                        public void onRequestComplete(JsonRequest request) {
+                            JSONObject data = request.getSuccessDataObject();
+                            if (data != null) {
+                                JSONArray items = data.optJSONArray("items");
+                                if (items != null) {
+                                    for (int i=0; i<items.length(); i++) {
+                                        JSONObject item = items.optJSONObject(i);
+                                        if (item != null && objects.size() > i) {
+                                            postListener.onSuccess(item, objects.get(i));
+                                        }
+                                    }
+                                }
                             }
                         }
                     });
@@ -229,6 +281,27 @@ public class SyncManager {
         }
     }
 
+    private <T extends SerializableRemoteModel> void deleteNotIn(Class<T> c, String idKey, List<Integer> list, String extraQuery) {
+        try {
+            String listValues = "";
+            for (int i=0; i<list.size(); i++) {
+                listValues += list.get(i);
+                if (i != list.size() - 1) {
+                    listValues += ", ";
+                }
+            }
+            if (extraQuery.length() > 0) {
+                T.delete(c, mDbHelper, extraQuery + " AND modified = 0 AND " + idKey + " NOT IN (" + listValues + ")", null);
+            }
+            else {
+                T.delete(c, mDbHelper, "modified = 0 AND " + idKey + " NOT IN (" + listValues + ")", null);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void getTransactions() {
         new JsonRequest(mDbHelper.getContext())
                 .getSync("api/v1/transaction/" + "?userId=" + mUser.userId + "&users=1&data=1", new JsonRequestListener() {
@@ -237,20 +310,22 @@ public class SyncManager {
                         JSONObject data = request.getSuccessDataObject();
                         if (data != null) {
 
-                            // Assuming that we are going to get new data for every bloody transaction and users that are not modified
-                            // Delete the existing ones.
-                            User.delete(User.class, mDbHelper, "userId != ? AND modified = 0", new String[]{mUser.userId+""});
-                            PaisoTransaction.delete(PaisoTransaction.class, mDbHelper, "modified = 0", null);
-                            TransactionData.delete(PaisoTransaction.class, mDbHelper, "modified = 0", null);
+                            // Delete everything not updated, assuming they are deleted on server
+                            List<Integer> userIds = new ArrayList<>();
+                            List<Integer> transactionIds = new ArrayList<>();
+                            List<Integer> dataIds = new ArrayList<>();
 
                             JSONArray users = data.optJSONArray("users");
                             for (int i=0; i<users.length(); i++) {
 
-                                saveOrUpdate(User.class,
+                                User u = saveOrUpdate(User.class,
                                         users.optJSONObject(i),
                                         "userId", new User());
-
+                                if (u != null) {
+                                    userIds.add(u.userId);
+                                }
                             }
+
 
                             JSONArray transactions = data.optJSONArray("transactions");
                             for (int i=0; i<transactions.length(); i++) {
@@ -266,39 +341,40 @@ public class SyncManager {
 
                                         User user = User.get(User.class, mDbHelper, "userId=?", new String[] {transaction.user+""});
                                         Contact contact = ((user.email == null || user.email.length() == 0) && (user.phone == null || user.phone.length() == 0)) ? null :
-                                                Contact.get(Contact.class, mDbHelper, "(email != '' AND email=?) OR (phone != '' AND phone=?)", new String[]{ user.email, user.phone });
+                                                Contact.get(Contact.class, mDbHelper, "(email != '' AND email=?) OR (phone != '' AND phone=?)", new String[]{ user.email+"", user.phone+"" });
                                         if (contact == null) {
-//                                            contact = new Contact();
-//                                            contact.displayName = mUser.displayName;
-//                                            contact.email = mUser.email;
-//                                            contact.phone = mUser.phone;
-//                                            contact.photoUrl = mUser.photoUrl;
-//                                            contact.linkedUser = mUser.userId;
-//                                            contact.modified = true;
-//                                            contact.save(mDbHelper);
                                             transaction.delete(mDbHelper);
                                             continue;
                                         }
 
-//                                        transaction.user = mUser.userId;
                                         transaction.contact = contact.contactId;
                                         transaction.transactionType = (transaction.transactionType.equals("to")) ? "by" : "to";
                                         transaction.save(mDbHelper);
 
                                     }
 
+                                    transactionIds.add(transaction.transactionId);
+
                                     JSONArray datas = transactionJson.optJSONArray("data");
                                     for (int j=0; j<datas.length(); j++) {
 
-                                        saveOrUpdate(TransactionData.class,
+                                        TransactionData td = saveOrUpdate(TransactionData.class,
                                                 datas.optJSONObject(j),
                                                 "dataId", new TransactionData());
+                                        if (td != null) {
+                                            dataIds.add(td.dataId);
+                                        }
 
                                     }
 
                                 }
 
                             }
+
+
+                            deleteNotIn(User.class, "userId", userIds, "userId != " + mUser.userId);
+                            deleteNotIn(PaisoTransaction.class, "transactionId", transactionIds, "");
+                            deleteNotIn(TransactionData.class, "dataId", dataIds, "");
                         }
                     }
                 });

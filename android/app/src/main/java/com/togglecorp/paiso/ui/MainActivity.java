@@ -4,11 +4,11 @@ import android.Manifest;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity implements SyncListener {
     private DbHelper mDbHelper;
     private SyncManager mSyncManager;
 
-    private boolean mPhoneVerificationShown = false;
     private boolean mContactsRead = false;
 
     @Override
@@ -58,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements SyncListener {
         mDbHelper = new DbHelper(this);
         mUser = mAuthUser.getUser(mDbHelper);
         SyncManager.setUser(mUser);
-        mSyncManager = new SyncManager(mDbHelper);
+        mSyncManager = SyncManager.get(mDbHelper);
 
         // The toolbar and navigation
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -133,8 +132,10 @@ public class MainActivity extends AppCompatActivity implements SyncListener {
             mSyncManager.addListener(this);
         }
 
-        if (!mPhoneVerificationShown && (mUser.phone == null || mUser.phone.length() == 0)) {
-            mPhoneVerificationShown = true;
+        boolean phoneVerificationShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("phone_verification_shown", false);
+        if (!phoneVerificationShown && (mUser.phone == null || mUser.phone.length() == 0)) {
+            PreferenceManager.getDefaultSharedPreferences(this)
+                    .edit().putBoolean("phone_verification_shown", true).apply();
             startActivityForResult(new Intent(this, PhoneVerificationActivity.class), PhoneVerificationActivity.REQUEST_CODE);
             return;
         }

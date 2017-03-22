@@ -2,6 +2,7 @@ package com.togglecorp.paiso.ui;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -46,6 +47,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         DbHelper dbHelper = new DbHelper(this);
         dbHelper.resetAll(dbHelper.getWritableDatabase());
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit().putBoolean("phone_verification_shown", false).apply();
 
         // Initialize google api client
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)

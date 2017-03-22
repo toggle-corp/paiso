@@ -69,7 +69,14 @@ class ContactView(View):
         user, error = get_user(data_in)
         if error:
             return error
-        return JsonResult({'contact': Contact.deserialize(data_in).serialize()})
+
+        if data_in.get('items'):
+            result = []
+            for item in data_in.get('items'):
+                result.append({'contact': Contact.deserialize(item).serialize()})
+            return JsonResult({'items': result})
+        else:
+            return JsonResult({'contact': Contact.deserialize(data_in).serialize()})
 
 
 # /api/v1/transaction/
