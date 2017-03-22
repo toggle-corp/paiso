@@ -1,10 +1,7 @@
 package com.togglecorp.paiso.ui;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -18,16 +15,16 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.togglecorp.paiso.R;
-import com.togglecorp.paiso.adapters.NotificationsAdapter;
+import com.togglecorp.paiso.adapters.PendingTransactionsAdapter;
 import com.togglecorp.paiso.db.DbHelper;
 import com.togglecorp.paiso.helpers.ThemeUtils;
 
-public class NotificationsActivity extends AppCompatActivity {
+public class PendingTransactionsActivity extends AppCompatActivity {
 
     private DbHelper mDbHelper;
 
     private RecyclerView mNotificationsRecyclerView;
-    private NotificationsAdapter mNotificationsAdapter;
+    private PendingTransactionsAdapter mPendingTransactionsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,13 +44,13 @@ public class NotificationsActivity extends AppCompatActivity {
             actionBar.setHomeButtonEnabled(true);
         }
 
-        setTitle("Pending Transactions");
+        setTitle("Pending Approval");
 
         // Recycler view and adapter
-        mNotificationsAdapter = new NotificationsAdapter(this, mDbHelper);
+        mPendingTransactionsAdapter = new PendingTransactionsAdapter(this, mDbHelper);
         mNotificationsRecyclerView = (RecyclerView) findViewById(R.id.notifications_recyclerview);
         mNotificationsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mNotificationsRecyclerView.setAdapter(mNotificationsAdapter);
+        mNotificationsRecyclerView.setAdapter(mPendingTransactionsAdapter);
 
         new ItemTouchHelper(mItemTouchHelperCallback).attachToRecyclerView(mNotificationsRecyclerView);
     }
@@ -83,7 +80,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
         @Override
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-            ((NotificationsAdapter.ViewHolder) viewHolder).approveSelected();
+            ((PendingTransactionsAdapter.ViewHolder) viewHolder).approveSelected();
         }
 
         @Override
@@ -93,10 +90,10 @@ public class NotificationsActivity extends AppCompatActivity {
             c.clipRect(0, 0, dX, itemView.getBottom());
 
             Paint paint = new Paint();
-            paint.setColor(ThemeUtils.getThemeColor(NotificationsActivity.this, R.attr.colorAccent));
+            paint.setColor(ThemeUtils.getThemeColor(PendingTransactionsActivity.this, R.attr.colorAccent));
             c.drawRect((float) itemView.getLeft(), (float) itemView.getTop(), dX, (float) itemView.getBottom(), paint);
 
-            Drawable drawable = ContextCompat.getDrawable(NotificationsActivity.this, R.drawable.ic_check);
+            Drawable drawable = ContextCompat.getDrawable(PendingTransactionsActivity.this, R.drawable.ic_check);
             drawable.setBounds(dpToPx(28), dpToPx(28), itemView.getBottom() - dpToPx(28), itemView.getBottom() - dpToPx(28));
             drawable.draw(c);
 

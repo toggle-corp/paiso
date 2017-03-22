@@ -94,12 +94,4 @@ public class NavigationManager {
         mDrawerLayout.openDrawer(GravityCompat.START);
     }
 
-    public void refresh() {
-        mActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mDashboardFragment.refresh();
-            }
-        });
-    }
 }

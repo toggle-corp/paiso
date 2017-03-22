@@ -15,12 +15,16 @@ import android.view.MenuItem;
 import com.togglecorp.paiso.R;
 import com.togglecorp.paiso.db.Contact;
 import com.togglecorp.paiso.db.DbHelper;
+import com.togglecorp.paiso.db.PaisoTransaction;
+import com.togglecorp.paiso.db.TransactionData;
 import com.togglecorp.paiso.db.User;
 import com.togglecorp.paiso.helpers.AuthUser;
 import com.togglecorp.paiso.helpers.PermissionListener;
 import com.togglecorp.paiso.helpers.PermissionsManager;
 import com.togglecorp.paiso.network.SyncListener;
 import com.togglecorp.paiso.network.SyncManager;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SyncListener {
     private final static String TAG = "MainActivity";
@@ -75,6 +79,18 @@ public class MainActivity extends AppCompatActivity implements SyncListener {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        boolean hasPending = false;
+        List<PaisoTransaction> allTransactions = PaisoTransaction.getAll(PaisoTransaction.class, mDbHelper);
+        for (PaisoTransaction transaction: allTransactions) {
+            List<TransactionData> dataList = transaction.getPendingData(mDbHelper);
+            if (dataList.size() > 0) {
+                hasPending = true;
+                break;
+            }
+        }
+        menu.findItem(R.id.pending_transactions).setVisible(hasPending);
+
         return true;
     }
 
@@ -84,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements SyncListener {
             case android.R.id.home:
                 mNavigationManager.openDrawer();
                 return true;
-            case R.id.notifications:
+            case R.id.pending_transactions:
                 showNotifications();
                 return true;
             default:
@@ -93,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements SyncListener {
     }
 
     private void showNotifications() {
-        startActivity(new Intent(this, NotificationsActivity.class));
+        startActivity(new Intent(this, PendingTransactionsActivity.class));
     }
 
     @Override
@@ -157,9 +173,7 @@ public class MainActivity extends AppCompatActivity implements SyncListener {
 
     @Override
     public void onSync(boolean complete) {
-        if (complete && mNavigationManager != null) {
-            mNavigationManager.refresh();
-        }
+        invalidateOptionsMenu();
     }
 
     public void readContacts() {

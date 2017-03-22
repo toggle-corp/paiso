@@ -1,15 +1,11 @@
 package com.togglecorp.paiso.adapters;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -25,7 +21,7 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdapter.ViewHolder> {
+public class PendingTransactionsAdapter extends RecyclerView.Adapter<PendingTransactionsAdapter.ViewHolder> {
 
     private static class PendingTransaction {
         Contact contact;
@@ -37,7 +33,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     private final DbHelper mDbHelper;
     private List<PendingTransaction> mPendingTransactions = new ArrayList<>();
 
-    public NotificationsAdapter(Activity activity, DbHelper dbHelper) {
+    public PendingTransactionsAdapter(Activity activity, DbHelper dbHelper) {
         mActivity = activity;
         mDbHelper = dbHelper;
         refresh();
