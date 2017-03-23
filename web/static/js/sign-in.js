@@ -12,16 +12,15 @@ let auth = {
                     // Before doing anything, save/update the user in the database
                     // Save user details to db
                     let userData = {
-                        userId: user.uid,
                         displayName: user.displayName,
                         photoUrl: user.photoURL,
                         email: user.email,
-                        phone: null,
                     };
 
                     $http.post(userApi, userData).then(
                         function success(response) {
-                            // user-primary-key: response.data.data.userPk
+                            $scope.auth.user = response.data.data.user;
+                            $scope.userId = response.data.data.user.userId;
                             resolve();
                 		},
                         function error(response) {

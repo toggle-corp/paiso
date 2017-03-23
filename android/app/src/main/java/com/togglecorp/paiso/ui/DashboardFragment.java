@@ -2,6 +2,7 @@ package com.togglecorp.paiso.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -165,14 +166,14 @@ public class DashboardFragment extends Fragment implements SyncListener {
 
         // Change theme to render positive/negative total
         if (getActivity() != null && !getActivity().isFinishing()) {
-            String currentTheme = getActivity().getIntent().getStringExtra("theme");
-            if (currentTheme == null || currentTheme.equals("green")) {
+            String currentTheme = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("theme", "green");
+            if (currentTheme.equals("green")) {
                 if (total < 0) {
-                    getActivity().getIntent().putExtra("theme", "red");
+                    PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putString("theme", "red").apply();
                     getActivity().recreate();
                 }
             } else if (total >= 0) {
-                getActivity().getIntent().putExtra("theme", "green");
+                PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putString("theme", "green").apply();
                 getActivity().recreate();
             }
         }

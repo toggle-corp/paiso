@@ -34,9 +34,12 @@ class User(models.Model):
             user = User()
 
         user.display_name = data.get('displayName')
-        user.email = data.get('email')
-        user.phone = data.get('phone')
-        user.photo_url = data.get('photoUrl')
+        if data.get('email'):
+            user.email = data.get('email')
+        if data.get('phone'):
+            user.phone = data.get('phone')
+        if data.get('photoUrl'):
+            user.photo_url = data.get('photoUrl')
         user.save()
 
         unlinked_contacts = Contact.objects.filter(linked_user=None)
@@ -87,9 +90,12 @@ class Contact(models.Model):
         contact.linked_user = User.objects.get(pk=data['linkedUserId']) if data.get('linkedUserId') else None
 
         contact.display_name = data.get('displayName')
-        contact.email = data.get('email')
-        contact.phone = data.get('phone')
-        contact.photo_url = data.get('photoUrl')
+        if data.get('email'):
+            contact.email = data.get('email')
+        if data.get('phone'):
+            contact.phone = data.get('phone')
+        if data.get('photoUrl'):
+            contact.photo_url = data.get('photoUrl')
         contact.save()
 
         return contact

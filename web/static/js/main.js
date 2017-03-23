@@ -12,9 +12,9 @@ paiso.controller('mainController',  ['$scope', '$http', function($scope, $http) 
         // Do everything here
 
         // Get all parties and their transactions
-        $http.get(partyApi, { params: { userId: $scope.auth.user.uid } }).then(
+        $http.get(transactionApi, { params: { userId: $scope.auth.user.userId, users: 1, contacts: 1, data: 1 } }).then(
             function success(response) {
-                $scope.users = response.data.data;
+                transactions.init($scope, response.data.data);
             },
             function error(response) {
                 console.log('Failed get transactions for current user');

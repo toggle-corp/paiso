@@ -99,6 +99,7 @@ class TransactionView(View):
 
         data = {'transactions': []}
         users = []
+        contacts = []
         for transaction in transactions:
             transactionData = transaction.serialize()
 
@@ -109,9 +110,19 @@ class TransactionView(View):
             if transaction.user != user:
                 users.append(transaction.user)
 
+                temp = Contact.objects.filter(user=user, linked_user=transaction.user)
+                if temp.count() > 0:
+                    contacts.append(temp[0])
+            else:
+                contacts.append(transaction.contact)
+
         if request.GET.get('users') == '1':
             users = list(set(users))
             data['users'] = [user.serialize() for user in users]
+
+        if request.GET.get('contacts') == '1':
+            contacts = list(set(contacts))
+            data['contacts'] = [contact.serialize() for contact in contacts]
 
         return JsonResult(data=data)
 

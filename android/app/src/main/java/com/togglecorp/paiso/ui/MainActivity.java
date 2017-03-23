@@ -40,8 +40,8 @@ public class MainActivity extends AppCompatActivity implements SyncListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Theme
-        String theme = getIntent().getStringExtra("theme");
-        if (theme == null || theme.equals("green")) {
+        String theme = PreferenceManager.getDefaultSharedPreferences(this).getString("theme", "green");
+        if (theme.equals("green")) {
             setTheme(R.style.GreenTheme);
         } else {
             setTheme(R.style.RedTheme);
