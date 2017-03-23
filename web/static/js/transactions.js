@@ -57,6 +57,7 @@ let transactions = {
             contact.timestamp = Math.max(transaction.timestamp, contact.timestamp);
 
             contact.transactions.sort((s1, s2) => s2.timestamp - s1.timestamp);
+            contact.sign = (contact.amount < 0) ? 'negative' : 'positive';
         }
 
         // Sort contacts by transaction timestamp

@@ -63,11 +63,19 @@
     </aside>
     <main>
         <div ng-repeat="contact in contacts" class="user-detail">
-            <header>{{ contact.displayName }}</header>
+            <header class="{{contact.sign}}">
+                <img class="avatar" ng-src="{{ contact.photoUrl }}">
+                <div class="user-info">
+                    <div class="name">{{ contact.displayName }}</div>
+                    <div class="extra">{{ contact.email }}</div>
+                </div>
+            </header>
             <div ng-repeat="transaction in contact.transactions" class="transaction">
-                <div class="title">{{ transaction.title }}</div>
+                <div class="transaction-info">
+                    <div class="title">{{ transaction.title }}</div>
+                    <date>{{ transaction.timestamp | date:'yyyy-MM-dd HH:mm' }}</date>
+                </div>
                 <div class="amount">{{ transaction.amount }}</div>
-                <date>{{ transaction.timestamp | date:'yyyy-MM-dd HH:mm' }}</date>
             </div>
         </div>
     </main>
