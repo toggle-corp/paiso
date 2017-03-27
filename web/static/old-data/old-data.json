@@ -1484,6 +1484,69 @@
       "date" : 1489925957995,
       "title" : "Paid",
       "to" : "Gq4MBdW6VwcwTqS8yPGUwq1anYv1"
+    },
+    "-Kfk-yVXkF7A0fD6WswZ" : {
+      "added_by" : "DRn64CxdTwe61FbPVgVAJfQpLvW2",
+      "amount" : 15,
+      "by" : "I5YNBwBvv7hxJEkaqTenzeOtR752",
+      "customUser" : false,
+      "date" : 1490093687918,
+      "title" : "Khaja",
+      "to" : "DRn64CxdTwe61FbPVgVAJfQpLvW2"
+    },
+    "-Kfk02HdWf6U-KBmeK-t" : {
+      "added_by" : "GqYR0Ym2WpbUQ7FiYXn8EYz3CUM2",
+      "amount" : 145,
+      "by" : "I5YNBwBvv7hxJEkaqTenzeOtR752",
+      "customUser" : false,
+      "date" : 1490085515447,
+      "title" : "Khaja",
+      "to" : "GqYR0Ym2WpbUQ7FiYXn8EYz3CUM2"
+    },
+    "-Kfp7n1czqhJyRO14BAa" : {
+      "added_by" : "DRn64CxdTwe61FbPVgVAJfQpLvW2",
+      "amount" : 130,
+      "by" : "DRn64CxdTwe61FbPVgVAJfQpLvW2",
+      "customUser" : false,
+      "date" : 1490171510722,
+      "title" : "Khaja",
+      "to" : "GqYR0Ym2WpbUQ7FiYXn8EYz3CUM2"
+    },
+    "-Kfp8D4nGm0bo0RLhtJv" : {
+      "added_by" : "DRn64CxdTwe61FbPVgVAJfQpLvW2",
+      "amount" : 50,
+      "by" : "DRn64CxdTwe61FbPVgVAJfQpLvW2",
+      "customUser" : false,
+      "date" : 1490171576200,
+      "title" : "50 Ko Khaja",
+      "to" : "I5YNBwBvv7hxJEkaqTenzeOtR752"
+    },
+    "-KfynzZfo9iiv_7evugd" : {
+      "added_by" : "vIVBuuGAPRVsEpRuM4Oylt85Htn1",
+      "amount" : 500,
+      "by" : "vIVBuuGAPRVsEpRuM4Oylt85Htn1",
+      "customUser" : true,
+      "date" : 1490333729180,
+      "title" : "Balance",
+      "to" : "71"
+    },
+    "-KfzToabJNlGRV3D1sGJ" : {
+      "added_by" : "GqYR0Ym2WpbUQ7FiYXn8EYz3CUM2",
+      "amount" : 10000,
+      "by" : "GqYR0Ym2WpbUQ7FiYXn8EYz3CUM2",
+      "customUser" : false,
+      "date" : 1490344955819,
+      "title" : "Cash Given",
+      "to" : "I5YNBwBvv7hxJEkaqTenzeOtR752"
+    },
+    "-Kg8fkm3gdJBqgXu6paS" : {
+      "added_by" : "GqYR0Ym2WpbUQ7FiYXn8EYz3CUM2",
+      "amount" : 90,
+      "by" : "GqYR0Ym2WpbUQ7FiYXn8EYz3CUM2",
+      "customUser" : false,
+      "date" : 1490516119011,
+      "title" : "Khaja",
+      "to" : "I5YNBwBvv7hxJEkaqTenzeOtR752"
     }
   },
   "user_transactions" : {
@@ -1575,7 +1638,10 @@
       "-KfL6vw48tYGzNTcQah1" : "true",
       "-KfL79K8mj3MrKCpAoDM" : "true",
       "-KfL7T-CmK0j5N2uh-yD" : "true",
-      "-KfL89DCZDaQdpOq-eSI" : "true"
+      "-KfL89DCZDaQdpOq-eSI" : "true",
+      "-Kfk-yVXkF7A0fD6WswZ" : "true",
+      "-Kfp7n1czqhJyRO14BAa" : "true",
+      "-Kfp8D4nGm0bo0RLhtJv" : "true"
     },
     "Gq4MBdW6VwcwTqS8yPGUwq1anYv1" : {
       "-KcBkqTDqDs7iUbMWx7a" : "true",
@@ -1702,7 +1768,11 @@
       "-KfArkXmouXPFSsgTzl0" : "true",
       "-KfG2DrTsc_tVqn40MH_" : "true",
       "-KfG2UaqN5T7KVIhaVvW" : "true",
-      "-KfL89DCZDaQdpOq-eSI" : "true"
+      "-KfL89DCZDaQdpOq-eSI" : "true",
+      "-Kfk02HdWf6U-KBmeK-t" : "true",
+      "-Kfp7n1czqhJyRO14BAa" : "true",
+      "-KfzToabJNlGRV3D1sGJ" : "true",
+      "-Kg8fkm3gdJBqgXu6paS" : "true"
     },
     "Huv6VAWcn3OQoYydiMkkGt1gx2F3" : {
       "-KaRnQK7YzViJhJEaJOy" : "true",
@@ -1805,7 +1875,12 @@
       "-KfG1WAX22hv7IDtCkTs" : "true",
       "-KfG2DrTsc_tVqn40MH_" : "true",
       "-KfG2UaqN5T7KVIhaVvW" : "true",
-      "-KfL6vw48tYGzNTcQah1" : "true"
+      "-KfL6vw48tYGzNTcQah1" : "true",
+      "-Kfk-yVXkF7A0fD6WswZ" : "true",
+      "-Kfk02HdWf6U-KBmeK-t" : "true",
+      "-Kfp8D4nGm0bo0RLhtJv" : "true",
+      "-KfzToabJNlGRV3D1sGJ" : "true",
+      "-Kg8fkm3gdJBqgXu6paS" : "true"
     },
     "KMxN8bltK8TJ1UsJoBPdRRhb7Uv2" : {
       "-K_oKOOBFcMFzN7km3g6" : "true",
@@ -1818,6 +1893,9 @@
       "-KasUj1f-btt3RnaA4uf" : "true",
       "-Kbto1DTyqr_7Wu5TPsw" : "true",
       "-Kbto5hOW0STRhvnOyPt" : "true"
+    },
+    "vIVBuuGAPRVsEpRuM4Oylt85Htn1" : {
+      "-KfynzZfo9iiv_7evugd" : "true"
     }
   },
   "users" : {
@@ -1865,6 +1943,11 @@
       "displayName" : "Slesa Adhikari",
       "email" : "slesaad@gmail.com",
       "photoUrl" : "https://lh3.googleusercontent.com/-BZc29A4lmUo/AAAAAAAAAAI/AAAAAAAAAnk/iHZYqWnFGZo/s96-c/photo.jpg"
+    },
+    "OvLuFFbd3cVrLI480E8Xw6vPPhr1" : {
+      "displayName" : "Md Chanchal",
+      "email" : "chanchalstk1414@gmail.com",
+      "photoUrl" : "https://lh5.googleusercontent.com/-QE3NBIuGkHs/AAAAAAAAAAI/AAAAAAAAAAs/t4QTFKDAd4s/s96-c/photo.jpg"
     },
     "PEJ8PSrwzUU0SE9k6iPJqkeiZer2" : {
       "displayName" : "Shankar Kapri",
