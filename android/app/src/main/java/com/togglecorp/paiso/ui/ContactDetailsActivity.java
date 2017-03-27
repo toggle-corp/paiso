@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.togglecorp.paiso.R;
 import com.togglecorp.paiso.adapters.ContactTransactionsAdapter;
+import com.togglecorp.paiso.adapters.DashboardTransactionsAdapter;
 import com.togglecorp.paiso.db.Contact;
 import com.togglecorp.paiso.db.DbHelper;
 import com.togglecorp.paiso.db.PaisoTransaction;
@@ -158,10 +159,11 @@ public class ContactDetailsActivity extends AppCompatActivity implements SyncLis
             }
         }
 
+
         Collections.sort(mItems, new Comparator<ContactTransactionsAdapter.Item>() {
             @Override
             public int compare(ContactTransactionsAdapter.Item item1, ContactTransactionsAdapter.Item item2) {
-                return (int)(item2.timestamp - item1.timestamp);
+                return Long.valueOf(item2.timestamp).compareTo(item1.timestamp);
             }
         });
 

@@ -154,7 +154,7 @@ public class DashboardFragment extends Fragment implements SyncListener {
         Collections.sort(mItems, new Comparator<DashboardTransactionsAdapter.Item>() {
             @Override
             public int compare(DashboardTransactionsAdapter.Item item1, DashboardTransactionsAdapter.Item item2) {
-                return (int)(item1.timestamp - item2.timestamp);
+                return Long.valueOf(item2.timestamp).compareTo(item1.timestamp);
             }
         });
 

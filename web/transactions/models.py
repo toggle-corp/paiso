@@ -105,7 +105,7 @@ class Contact(models.Model):
             self.linked_user = User.objects.get(email=self.email)
             self.save()
         elif self.phone and self.phone != '' and User.objects.filter(phone=self.phone).count() > 0:
-            self.phone = User.objects.get(phone=self.phone)
+            self.linked_user = User.objects.get(phone=self.phone)
             self.save()
 
 
