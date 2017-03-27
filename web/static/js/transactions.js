@@ -15,7 +15,12 @@ let transactions = {
             // Get latest title and amount of transaction
             if (transaction.data.length > 0) {
                 transaction.title = transaction.data[0].title;
-                transaction.amount = (transaction.transactionType == 'to') ? transaction.data[0].amount : -transaction.data[0].amount;
+
+                if (transaction.userId == $scope.userId) {
+                    transaction.amount = (transaction.transactionType == 'to') ? transaction.data[0].amount : -transaction.data[0].amount;
+                } else {
+                    transaction.amount = (transaction.transactionType == 'to') ? -transaction.data[0].amount : transaction.data[0].amount;
+                }
                 transaction.timestamp = transaction.data[0].timestamp;
             } else {
                 // This shouldn't really be happening
