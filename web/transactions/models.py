@@ -79,10 +79,10 @@ class Contact(models.Model):
 
         if data.get('contactId') and Contact.objects.filter(pk=data['contactId']).count() > 0:
             contact = Contact.objects.get(pk=data['contactId'])
-        elif data.get('email') and data.get('email') != '' and Contact.objects.filter(email=data['email']).count() > 0:
-            contact = Contact.objects.filter(email=data['email'])[0]
-        elif data.get('phone') and data.get('phone') != '' and Contact.objects.filter(phone=data['phone']).count() > 0:
-            contact = Contact.objects.filter(phone=data['phone'])[0]
+        elif data.get('email') and data.get('email') != '' and Contact.objects.filter(user=user, email=data['email']).count() > 0:
+            contact = Contact.objects.filter(user=user, email=data['email'])[0]
+        elif data.get('phone') and data.get('phone') != '' and Contact.objects.filter(user=user, phone=data['phone']).count() > 0:
+            contact = Contact.objects.filter(user=user, phone=data['phone'])[0]
         else:
             contact = Contact()
 
@@ -121,7 +121,8 @@ class Transaction(models.Model):
     transaction_type = models.CharField(max_length=2, choices=TRANSACTION_TYPES, default='to')
 
     def __str__(self):
-        return "By {} to {}".format(
+        return "{}By {} to {}".format(
+            self.get_history()[0].title if self.get_history().count() > 0 else '',
             str(self.user) if self.transaction_type == 'to' else str(self.contact),
             str(self.contact) if self.transaction_type == 'to' else str(self.user)
         )

@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -33,6 +34,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ContactDetailsActivity extends AppCompatActivity implements SyncListener {
 
+    private static final String TAG = "Contact Details";
     private Contact mContact;
 
     private DbHelper mDbHelper;
