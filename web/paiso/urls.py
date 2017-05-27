@@ -1,18 +1,28 @@
 """paiso URL Configuration
+
+https://docs.djangoproject.com/en/1.10/topics/http/urls/
 """
-from django.conf.urls import url
+
+from django.conf.urls import url, include
 from django.contrib import admin
 
-from transactions.views import *
+from rest_framework import routers
+import rest_framework.authtoken.views
+
+import users.views
+import transactions.views
+
+
+router = routers.DefaultRouter()
+router.register(r'user', users.views.UserViewSet)
+router.register(r'contact', users.views.ContactViewSet)
+router.register(r'transaction', transactions.views.TransactionViewSet)
+
 
 urlpatterns = [
-    url(r'^$', HomeView.as_view(), name='home'),
-
-    url(r'^api/v1/user/$', UserView.as_view(), name='user_api'),
-    url(r'^api/v1/contact/$', ContactView.as_view(), name='contact_api'),
-    url(r'^api/v1/transaction/$', TransactionView.as_view(), name='transaction_api'),
-    url(r'^api/v1/transaction-data/$', TransactionDataView.as_view(), name='transaction_data_api'),
-    # url(r'^api/v1/party/$', PartyView.as_view(), name='party_api'),
+    url(r'^', include(router.urls)),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^api-token-auth/', rest_framework.authtoken.views.obtain_auth_token),
 
     url(r'^admin/', admin.site.urls),
 ]
