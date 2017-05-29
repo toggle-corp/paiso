@@ -3,15 +3,20 @@ import {
     View,
     Text,
     ListView,
+    TouchableNativeFeedback,
 } from 'react-native';
 
 
 function UserItem(props) {
     return (
-        <View>
-            <Text>{props.name}</Text>
-            <Text>{props.amount}</Text>
-        </View>
+        <TouchableNativeFeedback
+            background={TouchableNativeFeedback.SelectableBackground()}
+            onPress={props.onPress}>
+            <View>
+                <Text>{props.name}</Text>
+                <Text>{props.amount}</Text>
+            </View>
+        </TouchableNativeFeedback>
     );
 }
 
@@ -41,7 +46,7 @@ export default class UserList extends Component {
         return (
             <ListView
                 dataSource={this.state.dataSource}
-                renderRow={(user) => <UserItem name={user.name} amount={user.amount} />}
+                renderRow={(user) => <UserItem onPress={() => this.props.onSelect(user)} name={user.name} amount={user.amount} />}
             />
         );
     }

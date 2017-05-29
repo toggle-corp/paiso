@@ -3,9 +3,10 @@ import {
     View,
 } from 'react-native';
 
-// import styles from '../styles/dashboard';
 import AmountHeader from '../components/AmountHeader';
 import UserList from '../components/UserList';
+
+import styles from '../styles/dashboard';
 
 
 export default class Dashboard extends Component {
@@ -14,15 +15,21 @@ export default class Dashboard extends Component {
     };
 
     render() {
-        let users = [
-            { name: 'Aditya Noob', amount: '200', },
-            { name: 'Frozen Helium', amount: '500', },
+        const { navigate } = this.props.navigation;
+
+        const users = [
+            { name: 'Aditya Noob', amount: 200, },
+            { name: 'Frozen Helium', amount: 500, },
         ];
 
+        const total = users.reduce((a, b) => a + b.amount, 0);
+
         return (
-            <View>
-                <AmountHeader amount={200} />
-                <UserList users={users} />
+            <View style={styles.dashboard}>
+                <AmountHeader amount={total} />
+                <UserList
+                    users={users}
+                    onSelect={(user) => navigate('UserScreen', { user: user })} />
             </View>
         );
     }
