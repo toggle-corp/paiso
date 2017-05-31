@@ -1,11 +1,21 @@
-import { StackNavigator, } from 'react-navigation';
-import UserScreen from './UserScreen.js';
-import Dashboard from './Dashboard.js';
+import { StackNavigator } from 'react-navigation';
+import HomeScreen from './HomeScreen';
+import ContactScreen from './ContactScreen';
+import EditContactScreen from './EditContactScreen';
+import EditTransactionScreen from './EditTransactionScreen';
 
 
 const App = StackNavigator({
-    Dashboard: { screen: Dashboard },
-    UserScreen: { screen: UserScreen },
+    Home: { screen: HomeScreen },
+    Contact: { screen: ContactScreen },
+    EditContact: { screen: EditContactScreen },
+    EditTransaction: { screen: EditTransactionScreen },
+}, {
+    initialRouteName: 'Home',
+    navigationOptions: {
+        header: null,
+    },
 });
 
 export default App;
+

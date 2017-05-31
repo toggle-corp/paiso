@@ -2,28 +2,24 @@ import { StyleSheet } from 'react-native';
 
 
 const styles = StyleSheet.create({
-    transaction: {
+    contact: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 8,
+        paddingLeft: 16,
+        paddingRight: 16,
+        paddingTop: 8,
+        paddingBottom: 8,
     },
-    transactionIcon: {
+    contactIcon: {
         fontSize: 32,
-        paddingLeft: 8,
         paddingRight: 16,
     },
-    transactionLabel: {
-        marginRight: 'auto',
-    },
-    transactionName: {
+    contactName: {
         fontSize: 16,
     },
-    transactionInfo: {
+    contactInfo: {
         fontSize: 12,
     },
-    transactionAmount: {
-        fontSize: 18
-    }
 });
 
 export default styles;

@@ -1,35 +1,31 @@
 import React, { Component } from 'react';
 import {
-    View,
+    View
 } from 'react-native';
+import { Toolbar } from 'react-native-material-ui';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import AmountHeader from '../components/AmountHeader';
-import UserList from '../components/UserList';
-
-import styles from '../styles/dashboard';
+import DashboardTransactionList from '../components/DashboardTransactionList';
 
 
 export default class Dashboard extends Component {
     static navigationOptions = {
-        title: 'Paiso',
+        tabBarIcon: ({ tintColor }) => (
+            <Icon name="dashboard" size={24} color={tintColor} />
+        ),
     };
 
     render() {
-        const { navigate } = this.props.navigation;
-
-        const users = [
-            { name: 'Aditya Noob', amount: 200, },
-            { name: 'Frozen Helium', amount: 500, },
+        const transactions = [
+            { name: 'Ankit Mehta', username: 'frozenhelium', amount: -300, },
+            { name: 'Aditya Khatri', username: 'adityakhatri47', amount: 3000, },
         ];
-
-        const total = users.reduce((a, b) => a + b.amount, 0);
-
         return (
-            <View style={styles.dashboard}>
-                <AmountHeader amount={total} />
-                <UserList
-                    users={users}
-                    onSelect={(user) => navigate('UserScreen', { user: user })} />
+            <View>
+                <Toolbar centerElement="Dashboard" leftElement='dashboard' />
+                <AmountHeader amount={3000-300} />
+                <DashboardTransactionList transactions={transactions} />
             </View>
         );
     }

@@ -2,26 +2,25 @@ import { StyleSheet } from 'react-native';
 
 
 const styles = StyleSheet.create({
-    actionButtonContainer: {
-        position: 'absolute',
-        right: 24,
-        bottom: 24,
-        elevation: 5,
-        borderRadius: 50,
+    amountHeader: {
+        height: 64,
+        padding: 8,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        elevation: 4,
     },
-
-    actionButton: {
-        borderRadius: 50,
-        backgroundColor: '#ff5722',
-        width: 56,
-        height: 56,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-
-    actionButtonText: {
-        fontSize: 24,
+    amountHeaderLabel: {
         color: 'white',
+        fontSize: 18,
+    },
+    amountHeaderAmount: {
+        color: 'white',
+        fontSize: 24,
+    },
+
+    formGroup: {
+        padding: 16,
     },
 });
 
