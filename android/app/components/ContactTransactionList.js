@@ -11,15 +11,18 @@ export default class ContactTransactionList extends Component {
 
         const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
         this.state = {
-            dataSource: ds.cloneWithRows(props.transactions),
+            ds: ds,
         };
     }
 
+
     render() {
+        const dataSource = this.state.ds.cloneWithRows(this.props.transactions);
         return (
             <ListView
-                dataSource={this.state.dataSource}
-                renderRow={(data) => <ContactTransaction transaction={data} onSelect={this.props.onSelect}/>}
+                dataSource={dataSource}
+                enableEmptySections={true}
+                renderRow={(data) => <ContactTransaction transaction={data} onSelect={() => this.props.onSelect(data.id)}/>}
             />
         );
     }

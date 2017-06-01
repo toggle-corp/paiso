@@ -16,7 +16,9 @@ export default function Contact(props) {
                 <Icon name='user-o' style={styles.contactIcon}/>
                 <View style={styles.contactLabel}>
                     <Text style={styles.contactName}>{props.contact.name}</Text>
-                    <Text style={styles.contactInfo}>{props.contact.username}</Text>
+                    { props.contact.username && (
+                        <Text style={styles.contactInfo}>{props.contact.username}</Text>
+                    )}
                 </View>
             </View>
         </TouchableNativeFeedback>

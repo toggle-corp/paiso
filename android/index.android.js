@@ -1,4 +1,3 @@
-
 import React, { Component } from 'react';
 import { AppRegistry } from 'react-native';
 
@@ -7,34 +6,18 @@ import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 
 import App from './app/containers/App';
-import * as reducers from './app/reducers';
-
-import { COLOR, ThemeProvider } from 'react-native-material-ui';
-
+import reducers from './app/reducers';
 
 const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
 const reducer = combineReducers(reducers);
 const store = createStoreWithMiddleware(reducer);
-
-const uiTheme = {
-    palette: {
-        primaryColor: COLOR.blue600,
-    },
-    toolbar: {
-        container: {
-            height: 56,
-        },
-    },
-};
 
 
 class Paiso extends Component {
     render() {
         return (
             <Provider store={store}>
-                <ThemeProvider uiTheme={uiTheme}>
-                    <App />
-                </ThemeProvider>
+                <App />
             </Provider>
         );
     }

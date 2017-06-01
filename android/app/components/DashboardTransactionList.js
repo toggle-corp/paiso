@@ -11,6 +11,7 @@ export default function DashboardTransactionList(props) {
     return (
         <ListView
             dataSource={dataSource}
+            enableEmptySections={true}
             renderRow={(data) => <DashboardTransaction transaction={data} />}
         />
     );
