@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from rest_framework import permissions
 from rest_framework import viewsets
@@ -17,6 +18,10 @@ class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
     permission_classes = (TransactionPermission, permissions.IsAuthenticated, )
+
+    def get_queryset(self):
+        return Transaction.objects.filter(Q(user=self.request.user) |
+                                          Q(contact__user=self.request.user))
 
 
 # EOF

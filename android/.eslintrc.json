@@ -36,5 +36,8 @@
         "no-console": 0,
         "react/jsx-uses-react": "error",
         "react/jsx-uses-vars": "error"
+    },
+    "globals": {
+        "fetch": false
     }
 }

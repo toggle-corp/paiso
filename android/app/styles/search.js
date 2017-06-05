@@ -2,24 +2,23 @@ import { StyleSheet } from 'react-native';
 
 
 const styles = StyleSheet.create({
-    contact: {
+    searchItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingLeft: 16,
-        paddingRight: 16,
-        paddingTop: 8,
-        paddingBottom: 8,
+        padding: 8,
     },
-    contactIcon: {
+    icon: {
         fontSize: 42,
-        paddingRight: 8,
+        marginRight: 8,
     },
-    contactName: {
+    itemLabel: {
+    },
+    name: {
         fontSize: 16,
     },
-    contactInfo: {
+    info: {
         fontSize: 12,
-    },
+    }
 });
 
 export default styles;

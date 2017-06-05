@@ -12,7 +12,7 @@ export default function DashboardTransactionList(props) {
         <ListView
             dataSource={dataSource}
             enableEmptySections={true}
-            renderRow={(data) => <DashboardTransaction transaction={data} />}
+            renderRow={(data) => <DashboardTransaction transaction={data} onSelect={() => props.onSelect(data.id)}/>}
         />
     );
 }

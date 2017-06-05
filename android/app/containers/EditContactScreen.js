@@ -19,7 +19,8 @@ class EditContactScreen extends Component {
 
         this.state = {
             linkModalVisible: false,
-            name: '',
+            name: this.props.contact && this.props.contact.name || '',
+            user: this.props.contact && this.props.contact.user || null,
         };
     }
 
@@ -32,13 +33,13 @@ class EditContactScreen extends Component {
         const { goBack } = this.props.navigation;
         if (params.mode == 'add') {
             if (this.props.add) {
-                this.props.add(this.state.name);
+                this.props.add(this.state.name, this.state.user);
                 goBack();
             }
         }
         else if (params.mode == 'edit') {
             if (this.props.edit) {
-                this.props.edit(this.state.name);
+                this.props.edit(this.state.name, this.state.user);
                 goBack();
             }
         }
@@ -75,13 +76,16 @@ class EditContactScreen extends Component {
                         onChangeText={(name) => this.setState({name})}
                     />
                 </View>
-                <View style={styles.formGroup}>
-                    <Text>Username</Text>
-                    <TextInput />
-                </View>
+
+                {this.props.user && (
+                    <View style={styles.formGroup}>
+                        <Text> Linked with paiso user: {this.props.user.username}</Text>
+                    </View>
+                )}
 
                 <LinkContactModal
                     visible={this.state.linkModalVisible}
+                    selectUser={(user) => this.setState({ user: user })}
                     onRequestClose={() => this.setState({ linkModalVisible: false })}
                 />
             </View>
@@ -93,9 +97,11 @@ class EditContactScreen extends Component {
 const mapStateToProps = (state, ownProps) => {
     const { params } = ownProps.navigation.state;
 
+    let contact = (params.mode == 'edit') ? state.contacts.find(c => c.id == params.contactId) : undefined;
+
     return {
-        contact: (params.mode == 'edit') ?
-            state.contacts.find(c => c.id == params.contactId) : undefined,
+        contact: contact,
+        user: contact && contact.user && state.users.find(u => u.id == contact.user),
     };
 };
 
@@ -104,8 +110,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     const { params } = ownProps.navigation.state;
 
     return {
-        add: name => dispatch(addContact(name)),
-        edit: name => dispatch(editContact(params.contactId, name)),
+        add: (name, user) => dispatch(addContact(name, user)),
+        edit: (name, user) => dispatch(editContact(params.contactId, name, user)),
     };
 };
 

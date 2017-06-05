@@ -15,6 +15,16 @@ class ContactScreen extends Component {
         header: null,
     };
 
+    editTransaction(id) {
+        if (this.props.transactions.find(t => t.id == id).user != this.props.myId) {
+            return;
+        }
+
+        const { navigate } = this.props.navigation;
+        const { params } = this.props.navigation.state;
+        navigate('EditTransaction', { mode: 'edit', contactId: params.contactId, transactionId: id });
+    }
+
     render() {
         const { navigate, goBack } = this.props.navigation;
         const { params } = this.props.navigation.state;
@@ -30,7 +40,7 @@ class ContactScreen extends Component {
                     onRightElementPress={() => navigate('EditContact', { mode: 'edit', contactId: params.contactId })}
                 />
                 <AmountHeader amount={total} />
-                <ContactTransactionList transactions={this.props.transactions} onSelect={(id) => navigate('EditTransaction', { mode: 'edit', contactId: params.contactId, transactionId: id })} />
+                <ContactTransactionList transactions={this.props.transactions} onSelect={id => this.editTransaction(id)} />
                 <ActionButton onPress={() => navigate('EditTransaction', { mode: 'add', contactId: params.contactId })} />
             </View>
         );
@@ -40,19 +50,22 @@ class ContactScreen extends Component {
 
 const mapStateToProps = (state, ownProps) => {
     const { params } = ownProps.navigation.state;
+
+    const contact = state.contacts.find(c => c.id == params.contactId);
     const ownTransactions =
-        state.transactions.filter(t => t.contact == params.contactId);
+        state.transactions.filter(t => t.contact == params.contactId || (t.user && t.user == contact.user));
 
     return {
-        contact: state.contacts.find(c => c.id == params.contactId),
+        contact: contact,
         transactions: ownTransactions.map(transaction => ({
             id: transaction.id,
             title: transaction.title,
             date: transaction.createdAt,
-            amount: getAmount(transaction),
-            addedBy: transaction.self,
+            amount: getAmount(transaction, state.auth.myId),
+            user: transaction.user,
             transactionType: transaction.transactionType,
         })),
+        myId: state.auth.myId,
     };
 };
 

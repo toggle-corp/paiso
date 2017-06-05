@@ -12,12 +12,12 @@ export default function contactsReducer(state=[], action) {
             return [
                 ...state,
                 {
-                    id: getUniqueId(state),  // Note while synchronizing to synchronize references as well, like in transactions
+                    id: action.id ? action.id : getUniqueId(state),
                     name: action.name,
                     user: action.user,
-                    createdAt: new Date(),
-                    editedAt: new Date(),
-                    status: 'new',
+                    createdAt: action.createdAt ? action.createdAt : new Date(),
+                    editedAt: action.editedAt ? action.editedAt : new Date(),
+                    status: action.status,
                 },
             ];
 
@@ -28,12 +28,17 @@ export default function contactsReducer(state=[], action) {
                 }
 
                 return Object.assign({}, contact, {
+                    id: action.newId ? action.newId : contact.id,
                     name: action.name,
                     user: action.user,
-                    editedAt: new Date(),
-                    status: (contact.status == 'new' ? 'new' : 'edited')
+                    createdAt: action.createdAt ? action.createdAt : contact.createdAt,
+                    editedAt: action.editedAt ? action.editedAt : new Date(),
+                    status: action.status,
                 });
             });
+
+        case 'CLEAR_CONTACTS':
+            return [];
 
         default:
             return state;

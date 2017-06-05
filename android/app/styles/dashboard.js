@@ -8,9 +8,9 @@ const styles = StyleSheet.create({
         padding: 8,
     },
     transactionIcon: {
-        fontSize: 32,
+        fontSize: 42,
         paddingLeft: 8,
-        paddingRight: 16,
+        paddingRight: 8,
     },
     transactionLabel: {
         marginRight: 'auto',

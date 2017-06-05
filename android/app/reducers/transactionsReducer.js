@@ -13,15 +13,15 @@ export default function transactionsReducer(state=[], action) {
             return [
                 ...state,
                 {
-                    id: getUniqueId(state),
+                    id: action.id ? action.id : getUniqueId(state),
                     title: action.title,
                     amount: action.amount,
                     contact: action.contact,
                     transactionType: action.transactionType,
-                    addedBy: 'self',
-                    createdAt: new Date(),
-                    editedAt: new Date(),
-                    status: 'new',
+                    user: action.user,
+                    createdAt: action.createdAt ? action.createdAt : new Date(),
+                    editedAt: action.editedAt ? action.editedAt : new Date(),
+                    status: action.status,
                 }
             ];
         case 'EDIT_TRANSACTION':
@@ -31,14 +31,34 @@ export default function transactionsReducer(state=[], action) {
                 }
 
                 return Object.assign({}, transaction, {
+                    id: action.newId ? action.newId : transaction.id,
                     title: action.title,
                     amount: action.amount,
                     contact: action.contact,
                     transactionType: action.transactionType,
-                    editedAt: new Date(),
-                    status: (transaction.status == 'new' ? 'new' : 'edited'),
+                    user: action.user,
+                    createdAt: action.createdAt ? action.createdAt : transaction.createdAt,
+                    editedAt: action.editedAt ? action.editedAt : new Date(),
+                    status: action.status,
                 });
             });
+        case 'EDIT_CONTACT':
+            if (!action.newId) {
+                return state;
+            }
+            return state.map(transaction => {
+                if (transaction.contact != action.id) {
+                    return transaction;
+                }
+
+                return Object.assign({}, transaction, {
+                    contact: action.newId,
+                });
+            });
+
+        case 'CLEAR_TRANSACTIONS':
+            return [];
+
         default:
             return state;
     }
