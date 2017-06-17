@@ -17,6 +17,11 @@ class ContactListScreen extends Component {
         ),
     };
 
+    constructor(props) {
+        super(props);
+        this.ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+    }
+
     render() {
         const { navigate } = this.props.navigation;
 
@@ -27,8 +32,7 @@ class ContactListScreen extends Component {
         //     { name: 'Navin Ayer', username: 'thenav56', },
         // ];
         const contacts = this.props.contacts;
-        const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-        const dataSource = ds.cloneWithRows(contacts);
+        const dataSource = this.ds.cloneWithRows(contacts);
 
         return (
             <View style={{flex: 1}}>

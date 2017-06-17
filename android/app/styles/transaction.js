@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
         fontSize: 48,
     },
     arrow: {
-        fontSize: 48,
+        fontSize: 32,
     },
 });
 

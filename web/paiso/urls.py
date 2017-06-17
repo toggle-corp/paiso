@@ -11,12 +11,14 @@ import rest_framework.authtoken.views
 
 import users.views
 import transactions.views
+import fcm.views
 
 
 router = routers.DefaultRouter()
 router.register(r'user', users.views.UserViewSet)
 router.register(r'contact', users.views.ContactViewSet)
 router.register(r'transaction', transactions.views.TransactionViewSet)
+router.register(r'fcm-token', fcm.views.FcmTokenViewSet)
 
 
 urlpatterns = [

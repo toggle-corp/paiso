@@ -13,7 +13,7 @@ export default function Contact(props) {
     return (
         <TouchableNativeFeedback onPress={props.onSelect}>
             <View style={styles.contact}>
-                <Icon name='account-circle' style={styles.contactIcon}/>
+                <Icon name="account-circle" style={styles.contactIcon}/>
                 <View style={styles.contactLabel}>
                     <Text style={styles.contactName}>{props.contact.name}</Text>
                     { props.contact.username && (

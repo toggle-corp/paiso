@@ -19,6 +19,8 @@ export default function transactionsReducer(state=[], action) {
                     contact: action.contact,
                     transactionType: action.transactionType,
                     user: action.user,
+                    approvalStatus: action.approvalStatus,
+                    deleted: action.deleted,
                     createdAt: action.createdAt ? action.createdAt : new Date(),
                     editedAt: action.editedAt ? action.editedAt : new Date(),
                     status: action.status,
@@ -37,11 +39,14 @@ export default function transactionsReducer(state=[], action) {
                     contact: action.contact,
                     transactionType: action.transactionType,
                     user: action.user,
+                    approvalStatus: action.approvalStatus ? action.approvalStatus : transaction.approvalStatus,
+                    deleted: action.deleted,
                     createdAt: action.createdAt ? action.createdAt : transaction.createdAt,
                     editedAt: action.editedAt ? action.editedAt : new Date(),
                     status: action.status,
                 });
             });
+
         case 'EDIT_CONTACT':
             if (!action.newId) {
                 return state;

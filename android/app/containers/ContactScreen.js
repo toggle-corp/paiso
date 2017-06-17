@@ -53,14 +53,18 @@ const mapStateToProps = (state, ownProps) => {
 
     const contact = state.contacts.find(c => c.id == params.contactId);
     const ownTransactions =
-        state.transactions.filter(t => t.contact == params.contactId || (t.user && t.user == contact.user));
+        state.transactions.filter(t =>
+            !t.deleted && (t.contact == params.contactId
+                || (t.user && t.user == contact.user && t.approvalStatus == 'approved')));
+
+    ownTransactions.sort((t1, t2) => (new Date(t2.editedAt) - new Date(t1.editedAt)));
 
     return {
         contact: contact,
         transactions: ownTransactions.map(transaction => ({
             id: transaction.id,
             title: transaction.title,
-            date: transaction.createdAt,
+            date: transaction.editedAt,
             amount: getAmount(transaction, state.auth.myId),
             user: transaction.user,
             transactionType: transaction.transactionType,

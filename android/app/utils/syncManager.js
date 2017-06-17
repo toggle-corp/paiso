@@ -3,6 +3,7 @@ import { addContact, editContact } from '../actions/contacts';
 import { addTransaction, editTransaction } from '../actions/transactions';
 import { clearUsers, saveUser } from '../actions/users';
 import { saveMyId } from '../actions/auth';
+import { saveToken } from '../actions/fcm';
 
 
 const syncManager = {
@@ -11,16 +12,47 @@ const syncManager = {
             if (this.onSync) {
                 return;
             }
+
+            if (!store.getState().auth.token) {
+                return;
+            }
+
             this.onSync = true;
 
             // Start by synchronizing data of logged in user
             this.syncSelf(store).then(() => {
-                // After which synchronize contacts, users and transactions
+                // Then synchronize fcm token if exists and
+                return this.syncFcm(store);
+            }).then(() => {
+                // synchronize contacts, users and transactions
                 return this.sync(store);
             }).then(() => {
                 this.onSync = false;
             });
         });
+    },
+
+    syncFcm: function(store) {
+        let state = store.getState();
+        let dispatch = store.dispatch;
+
+        const data = {
+            user: state.auth.myId,
+            token: state.fcm.token,
+        };
+
+        if (state.fcm.token && state.auth.myId) {
+            (() => {
+                if (state.fcm.id) {
+                    return request('fcm-token/' + state.fcm.id + '/', data, 'PUT', state.auth.token);
+                } else {
+                    return request('fcm-token/', data, 'POST', state.auth.token);
+                }
+            })().then(json => {
+                dispatch(saveToken(json.pk, json.token));
+            })
+                .catch(error => console.log(error));
+        }
     },
 
     syncSelf: function(store) {
@@ -122,9 +154,14 @@ const syncManager = {
 
                 const data = {
                     transaction_type: transaction.transactionType,
+                    user: transaction.user,
                     contact: transaction.contact,
                     title: transaction.title,
                     amount: transaction.amount,
+                    status: transaction.approvalStatus,
+                    deleted: transaction.deleted,
+                    created_at: transaction.createdAt.toISOString().split('.')[0],
+                    edited_at: transaction.editedAt.toISOString().split('.')[0],
                 };
                 let method = 'POST';
                 let url = 'transaction/';
@@ -138,7 +175,8 @@ const syncManager = {
                     .then(json => {
                         dispatch(editTransaction(transaction.id,
                             json.title, json.amount, json.contact, json.transactionType,
-                            json.user, json.pk, json.created_at, json.edited_at, 'sync'));
+                            json.user, json.status, json.deleted, json.pk,
+                            new Date(json.created_at), new Date(json.edited_at), 'sync'));
                     }).catch(error => console.log(error)));
             });
 
@@ -153,12 +191,15 @@ const syncManager = {
                     if (state.transactions.find(t => t.id == transaction.pk)) {
                         dispatch(editTransaction(transaction.pk,
                             transaction.title, transaction.amount, transaction.contact, transaction.transaction_type,
-                            transaction.user, null, transaction.created_at, transaction.edited_at, 'sync'));
+                            transaction.user, transaction.status, transaction.deleted, null,
+                            new Date(transaction.created_at), new Date(transaction.edited_at), 'sync'));
                     }
                     else {
                         dispatch(addTransaction(transaction.title, transaction.amount,
-                            transaction.contact, transaction.transaction_type, transaction.user,
-                            transaction.pk, transaction.created_at, transaction.edited_at, 'sync'));
+                            transaction.contact, transaction.transaction_type,
+                            transaction.user, transaction.status, transaction.deleted,
+                            transaction.pk,
+                            new Date(transaction.created_at), new Date(transaction.edited_at), 'sync'));
                     }
                 });
             }).catch(error => console.log(error));

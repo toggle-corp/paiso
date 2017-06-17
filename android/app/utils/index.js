@@ -15,8 +15,8 @@ export function getAmount(transaction, myId) {
     }
 }
 
-export const SERVER_URL = 'http://192.168.100.30:8000/';
-// export const SERVER_URL = 'http://192.168.100.11:8000/';
+// export const SERVER_URL = 'http://192.168.100.30:8000/';
+export const SERVER_URL = 'http://192.168.100.11:8000/';
 
 export function request(path, body=null, method='GET', token=null) {
     let headers = {
@@ -25,7 +25,7 @@ export function request(path, body=null, method='GET', token=null) {
     };
 
     if (token) {
-        headers['Authorization'] = 'Token ' + token;
+        headers.Authorization = 'Token ' + token;
     }
 
     if (body) {

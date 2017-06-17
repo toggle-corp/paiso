@@ -1,8 +1,7 @@
-from django.contrib.auth.models import User
 from django.db.models import Q
 
-from rest_framework import permissions
 from rest_framework import viewsets
+from rest_framework import permissions
 
 from transactions.serializers import TransactionSerializer
 from transactions.models import Transaction
@@ -11,7 +10,7 @@ from transactions.models import Transaction
 class TransactionPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return request.user == obj.user or\
-                request.contact.user == obj.user
+                request.user == obj.contact.user
 
 
 class TransactionViewSet(viewsets.ModelViewSet):

@@ -39,7 +39,10 @@ const mapStateToProps = (state) => {
     let transactions = [];
 
     state.contacts.forEach(contact => {
-        let ts = state.transactions.filter(t => t.contact == contact.id || (t.user && t.user == contact.user));
+        let ts = state.transactions.filter( t =>
+            !t.deleted && (t.contact == contact.id ||
+            (t.user && t.user == contact.user && t.approvalStatus == 'approved')));
+
         if (ts.length > 0) {
             transactions.push({
                 id: contact.id,
