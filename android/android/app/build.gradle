@@ -89,7 +89,7 @@ android {
 
     defaultConfig {
         applicationId "com.paiso"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
@@ -127,6 +127,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-background-job')
     compile project(':react-native-fcm')
     compile project(':react-native-vector-icons')
     compile fileTree(dir: "libs", include: ["*.jar"])

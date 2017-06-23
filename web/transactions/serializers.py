@@ -7,7 +7,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = ('pk', 'user', 'transaction_type', 'contact',
                   'title', 'amount', 'status', 'created_at',
-                  'edited_at', 'deleted',)
+                  'acknowledged_at', 'edited_at', 'deleted',)
 
 
 # EOF

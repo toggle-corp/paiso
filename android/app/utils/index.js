@@ -15,6 +15,33 @@ export function getAmount(transaction, myId) {
     }
 }
 
+
+export function getAcknowledgeStatus(transaction) {
+    if (transaction.approvalStatus == 'rejected' || 
+        transaction.approvalStatus == 'pending') {
+        return null;
+    }
+
+    if (transaction.deleted) {
+        return 'deleted';
+    }
+
+    if (!transaction.acknowledgedAt) {
+        return 'added';
+    }
+
+    if (transaction.acknowledgedAt < transaction.createdAt) {
+        return 'added';
+    }
+
+    if (transaction.acknowledgedAt < transaction.editedAt) {
+        return 'edited';
+    }
+
+    return null;
+}
+
+
 // export const SERVER_URL = 'http://192.168.100.30:8000/';
 export const SERVER_URL = 'http://192.168.100.11:8000/';
 

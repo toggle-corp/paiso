@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import {
+    View,
     ListView,
 } from 'react-native';
 import ContactTransaction from './ContactTransaction';
+import styles from '../styles/dashboard';
 
 
 export default class ContactTransactionList extends Component {
@@ -22,6 +24,7 @@ export default class ContactTransactionList extends Component {
             <ListView
                 dataSource={dataSource}
                 enableEmptySections={true}
+                renderSeparator={() => <View style={styles.separator}/>}
                 renderRow={(data) => <ContactTransaction transaction={data} onSelect={() => this.props.onSelect(data.id)}/>}
             />
         );

@@ -10,11 +10,11 @@ import { connect } from 'react-redux';
 
 import FcmController from './FcmController';
 
-import { getAmount } from '../utils';
-import { PendingTransaction } from '../components/NotificationItem';
+import { InfoTransaction, PendingTransaction } from '../components/NotificationItem';
 import styles from '../styles/notification';
 
-import { editTransaction } from '../actions/transactions';
+import { approveTransaction, acceptTransaction, rejectTransaction } from '../actions/transactions';
+import { getAmount, getAcknowledgeStatus } from '../utils';
 
 
 class NotificationListScreen extends Component {
@@ -30,15 +30,27 @@ class NotificationListScreen extends Component {
     }
 
     render() {
-        const dataSource = this.ds.cloneWithRows(this.props.pendingTransactions);
+        const dataSource = this.ds.cloneWithRows(this.props.transactions);
         return (
-            <View>
+            <View style={{ flex: 1, backgroundColor: '#616161', }}>
                 <Toolbar centerElement='Notifications' leftElement='notifications' />
                 <ListView
+                    style={{ paddingTop: 4 }}
                     dataSource={dataSource}
                     enableEmptySections={true}
-                    renderRow={data => <PendingTransaction transaction={data} onAccept={() => this.accept(data)} onReject={() => this.reject(data)} />}
-                    renderSeparator={() => <View style={styles.separator} />}
+                    renderRow={data => (data.approvalStatus == 'pending') ? (
+                        <PendingTransaction
+                            transaction={data}
+                            onAccept={() => this.accept(data) }
+                            onReject={() => this.reject(data) }
+                        />
+                    ) :
+                    (
+                        <InfoTransaction
+                            transaction={data}
+                            onDismiss={() => this.acknowledge(data) }
+                        />
+                    )}
                 />
                 <FcmController />
             </View>
@@ -49,20 +61,28 @@ class NotificationListScreen extends Component {
         this.props.accept(transaction);
     }
 
+    acknowledge(transaction) {
+        this.props.acknowledge(transaction);
+    }
+
     reject(transaction) {
         Alert.alert('Are you sure you want to reject this transaction?',
             transaction.title + ' by ' + transaction.contact.name,
             [
                 { text: 'No' },
-                { text: 'Yes', onPress: () => this.props.reject(transaction), },
+                { text: 'Yes', onPress: () => {
+                    this.props.reject(transaction);
+                }, },
             ]);
     }
 }
 
 
 const mapStateToProps = (state) => {
-    let pendingTransactions = state.transactions.filter(t =>
-        (t.user && t.user != state.auth.myId && t.approvalStatus == 'pending'))
+    let transactions = state.transactions.filter(t =>
+        (t.user && t.user != state.auth.myId &&
+            ((t.approvalStatus == 'pending' && !t.deleted) ||
+                getAcknowledgeStatus(t))))
             .map(t => ({
                 id: t.id,
                 title: t.title,
@@ -71,26 +91,24 @@ const mapStateToProps = (state) => {
                 amount: getAmount(t, state.auth.myId),
                 user: t.user,
                 transactionType: t.transactionType,
+                approvalStatus: t.approvalStatus,
+                acknowledgeStatus: getAcknowledgeStatus(t),
+                editedAt: t.editedAt,
             }));
 
-    pendingTransactions = pendingTransactions.filter(t => t.contact);
+    transactions = transactions.filter(t => t.contact);
+    transactions.sort((t1, t2) => (new Date(t2.editedAt) - new Date(t1.editedAt)));
     return {
-        pendingTransactions,
+        transactions,
     };
 };
 
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        accept: (transaction) => dispatch(
-            editTransaction(transaction.id, transaction.title, transaction.amount,
-                transaction.contactId, transaction.transactionType, transaction.user,
-                'approved')),
-
-        reject: (transaction) => dispatch(
-            editTransaction(transaction.id, transaction.title, transaction.amount,
-                transaction.contactId, transaction.transactionType, transaction.user,
-                'rejected')),
+        accept: (transaction) => dispatch(acceptTransaction(transaction.id)),
+        reject: (transaction) => dispatch(rejectTransaction(transaction.id)),
+        acknowledge: (transaction) => dispatch(approveTransaction(transaction.id)),
     };
 };
 

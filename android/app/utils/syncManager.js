@@ -9,26 +9,30 @@ import { saveToken } from '../actions/fcm';
 const syncManager = {
     init: function(store) {
         this.unsubscribe = store.subscribe(() => {
-            if (this.onSync) {
-                return;
-            }
+            this.syncStore(store);
+        });
+    },
 
-            if (!store.getState().auth.token) {
-                return;
-            }
+    syncStore: function(store) {
+        if (this.onSync) {
+            return;
+        }
 
-            this.onSync = true;
+        if (!store.getState().auth.token) {
+            return;
+        }
 
-            // Start by synchronizing data of logged in user
-            this.syncSelf(store).then(() => {
-                // Then synchronize fcm token if exists and
-                return this.syncFcm(store);
-            }).then(() => {
-                // synchronize contacts, users and transactions
-                return this.sync(store);
-            }).then(() => {
-                this.onSync = false;
-            });
+        this.onSync = true;
+
+        // Start by synchronizing data of logged in user
+        this.syncSelf(store).then(() => {
+            // Then synchronize fcm token if exists and
+            return this.syncFcm(store);
+        }).then(() => {
+            // synchronize contacts, users and transactions
+            return this.sync(store);
+        }).then(() => {
+            this.onSync = false;
         });
     },
 
@@ -162,6 +166,7 @@ const syncManager = {
                     deleted: transaction.deleted,
                     created_at: transaction.createdAt.toISOString().split('.')[0],
                     edited_at: transaction.editedAt.toISOString().split('.')[0],
+                    acknowledged_at: transaction.acknowledgedAt ? transaction.acknowledgedAt.toISOString().split('.')[0] : null,
                 };
                 let method = 'POST';
                 let url = 'transaction/';
@@ -173,10 +178,15 @@ const syncManager = {
 
                 transactionPosts.push(request(url, data, method, state.auth.token)
                     .then(json => {
+                        if (!json.title) {
+                            return;
+                        }
                         dispatch(editTransaction(transaction.id,
                             json.title, json.amount, json.contact, json.transactionType,
                             json.user, json.status, json.deleted, json.pk,
-                            new Date(json.created_at), new Date(json.edited_at), 'sync'));
+                            new Date(json.created_at), new Date(json.edited_at),
+                            json.acknowledged_at ? new Date(json.acknowledged_at) : null,
+                            'sync'));
                     }).catch(error => console.log(error)));
             });
 
@@ -192,14 +202,18 @@ const syncManager = {
                         dispatch(editTransaction(transaction.pk,
                             transaction.title, transaction.amount, transaction.contact, transaction.transaction_type,
                             transaction.user, transaction.status, transaction.deleted, null,
-                            new Date(transaction.created_at), new Date(transaction.edited_at), 'sync'));
+                            new Date(transaction.created_at), new Date(transaction.edited_at),
+                            transaction.acknowledged_at ? new Date(transaction.acknowledged_at) : null,
+                            'sync'));
                     }
                     else {
                         dispatch(addTransaction(transaction.title, transaction.amount,
                             transaction.contact, transaction.transaction_type,
                             transaction.user, transaction.status, transaction.deleted,
                             transaction.pk,
-                            new Date(transaction.created_at), new Date(transaction.edited_at), 'sync'));
+                            new Date(transaction.created_at), new Date(transaction.edited_at),
+                            transaction.acknowledged_at ? new Date(transaction.acknowledged_at) : null,
+                            'sync'));
                     }
                 });
             }).catch(error => console.log(error));

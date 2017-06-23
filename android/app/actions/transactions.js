@@ -1,6 +1,6 @@
 export const addTransaction = (title, amount, contact, transactionType, user,
     approvalStatus='pending', deleted=false,
-    id=null, createdAt=null, editedAt=null, status='edited') => ({
+    id=null, createdAt=null, editedAt=null, acknowledgedAt=null, status='edited') => ({
         id: id,
         type: 'ADD_TRANSACTION',
         title: title,
@@ -12,12 +12,13 @@ export const addTransaction = (title, amount, contact, transactionType, user,
         deleted: deleted,
         createdAt: createdAt,
         editedAt: editedAt,
+        acknowledgedAt: acknowledgedAt,
         status: status,
     });
 
 export const editTransaction = (id, title, amount, contact, transactionType, user,
     approvalStatus=null, deleted=false,
-    newId=null, createdAt=null, editedAt=null, status='edited') => ({
+    newId=null, createdAt=null, editedAt=null, acknowledgedAt=null, status='edited') => ({
         type: 'EDIT_TRANSACTION',
         id: id,
         title: title,
@@ -30,8 +31,24 @@ export const editTransaction = (id, title, amount, contact, transactionType, use
         newId: newId,
         createdAt: createdAt,
         editedAt: editedAt,
+        acknowledgedAt: acknowledgedAt,
         status: status,
     });
+
+export const acceptTransaction = (id) => ({
+    type: 'ACCEPT_TRANSACTION',
+    id,
+});
+
+export const rejectTransaction = (id) => ({
+    type: 'REJECT_TRANSACTION',
+    id,
+});
+
+export const approveTransaction = (id) => ({
+    type: 'APPROVE_TRANSACTION',
+    id,
+});
 
 export const clearTransactions = () => ({
     type: 'CLEAR_TRANSACTIONS',

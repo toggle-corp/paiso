@@ -19,6 +19,9 @@ const HomeScreen = TabNavigator({
         showLabel: false,
         indicatorStyle: { display: 'none' },
         showIcon: true,
+        style: {
+            backgroundColor: '#424242',
+        },
     },
 });
 

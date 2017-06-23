@@ -30,11 +30,20 @@ class Transaction(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     edited_at = models.DateTimeField(default=timezone.now)
 
+    acknowledged_at = models.DateTimeField(null=True, blank=True,
+                                           default=None)
+
     status = models.CharField(max_length=20,
                               choices=TRANSACTION_STATUS,
                               default='pending')
 
     def __str__(self):
         return "{} ({})".format(self.title, str(self.user))
+
+    def save(self, *args, **kwargs):
+        super(Transaction, self).save(*args, **kwargs)
+
+        from transactions.notify import generate_notification_for
+        generate_notification_for(self)
 
 # EOF

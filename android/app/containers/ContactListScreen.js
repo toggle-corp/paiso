@@ -7,6 +7,7 @@ import { ActionButton, Toolbar } from 'react-native-material-ui';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { connect } from 'react-redux';
 
+import styles from '../styles/contact';
 import ContactItem from '../components/ContactItem';
 
 
@@ -35,11 +36,12 @@ class ContactListScreen extends Component {
         const dataSource = this.ds.cloneWithRows(contacts);
 
         return (
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1, backgroundColor: '#616161', }}>
                 <Toolbar centerElement='Contacts' leftElement='contacts' />
                 <ListView
                     dataSource={dataSource}
                     enableEmptySections={true}
+                    renderSeparator={() => <View style={styles.separator} />}
                     renderRow={(data) => (
                         <ContactItem
                             contact={data}

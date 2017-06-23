@@ -12,7 +12,6 @@ export default function AmountHeader(props, context) {
     const { primaryColor } = context.uiTheme.palette;
     return (
         <View style={[styles.amountHeader, {backgroundColor: primaryColor}, ]}>
-            <Text style={styles.amountHeaderLabel}>Total</Text>
             <Text style={styles.amountHeaderAmount}>{props.amount}</Text>
         </View>
     );

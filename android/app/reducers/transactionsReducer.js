@@ -23,6 +23,7 @@ export default function transactionsReducer(state=[], action) {
                     deleted: action.deleted,
                     createdAt: action.createdAt ? action.createdAt : new Date(),
                     editedAt: action.editedAt ? action.editedAt : new Date(),
+                    acknowledgedAt: action.acknowledgedAt,
                     status: action.status,
                 }
             ];
@@ -43,7 +44,46 @@ export default function transactionsReducer(state=[], action) {
                     deleted: action.deleted,
                     createdAt: action.createdAt ? action.createdAt : transaction.createdAt,
                     editedAt: action.editedAt ? action.editedAt : new Date(),
+                    acknowledgedAt: action.acknowledgedAt ? action.acknowledgedAt : transaction.acknowledgedAt,
                     status: action.status,
+                });
+            });
+
+        case 'APPROVE_TRANSACTION':
+            return state.map(transaction => {
+                if (transaction.id != action.id) {
+                    return transaction;
+                }
+
+                return Object.assign({}, transaction, {
+                    acknowledgedAt: new Date(),
+                    status: 'edited',
+                });
+            });
+
+        case 'ACCEPT_TRANSACTION':
+            return state.map(transaction => {
+                if (transaction.id != action.id) {
+                    return transaction;
+                }
+
+                return Object.assign({}, transaction, {
+                    acknowledgedAt: new Date(),
+                    approvalStatus: 'approved',
+                    status: 'edited',
+                });
+            });
+
+        case 'REJECT_TRANSACTION':
+            return state.map(transaction => {
+                if (transaction.id != action.id) {
+                    return transaction;
+                }
+
+                return Object.assign({}, transaction, {
+                    acknowledgedAt: new Date(),
+                    approvalStatus: 'rejected',
+                    status: 'edited',
                 });
             });
 

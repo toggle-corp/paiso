@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import {
     View
 } from 'react-native';
-import { Toolbar } from 'react-native-material-ui';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Toolbar } from 'react-native-material-ui';
 import { connect } from 'react-redux';
 
 import AmountHeader from '../components/AmountHeader';
@@ -22,7 +22,7 @@ class Dashboard extends Component {
         const { navigate } = this.props.navigation;
         const total = this.props.transactions.reduce((a, t) => a + t.amount, 0);
         return (
-            <View>
+            <View style={{ flex:1, backgroundColor: '#616161' }}>
                 <Toolbar centerElement="Dashboard" leftElement='dashboard' />
                 <AmountHeader amount={total} />
                 <DashboardTransactionList

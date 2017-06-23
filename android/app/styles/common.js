@@ -3,10 +3,10 @@ import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
     amountHeader: {
-        height: 64,
-        padding: 8,
+        height: 96,
+        padding: 16,
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         alignItems: 'flex-end',
         elevation: 4,
     },
@@ -16,7 +16,8 @@ const styles = StyleSheet.create({
     },
     amountHeaderAmount: {
         color: 'white',
-        fontSize: 24,
+        fontSize: 36,
+        fontFamily: 'monospace',
     },
 
     formGroup: {

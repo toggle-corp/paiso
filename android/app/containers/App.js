@@ -26,7 +26,9 @@ const App = StackNavigator({
 
 const uiTheme = {
     palette: {
-        primaryColor: COLOR.blue600,
+        primaryColor: '#424242',
+        primaryDarkColor: '#616161',
+        accentColor: '#FFC107',
     },
     toolbar: {
         container: {
