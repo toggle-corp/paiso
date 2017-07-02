@@ -5,4 +5,4 @@ from fcm.models import FcmToken
 class FcmTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = FcmToken
-        fields = ('pk', 'token', 'user',)
+        fields = ('id', 'token', 'user',)

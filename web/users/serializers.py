@@ -6,7 +6,7 @@ from rest_framework import serializers
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('pk', 'username', 'password', 'first_name', 'last_name', )
+        fields = ('id', 'username', 'password', 'first_name', 'last_name', )
         extra_kwargs = {'password': {'write_only': True}, }
 
     def create(self, validated_data):
@@ -21,7 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
 class UserPutSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('pk', 'username', 'first_name', 'last_name', )
+        fields = ('id', 'username', 'first_name', 'last_name', )
 
 
 class ContactSerializer(serializers.ModelSerializer):
@@ -31,7 +31,7 @@ class ContactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Contact
-        fields = ('pk', 'name', 'user', 'belongs_to', 'created_at', 
+        fields = ('id', 'name', 'user', 'belongs_to', 'created_at',
                   'edited_at', )
 
 
