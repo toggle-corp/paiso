@@ -5,6 +5,7 @@ from rest_framework import permissions
 
 from transactions.serializers import TransactionSerializer
 from transactions.models import Transaction
+from transactions.notify import generate_notification_for
 
 
 class TransactionPermission(permissions.BasePermission):
@@ -27,5 +28,15 @@ class TransactionViewSet(viewsets.ModelViewSet):
             )
         )
 
+    def perform_create(self, serializer):
+        transaction = serializer.save()
+        self.post_save(transaction)
+
+    def perform_update(self, serializer):
+        transaction = serializer.save()
+        self.post_save(transaction)
+
+    def post_save(self, transaction):
+        generate_notification_for(transaction, self.request.user)
 
 # EOF

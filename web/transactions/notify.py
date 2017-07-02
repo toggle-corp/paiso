@@ -1,14 +1,21 @@
+from django.db.models import Q
+
 from fcm.models import FcmToken
+from users.models import Contact
 from config import SERVER_KEY
 
 import requests
 
 
-def generate_notification_for(transaction):
-    if not transaction.contact.user:
+def generate_notification_for(transaction, me):
+    if not transaction.contact.user or transaction.status == 'rejected':
         return
 
-    tokens = FcmToken.objects.filter(user=transaction.contact.user)
+    tokens = FcmToken.objects.filter(
+        ~Q(user=me),
+        user=transaction.contact.user,
+        user__contact__user=transaction.user
+    )
 
     url = 'https://fcm.googleapis.com/fcm/send'
 
@@ -17,22 +24,22 @@ def generate_notification_for(transaction):
         'Authorization': 'key=' + SERVER_KEY,
     }
 
+    contact = Contact.objects.get(user=transaction.user)
+
     action = 'added'
-    if transaction.acknowledged_at:
-        action = 'edited'
     if transaction.deleted:
         action = 'deleted'
+    elif transaction.acknowledged_at:
+        action = 'edited'
 
     body = {
         'registration_ids': [t.token for t in tokens],
-        'prority': 'high',
-        'notification': {
+        'data': {
+            'id': str(transaction.pk),
             'title': transaction.title,
-            'body': '{}, {} by {}'.format(
-                transaction.amount,
-                action,
-                transaction.user.get_full_name()),
-            'sound': 'default',
+            'user': contact.name,
+            'amount': str(transaction.amount),
+            'action': action,
         },
     }
 

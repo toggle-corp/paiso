@@ -2,7 +2,6 @@ package com.togglecorp.paiso.contacts
 
 import android.arch.lifecycle.LifecycleActivity
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
@@ -10,10 +9,12 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import com.togglecorp.paiso.R
+import com.togglecorp.paiso.database.DatabaseContext
 import com.togglecorp.paiso.transactions.EditTransactionActivity
 import com.togglecorp.paiso.transactions.PaisoTransaction
 import com.togglecorp.paiso.transactions.TransactionListAdapter
 import kotlinx.android.synthetic.main.activity_contact_details.*
+import kotlinx.android.synthetic.main.layout_amount_header.*
 
 class ContactDetailsActivity : LifecycleActivity() {
 
@@ -33,19 +34,23 @@ class ContactDetailsActivity : LifecycleActivity() {
         transactionListView.layoutManager = LinearLayoutManager(this)
         transactionListView.adapter = transactionListAdapter
 
-        val viewModel = ViewModelProviders.of(this).get(ContactViewModel::class.java)
-        viewModel.getContact(intent.getIntExtra("id", 0)).observe(this, Observer {
-            if (it != null && !it.deleted) {
-                contact = it
-                title = contact!!.name
+        headerTotalAmount.text = "0.0"
 
-                viewModel.getTransactionList(contact!!).observe(this, Observer {
-                    refresh(it!!)
+        DatabaseContext.get(this).contactDao().findById(intent.getIntExtra("id", 0))
+                .observe(this, Observer {
+                    if (it != null && !it.deleted) {
+                        contact = it
+                        title = contact!!.name
+
+                        DatabaseContext.get(this).transactionDao().getFor(
+                                contact!!.remoteId, contact!!.user)
+                                .observe(this, Observer {
+                                    refresh(it!!)
+                                })
+                    } else {
+                        finish()
+                    }
                 })
-            } else {
-                finish()
-            }
-        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -74,6 +79,12 @@ class ContactDetailsActivity : LifecycleActivity() {
         transactionList.clear()
         transactions.forEach { transactionList.add(it) }
         transactionListAdapter?.notifyDataSetChanged()
+
+        val total = transactionList.fold<PaisoTransaction, Float>(0.0f) {
+            total, next -> total + next.getSignedAmount(this)
+        }
+        headerTotalAmount.text = total.toString()
+
     }
 
     fun addTransaction(view: View) {

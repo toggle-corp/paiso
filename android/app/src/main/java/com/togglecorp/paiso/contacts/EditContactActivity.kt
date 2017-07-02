@@ -1,8 +1,8 @@
 package com.togglecorp.paiso.contacts
 
 import android.app.Activity
-import android.app.Application
-import android.arch.lifecycle.*
+import android.arch.lifecycle.LifecycleActivity
+import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
@@ -15,7 +15,6 @@ import com.togglecorp.paiso.api.promise
 import com.togglecorp.paiso.auth.Auth
 import com.togglecorp.paiso.database.DatabaseContext
 import com.togglecorp.paiso.misc.Confirmation
-import com.togglecorp.paiso.transactions.PaisoTransaction
 import com.togglecorp.paiso.users.SEARCH_USER
 import com.togglecorp.paiso.users.SearchUserActivity
 import com.togglecorp.paiso.users.UserApi
@@ -23,24 +22,6 @@ import kotlinx.android.synthetic.main.activity_edit_contact.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
-
-
-class ContactViewModel(application: Application?) : AndroidViewModel(application) {
-    fun getContact(id: Int) : LiveData<Contact> {
-        return DatabaseContext.get(getApplication()).contactDao().findById(id)
-    }
-
-    fun getContactByRemoteId(id: Int) : LiveData<Contact> {
-        return DatabaseContext.get(getApplication()).contactDao().findLiveByRemoteId(id)
-    }
-
-    fun getTransactionList(contact: Contact) : LiveData<List<PaisoTransaction>> {
-        return DatabaseContext.get(getApplication()).transactionDao().getFor(
-                contact.remoteId, contact.user)
-    }
-
-
-}
 
 
 class EditContactActivity : LifecycleActivity() {
@@ -64,16 +45,17 @@ class EditContactActivity : LifecycleActivity() {
         }
 
         if (mode == "edit") {
-            ViewModelProviders.of(this).get(ContactViewModel::class.java)
-                    .getContact(intent.getIntExtra("id", 0)).observe(this, Observer {
-                if (it != null) {
-                    contact = it
-                    contactName.setText(contact.name)
-                    if (contact.user != null) {
-                        linkUser(contact.user!!)
-                    }
-                }
-            })
+            DatabaseContext.get(this).contactDao()
+                    .findById(intent.getIntExtra("id", 0))
+                    .observe(this, Observer {
+                        if (it != null) {
+                            contact = it
+                            contactName.setText(contact.name)
+                            if (contact.user != null) {
+                                linkUser(contact.user!!)
+                            }
+                        }
+                    })
 
             title = "Edit Contact"
         } else {

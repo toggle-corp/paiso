@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import com.togglecorp.paiso.auth.Auth
 import com.togglecorp.paiso.auth.LoginActivity
 import com.togglecorp.paiso.contacts.ContactListFragment
-import com.togglecorp.paiso.containers.DashboardFragment
+import com.togglecorp.paiso.dashboard.DashboardFragment
 import com.togglecorp.paiso.notifications.NotificationListFragment
 import com.togglecorp.paiso.containers.SettingsFragment
 import com.togglecorp.paiso.database.SyncManager

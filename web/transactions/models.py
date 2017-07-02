@@ -40,10 +40,4 @@ class Transaction(models.Model):
     def __str__(self):
         return "{} ({})".format(self.title, str(self.user))
 
-    def save(self, *args, **kwargs):
-        super(Transaction, self).save(*args, **kwargs)
-
-        from transactions.notify import generate_notification_for
-        generate_notification_for(self)
-
 # EOF

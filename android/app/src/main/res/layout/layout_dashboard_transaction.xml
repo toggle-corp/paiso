@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?selectableItemBackground">
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginRight="8dp"
+        android:src="@drawable/ic_account_circle"/>
+
+    <TextView
+        android:id="@+id/contactName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="21sp"
+        android:text="Bibek Dahal"/>
+
+    <TextView
+        android:id="@+id/amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="28sp"
+        android:text="3000"/>
+
+</LinearLayout>

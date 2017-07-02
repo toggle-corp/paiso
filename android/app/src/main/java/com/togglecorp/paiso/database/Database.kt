@@ -29,6 +29,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun contactDao(): ContactDao
     abstract fun userDao(): UserDao
     abstract fun transactionDao(): TransactionDao
+    abstract fun contactAmountDao(): ContactAmountDao
 }
 
 class DatabaseContext private constructor(var context: Context){

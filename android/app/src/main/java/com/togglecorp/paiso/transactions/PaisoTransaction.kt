@@ -98,6 +98,9 @@ interface ITransactionApi {
     @GET("transaction/")
     fun get(@Header("Authorization") header: String) : Call<List<PaisoTransaction>>
 
+    @GET("transaction/{id}/")
+    fun get(@Header("Authorization") header: String, @Path("id") id: Int) : Call<PaisoTransaction>
+
     @PUT("transaction/{id}/")
     fun put(@Header("Authorization") header: String, @Path("id") id: Int, @Body transaction: PaisoTransaction) : Call<PaisoTransaction>
 

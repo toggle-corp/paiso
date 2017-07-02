@@ -1,7 +1,6 @@
 package com.togglecorp.paiso.transactions
 
-import android.app.Application
-import android.arch.lifecycle.*
+import android.arch.lifecycle.LifecycleActivity
 import android.arch.lifecycle.Observer
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -11,7 +10,6 @@ import android.view.MenuItem
 import android.view.View
 import com.togglecorp.paiso.R
 import com.togglecorp.paiso.contacts.Contact
-import com.togglecorp.paiso.contacts.ContactViewModel
 import com.togglecorp.paiso.database.DatabaseContext
 import com.togglecorp.paiso.misc.Confirmation
 import kotlinx.android.synthetic.main.activity_edit_transaction.*
@@ -19,13 +17,6 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import java.util.*
-
-
-class TransactionViewModel(application: Application?) : AndroidViewModel(application) {
-    fun getTransaction(id: Int) : LiveData<PaisoTransaction> {
-        return DatabaseContext.get(getApplication()).transactionDao().findById(id)
-    }
-}
 
 
 class EditTransactionActivity : LifecycleActivity() {
@@ -45,8 +36,8 @@ class EditTransactionActivity : LifecycleActivity() {
             mode = "edit"
         }
 
-        ViewModelProviders.of(this).get(ContactViewModel::class.java)
-                .getContactByRemoteId(intent.getIntExtra("contactId", 0))
+        DatabaseContext.get(this).contactDao()
+                .findLiveByRemoteId(intent.getIntExtra("contactId", 0))
                 .observe(this,
                         Observer {
                             if (it == null) {
@@ -56,20 +47,21 @@ class EditTransactionActivity : LifecycleActivity() {
                         })
 
         if (mode == "edit") {
-            ViewModelProviders.of(this).get(TransactionViewModel::class.java)
-                    .getTransaction(intent.getIntExtra("id", 0)).observe(this, Observer {
-                if (it != null) {
-                    transaction = it
-                    transactionTitle.setText(transaction.title)
-                    transactionAmount.setText(transaction.amount.toString())
-                    transactionType = transaction.getType(this)
+            DatabaseContext.get(this).transactionDao()
+                    .findById(intent.getIntExtra("id", 0))
+                    .observe(this, Observer {
+                        if (it != null) {
+                            transaction = it
+                            transactionTitle.setText(transaction.title)
+                            transactionAmount.setText(transaction.amount.toString())
+                            transactionType = transaction.getType(this)
 
-                    if (transactionType == "to")
-                        transactionArrow.setImageResource(R.drawable.ic_arrow_long_right)
-                    else
-                        transactionArrow.setImageResource(R.drawable.ic_arrow_long_left)
-                }
-            })
+                            if (transactionType == "to")
+                                transactionArrow.setImageResource(R.drawable.ic_arrow_long_right)
+                            else
+                                transactionArrow.setImageResource(R.drawable.ic_arrow_long_left)
+                        }
+                    })
 
             title = "Edit Contact"
         } else {

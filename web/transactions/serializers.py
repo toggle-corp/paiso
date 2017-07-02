@@ -9,5 +9,4 @@ class TransactionSerializer(serializers.ModelSerializer):
                   'title', 'amount', 'status', 'created_at',
                   'acknowledged_at', 'edited_at', 'deleted',)
 
-
 # EOF

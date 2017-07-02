@@ -13,17 +13,6 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 
 
-class NotificationListViewModel(application: Application?) : AndroidViewModel(application) {
-    fun getNotificationList() : LiveData<List<PaisoTransaction>> {
-
-        return DatabaseContext.get(getApplication()).transactionDao().getNotifiable(
-                PreferenceManager.getDefaultSharedPreferences(getApplication()).getInt(
-                        "myRemoteId", 0)
-        )
-    }
-}
-
-
 class NotificationListFragment : LifecycleFragment() {
 
     var notificationListAdapter: NotificationListAdapter? = null
@@ -38,8 +27,10 @@ class NotificationListFragment : LifecycleFragment() {
         view.notificationListView.layoutManager = LinearLayoutManager(context)
         view.notificationListView.adapter = notificationListAdapter
 
-        ViewModelProviders.of(this).get(NotificationListViewModel::class.java)
-                .getNotificationList().observe(this, Observer { refresh(it) })
+        DatabaseContext.get(context).transactionDao().getNotifiable(
+                PreferenceManager.getDefaultSharedPreferences(context).getInt(
+                        "myRemoteId", 0)
+        ).observe(this, Observer { refresh(it) })
 
         return view
     }
