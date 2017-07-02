@@ -3,7 +3,10 @@ package com.togglecorp.paiso.auth
 import android.content.Context
 import android.preference.PreferenceManager
 import com.togglecorp.paiso.api.promise
+import com.togglecorp.paiso.database.DatabaseContext
 import com.togglecorp.paiso.promise.Promise
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.async
 
 object Auth {
     fun getToken(context: Context) : String? =
@@ -40,6 +43,18 @@ object Auth {
     ) : Promise<Unit?> {
         return AuthApi.register(Registration(first_name, last_name, username, password)).promise()
                 .thenPromise { attemptLogin(context, username, password) }
+    }
+
+    fun  logout(context: Context) {
+        Auth.storeToken(context, null, null)
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("myRemoteId", null)
+                .apply()
+
+        async(CommonPool) {
+            DatabaseContext.get(context).userDao().deleteAll()
+            DatabaseContext.get(context).transactionDao().deleteAll()
+            DatabaseContext.get(context).contactDao().deleteAll()
+        }
     }
 }
 

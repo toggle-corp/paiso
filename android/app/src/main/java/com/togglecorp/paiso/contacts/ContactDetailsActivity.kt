@@ -1,15 +1,18 @@
 package com.togglecorp.paiso.contacts
 
 import android.arch.lifecycle.LifecycleActivity
-import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import com.togglecorp.paiso.R
-import com.togglecorp.paiso.transaction.PaisoTransaction
-import com.togglecorp.paiso.transaction.TransactionListAdapter
+import com.togglecorp.paiso.transactions.EditTransactionActivity
+import com.togglecorp.paiso.transactions.PaisoTransaction
+import com.togglecorp.paiso.transactions.TransactionListAdapter
 import kotlinx.android.synthetic.main.activity_contact_details.*
 
 class ContactDetailsActivity : LifecycleActivity() {
@@ -32,7 +35,7 @@ class ContactDetailsActivity : LifecycleActivity() {
 
         val viewModel = ViewModelProviders.of(this).get(ContactViewModel::class.java)
         viewModel.getContact(intent.getIntExtra("id", 0)).observe(this, Observer {
-            if (it != null) {
+            if (it != null && !it.deleted) {
                 contact = it
                 title = contact!!.name
 
@@ -45,10 +48,22 @@ class ContactDetailsActivity : LifecycleActivity() {
         })
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.contact_details_menu, menu)
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             android.R.id.home -> {
                 onBackPressed()
+                return true
+            }
+            R.id.edit_contact -> {
+                val intent = Intent(this, EditContactActivity::class.java)
+                intent.putExtra("mode", "edit")
+                intent.putExtra("id", contact!!._id)
+                startActivity(intent)
                 return true
             }
         }
@@ -61,4 +76,10 @@ class ContactDetailsActivity : LifecycleActivity() {
         transactionListAdapter?.notifyDataSetChanged()
     }
 
+    fun addTransaction(view: View) {
+        val intent = Intent(this, EditTransactionActivity::class.java)
+        intent.putExtra("mode", "add")
+        intent.putExtra("contactId", contact!!.remoteId)
+        startActivity(intent)
+    }
 }

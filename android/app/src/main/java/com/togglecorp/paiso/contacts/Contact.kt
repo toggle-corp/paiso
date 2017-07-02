@@ -49,8 +49,14 @@ interface ContactDao {
     @Query("SELECT * FROM contact WHERE remoteId = :arg0 LIMIT 1")
     fun findByRemoteId(remoteId: Int?) : Contact?
 
+    @Query("SELECT * FROM contact WHERE user = :arg0 LIMIT 1")
+    fun findByUserId(userId: Int?) : Contact?
+
     @Query("SELECT * FROM contact WHERE _id = :arg0 LIMIT 1")
     fun  findById(_id: Int?): LiveData<Contact>
+
+    @Query("SELECT * FROM contact WHERE remoteId = :arg0 LIMIT 1")
+    fun  findLiveByRemoteId(_id: Int?): LiveData<Contact>
 
     @Update
     fun update(vararg contacts: Contact)
@@ -69,7 +75,7 @@ interface IContactApi {
     @POST("contact/")
     fun post(@Header("Authorization") header: String, @Body contact: Contact) : Call<Contact>
 
-    @DELETE("contact/{id}")
+    @DELETE("contact/{id}/")
     fun delete(@Header("Authorization") header: String, @Path("id") id: Int) : Call<Void>
 }
 

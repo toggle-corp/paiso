@@ -1,6 +1,7 @@
-package com.togglecorp.paiso.transaction
+package com.togglecorp.paiso.transactions
 
 import android.content.Context
+import android.content.Intent
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +18,7 @@ class TransactionListAdapter(val context: Context, val transactionList: List<Pai
     }
 
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-        holder?.bind(transactionList[position])
+        holder?.bind(context, transactionList[position])
     }
 
     override fun getItemCount(): Int {
@@ -26,10 +27,22 @@ class TransactionListAdapter(val context: Context, val transactionList: List<Pai
 
 
     class ViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView) {
-        fun bind(transaction: PaisoTransaction) {
+        fun bind(context: Context, transaction: PaisoTransaction) {
             itemView.name.text = transaction.title
             itemView.info.text = transaction.editedAt.toString()
-            itemView.amount.text = transaction.amount.toString()
+            itemView.transactionAmount.text = transaction.getSignedAmount(context).toString()
+
+            if (transaction.isMy(context)) {
+                itemView.setOnClickListener {
+                    val intent = Intent(context, EditTransactionActivity::class.java)
+                    intent.putExtra("mode", "edit")
+                    intent.putExtra("id", transaction._id)
+                    intent.putExtra("contactId", transaction.contact)
+                    context.startActivity(intent)
+                }
+            } else {
+                itemView.setOnClickListener(null)
+            }
         }
     }
 

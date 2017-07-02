@@ -19,8 +19,8 @@ object Api {
             .create())!!
 
     val retrofit = Retrofit.Builder()
-//            .baseUrl("http://192.168.100.11:8000/")
-            .baseUrl("http://192.168.100.30:8000/")
+            .baseUrl("http://192.168.100.11:8000/")
+//            .baseUrl("http://192.168.100.30:8000/")
             .addConverterFactory(gson)
             .callbackExecutor(Executors.newSingleThreadExecutor())
             .build()!!

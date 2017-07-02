@@ -4,8 +4,8 @@ import android.arch.persistence.room.*
 import android.content.Context
 import com.togglecorp.paiso.contacts.Contact
 import com.togglecorp.paiso.contacts.ContactDao
-import com.togglecorp.paiso.transaction.PaisoTransaction
-import com.togglecorp.paiso.transaction.TransactionDao
+import com.togglecorp.paiso.transactions.PaisoTransaction
+import com.togglecorp.paiso.transactions.TransactionDao
 import com.togglecorp.paiso.users.User
 import com.togglecorp.paiso.users.UserDao
 import java.util.*

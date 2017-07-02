@@ -1,17 +1,14 @@
 package com.togglecorp.paiso
 
-import android.accounts.AccountManager
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
-import com.togglecorp.paiso.auth.ACCOUNT_TYPE
-import com.togglecorp.paiso.auth.AUTH_TOKEN_TYPE
 import com.togglecorp.paiso.auth.Auth
 import com.togglecorp.paiso.auth.LoginActivity
 import com.togglecorp.paiso.contacts.ContactListFragment
 import com.togglecorp.paiso.containers.DashboardFragment
-import com.togglecorp.paiso.containers.NotificationListFragment
+import com.togglecorp.paiso.notifications.NotificationListFragment
 import com.togglecorp.paiso.containers.SettingsFragment
 import com.togglecorp.paiso.database.SyncManager
 import kotlinx.android.synthetic.main.activity_main.*

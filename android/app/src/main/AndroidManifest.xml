@@ -25,6 +25,7 @@
 
         <activity android:name=".contacts.ContactDetailsActivity" />
         <activity android:name=".contacts.EditContactActivity" />
+        <activity android:name=".transactions.EditTransactionActivity" />
 
         <activity android:name=".users.SearchUserActivity"
             android:launchMode="singleTop">

@@ -3,13 +3,15 @@ package com.togglecorp.paiso.database
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ProcessLifecycleOwner
 import android.content.Context
+import android.preference.PreferenceManager
+import android.util.Log
 import com.togglecorp.paiso.api.promise
 import com.togglecorp.paiso.auth.Auth
 import com.togglecorp.paiso.contacts.Contact
 import com.togglecorp.paiso.contacts.ContactApi
 import com.togglecorp.paiso.promise.Promise
-import com.togglecorp.paiso.transaction.PaisoTransaction
-import com.togglecorp.paiso.transaction.TransactionApi
+import com.togglecorp.paiso.transactions.PaisoTransaction
+import com.togglecorp.paiso.transactions.TransactionApi
 import com.togglecorp.paiso.users.User
 import com.togglecorp.paiso.users.UserApi
 
@@ -49,6 +51,9 @@ object SyncManager {
                         DatabaseContext.get(context).userDao().apply {
                             delete(user.username)
                             insert(user)
+
+                            PreferenceManager.getDefaultSharedPreferences(context).edit()
+                                    .putInt("myRemoteId", user.remoteId!!).apply()
                         }
                     }
 
@@ -75,7 +80,15 @@ object SyncManager {
             }
             else if (it.deleted) {
                 promises.add(ContactApi.delete(Auth.getHeader(context), it.remoteId!!)
-                        .promise().then { /* TODO delete that*/that.saveAsSynchronized(context); Contact() })
+                        .promise()
+                        .then {
+                            that.saveAsSynchronized(context);
+
+                            DatabaseContext.get(context).transactionDao().deleteFor(that.remoteId, that.user)
+                            /* TODO delete that*/
+
+                            Contact()
+                        })
             }
             else {
                 promises.add(

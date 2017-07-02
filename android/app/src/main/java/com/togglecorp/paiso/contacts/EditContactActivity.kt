@@ -5,6 +5,7 @@ import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Intent
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View.GONE
@@ -13,7 +14,8 @@ import com.togglecorp.paiso.R
 import com.togglecorp.paiso.api.promise
 import com.togglecorp.paiso.auth.Auth
 import com.togglecorp.paiso.database.DatabaseContext
-import com.togglecorp.paiso.transaction.PaisoTransaction
+import com.togglecorp.paiso.misc.Confirmation
+import com.togglecorp.paiso.transactions.PaisoTransaction
 import com.togglecorp.paiso.users.SEARCH_USER
 import com.togglecorp.paiso.users.SearchUserActivity
 import com.togglecorp.paiso.users.UserApi
@@ -22,9 +24,14 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 
+
 class ContactViewModel(application: Application?) : AndroidViewModel(application) {
     fun getContact(id: Int) : LiveData<Contact> {
         return DatabaseContext.get(getApplication()).contactDao().findById(id)
+    }
+
+    fun getContactByRemoteId(id: Int) : LiveData<Contact> {
+        return DatabaseContext.get(getApplication()).contactDao().findLiveByRemoteId(id)
     }
 
     fun getTransactionList(contact: Contact) : LiveData<List<PaisoTransaction>> {
@@ -34,6 +41,7 @@ class ContactViewModel(application: Application?) : AndroidViewModel(application
 
 
 }
+
 
 class EditContactActivity : LifecycleActivity() {
 
@@ -74,7 +82,7 @@ class EditContactActivity : LifecycleActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.edit_contact, menu)
+        menuInflater.inflate(R.menu.done_delete_menu, menu)
         menu?.findItem(R.id.delete)?.isVisible = mode == "edit"
         return true
     }
@@ -127,6 +135,10 @@ class EditContactActivity : LifecycleActivity() {
     }
 
     private fun save() {
+        if (TextUtils.isEmpty(contactName.text)) {
+            return
+        }
+
         async(UI) {
             contact.name = contactName.text.toString()
             contact.user = contact.user
@@ -149,14 +161,19 @@ class EditContactActivity : LifecycleActivity() {
             return
         }
 
-        async(UI) {
-            contact.deleted = true
-            async(CommonPool) {
-                DatabaseContext.get(this@EditContactActivity).contactDao().update(contact)
-            }.await()
+        Confirmation.show(this, "Are you sure you want to delete this contact?")
+                .then {
+                    async(UI) {
+                        contact.deleted = true
+                        contact.sync = false
 
-            finish()
-        }
+                        async(CommonPool) {
+                            DatabaseContext.get(this@EditContactActivity).contactDao().update(contact)
+                        }.await()
+
+                        finish()
+                    }
+                }
     }
 }
 

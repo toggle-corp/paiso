@@ -17,7 +17,7 @@ class SettingsFragment : android.support.v4.app.Fragment() {
     }
 
     private fun logout() {
-        Auth.storeToken(context, null, null)
+        Auth.logout(context)
         startActivity(Intent(context, LoginActivity::class.java))
         activity.finish()
     }

@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, F
 
 from rest_framework import viewsets
 from rest_framework import permissions
@@ -19,8 +19,13 @@ class TransactionViewSet(viewsets.ModelViewSet):
     permission_classes = (TransactionPermission, permissions.IsAuthenticated, )
 
     def get_queryset(self):
-        return Transaction.objects.filter(Q(user=self.request.user) |
-                                          Q(contact__user=self.request.user))
+        return Transaction.objects.filter(
+            Q(user=self.request.user) |
+            Q(
+                contact__user=self.request.user,
+                contact__user__contact__user=F('user')
+            )
+        )
 
 
 # EOF
