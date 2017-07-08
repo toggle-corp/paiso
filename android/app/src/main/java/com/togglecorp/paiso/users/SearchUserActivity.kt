@@ -11,6 +11,7 @@ import android.support.v7.widget.SearchView
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import com.togglecorp.paiso.R
 import com.togglecorp.paiso.api.promise
 import com.togglecorp.paiso.auth.Auth
@@ -30,12 +31,16 @@ class SearchUserActivity : AppCompatActivity() {
 
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        title = "Search user"
 
         userListAdapter = UserListAdapter(this, userList, {
             select(it)
         })
         userListView.layoutManager = LinearLayoutManager(this)
         userListView.adapter = userListAdapter
+
+        searchMessage.visibility = View.VISIBLE
+        userListView.visibility = View.GONE
 
         handleIntent(intent)
     }
@@ -70,6 +75,9 @@ class SearchUserActivity : AppCompatActivity() {
             return
         }
 
+        searchMessage.visibility = View.GONE
+        userListView.visibility = View.VISIBLE
+
         UserApi.search(Auth.getHeader(this), query).promise()
                 .then {
                     userList.clear()
@@ -93,9 +101,6 @@ class SearchUserActivity : AppCompatActivity() {
 
         searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName))
         searchView.setIconifiedByDefault(false)
-        searchView.isIconified = false
-        searchView.clearFocus()
-        searchView.requestFocus()
         return true
     }
 

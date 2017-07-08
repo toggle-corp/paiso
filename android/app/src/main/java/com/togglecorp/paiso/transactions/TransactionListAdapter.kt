@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.togglecorp.paiso.R
+import com.togglecorp.paiso.misc.DateFormatter
 import kotlinx.android.synthetic.main.layout_contact_transaction.view.*
 
 class TransactionListAdapter(val context: Context, val transactionList: List<PaisoTransaction>)
@@ -29,7 +30,7 @@ class TransactionListAdapter(val context: Context, val transactionList: List<Pai
     class ViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView) {
         fun bind(context: Context, transaction: PaisoTransaction) {
             itemView.name.text = transaction.title
-            itemView.info.text = transaction.editedAt.toString()
+            itemView.info.text = DateFormatter.getReadableTime(context, transaction.editedAt)
             itemView.transactionAmount.text = transaction.getSignedAmount(context).toString()
 
             if (transaction.isMy(context)) {

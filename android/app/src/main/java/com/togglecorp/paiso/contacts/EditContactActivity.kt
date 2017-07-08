@@ -5,6 +5,7 @@ import android.arch.lifecycle.LifecycleActivity
 import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
@@ -22,6 +23,7 @@ import kotlinx.android.synthetic.main.activity_edit_contact.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import java.util.*
 
 
 class EditContactActivity : LifecycleActivity() {
@@ -35,6 +37,13 @@ class EditContactActivity : LifecycleActivity() {
 
         setActionBar(toolbar)
         actionBar?.setDisplayHomeAsUpEnabled(true)
+
+        if (PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .getInt("myRemoteId", 0) == 0) {
+            finish()
+            return
+        }
 
         linkButton.setOnClickListener {
             startActivityForResult(Intent(this, SearchUserActivity::class.java), SEARCH_USER)
@@ -59,7 +68,7 @@ class EditContactActivity : LifecycleActivity() {
 
             title = "Edit Contact"
         } else {
-            title = "Add contact"
+            title = "Add Contact"
         }
     }
 
@@ -122,8 +131,13 @@ class EditContactActivity : LifecycleActivity() {
         }
 
         async(UI) {
+            if (contact._id == null) {
+                contact.createdAt = Date()
+            }
+
             contact.name = contactName.text.toString()
             contact.user = contact.user
+            contact.editedAt = Date()
             contact.sync = false
 
             async(CommonPool) {

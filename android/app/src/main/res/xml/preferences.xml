@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="User">
+
+        <Preference
+            android:title="My Name"
+            android:summary="Username"
+            android:key="pref_username"/>
+
+        <Preference
+            android:title="Logout"
+            android:key="pref_logout"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="About">
+
+        <Preference
+            android:title="@string/app_name"
+            android:summary="Version 1.1"/>
+
+        <Preference
+            android:title="Legal information"
+            android:summary="Copyright 2017 Togglecorp"/>
+
+    </PreferenceCategory>
+</PreferenceScreen>

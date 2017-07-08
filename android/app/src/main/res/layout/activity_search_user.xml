@@ -9,7 +9,18 @@
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
         android:background="?colorPrimary"
+        android:theme="@style/ToolbarTheme"
+        android:popupTheme="@style/AppTheme"
         android:elevation="4dp"/>
+
+    <TextView
+        android:id="@+id/searchMessage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textAllCaps="true"
+        android:textSize="12sp"
+        android:text="Search a user to link with this contact"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/userListView"

@@ -31,7 +31,7 @@ class DashboardListAdapter(val context: Context, val items: List<DashboardItem>)
     }
 
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-        holder?.bind(context, items[0])
+        holder?.bind(context, items[position])
     }
 
     class ViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView) {

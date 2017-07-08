@@ -26,11 +26,8 @@ class ContactListAdapter(val context: Context, val contacts: List<Contact>)
         fun bind(context: Context, contact: Contact) {
             itemView.name.text = contact.name
             itemView.setOnClickListener {
-                /*val intent = Intent(context, EditContactActivity::class.java)
-                intent.putExtra("mode", "edit")
-                intent.putExtra("id", contact._id)
-                context.startActivity(intent)*/
                 val intent = Intent(context, ContactDetailsActivity::class.java)
+                intent.putExtra("mode", "edit")
                 intent.putExtra("id", contact._id)
                 context.startActivity(intent)
             }

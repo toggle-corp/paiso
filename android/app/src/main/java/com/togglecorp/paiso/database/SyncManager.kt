@@ -9,6 +9,8 @@ import com.togglecorp.paiso.api.promise
 import com.togglecorp.paiso.auth.Auth
 import com.togglecorp.paiso.contacts.Contact
 import com.togglecorp.paiso.contacts.ContactApi
+import com.togglecorp.paiso.expenses.Expense
+import com.togglecorp.paiso.expenses.ExpenseApi
 import com.togglecorp.paiso.promise.Promise
 import com.togglecorp.paiso.transactions.PaisoTransaction
 import com.togglecorp.paiso.transactions.TransactionApi
@@ -30,6 +32,12 @@ object SyncManager {
                     pushTransactions(context, it)
                             .catch { it?.printStackTrace(); null }
                 })
+
+        DatabaseContext.get(cxt).expenseDao().getModified()
+                .observe(ProcessLifecycleOwner.get(), Observer {
+                    pushExpenses(context, it)
+                            .catch { it?.printStackTrace(); null }
+                })
     }
 
     fun fetch(context: Context) : Promise<Unit?> {
@@ -37,6 +45,7 @@ object SyncManager {
         return fetchSelf(cxt)
                 .thenPromise { fetchContacts(cxt) }
                 .thenPromise { fetchTransactions(cxt) }
+                .thenPromise { fetchExpenses(cxt) }
                 .catch {
                     it?.printStackTrace()
                     null
@@ -168,6 +177,54 @@ object SyncManager {
                     }
 
                     transactions
+                }
+    }
+
+    fun pushExpenses(context: Context, expenseList: List<Expense>?) : Promise<List<Expense?>?> {
+        val promises = mutableListOf<Promise<Expense?>>()
+
+        expenseList?.forEach {
+            val that = it
+            if (it.remoteId == null) {
+                promises.add(
+                        ExpenseApi.post(Auth.getHeader(context), it)
+                                .promise()
+                                .then {
+                                    that.remoteId = it?.body()?.remoteId
+                                    that.saveAsSynchronized(context);
+                                    it?.body()
+                                }
+                )
+            } else {
+                promises.add(
+                        ExpenseApi.put(Auth.getHeader(context), it.remoteId!!, it)
+                                .promise().then { that.saveAsSynchronized(context); it?.body() }
+                )
+            }
+        }
+
+        return Promise.all(promises).then { it }
+    }
+
+    fun fetchExpenses(context: Context) : Promise<List<Expense>?> {
+        return ExpenseApi.get(Auth.getHeader(context)).promise()
+                .then {
+                    val expenses = it?.body()
+                    val expenseDao = DatabaseContext.get(context).expenseDao()
+
+                    expenses?.forEach {
+                        it.sync = true
+
+                        val existing = expenseDao.findByRemoteId(it.remoteId)
+                        if (existing == null) {
+                            expenseDao.insert(it)
+                        } else {
+                            it._id = existing._id
+                            expenseDao.update(it)
+                        }
+                    }
+
+                    expenses
                 }
     }
 }

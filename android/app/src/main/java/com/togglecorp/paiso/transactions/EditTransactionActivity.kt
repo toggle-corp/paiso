@@ -32,6 +32,13 @@ class EditTransactionActivity : LifecycleActivity() {
         setActionBar(toolbar)
         actionBar?.setDisplayHomeAsUpEnabled(true)
 
+        if (PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .getInt("myRemoteId", 0) == 0) {
+            finish()
+            return
+        }
+
         if (intent.getStringExtra("mode") == "edit") {
             mode = "edit"
         }
@@ -63,9 +70,9 @@ class EditTransactionActivity : LifecycleActivity() {
                         }
                     })
 
-            title = "Edit Contact"
+            title = "Edit Transaction"
         } else {
-            title = "Add contact"
+            title = "Add Transaction"
         }
     }
 

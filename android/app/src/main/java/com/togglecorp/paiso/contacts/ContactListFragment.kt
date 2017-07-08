@@ -3,7 +3,9 @@ package com.togglecorp.paiso.contacts
 import android.arch.lifecycle.LifecycleFragment
 import android.arch.lifecycle.Observer
 import android.content.Intent
+import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
+import com.togglecorp.paiso.R
 import com.togglecorp.paiso.database.DatabaseContext
 import kotlinx.android.synthetic.main.fragment_contact_list.view.*
 
@@ -15,12 +17,13 @@ class ContactListFragment : LifecycleFragment() {
 
     override fun onCreateView(inflater: android.view.LayoutInflater?, container: android.view.ViewGroup?,
                               savedInstanceState: android.os.Bundle?): android.view.View? {
-        val view = inflater!!.inflate(com.togglecorp.paiso.R.layout.fragment_contact_list, container, false)
+        val view = inflater!!.inflate(R.layout.fragment_contact_list, container, false)
 
 
         contactListAdapter = ContactListAdapter(context, contactList)
         view.contactListView.layoutManager = LinearLayoutManager(context)
         view.contactListView.adapter = contactListAdapter
+        view.contactListView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
         view.addContact.setOnClickListener {
             val intent = Intent(context, EditContactActivity::class.java)

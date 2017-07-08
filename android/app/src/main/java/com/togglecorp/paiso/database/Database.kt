@@ -4,6 +4,8 @@ import android.arch.persistence.room.*
 import android.content.Context
 import com.togglecorp.paiso.contacts.Contact
 import com.togglecorp.paiso.contacts.ContactDao
+import com.togglecorp.paiso.expenses.Expense
+import com.togglecorp.paiso.expenses.ExpenseDao
 import com.togglecorp.paiso.transactions.PaisoTransaction
 import com.togglecorp.paiso.transactions.TransactionDao
 import com.togglecorp.paiso.users.User
@@ -23,16 +25,17 @@ class Converters {
     }
 }
 
-@Database(entities = arrayOf(Contact::class, User::class, PaisoTransaction::class), version = 1)
+@Database(entities = arrayOf(Contact::class, User::class, PaisoTransaction::class, Expense::class), version = 1)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun contactDao(): ContactDao
     abstract fun userDao(): UserDao
     abstract fun transactionDao(): TransactionDao
+    abstract fun expenseDao(): ExpenseDao
     abstract fun contactAmountDao(): ContactAmountDao
 }
 
-class DatabaseContext private constructor(var context: Context){
+class DatabaseContext private constructor(context: Context){
     companion object {
         private var databaseContext: DatabaseContext? = null
 
