@@ -4,14 +4,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        
-        <item name="preferenceTheme">@style/MyPreferenceThemeOverlay</item>
     </style>
 
     <style name="ToolbarTheme" parent="AppTheme">
-    </style>
-
-    <style name="MyPreferenceThemeOverlay" parent="@style/PreferenceThemeOverlay">
-        <item name="android:textAppearanceLarge">@style/TextAppearance.AppCompat.Subhead</item>
     </style>
 </resources>

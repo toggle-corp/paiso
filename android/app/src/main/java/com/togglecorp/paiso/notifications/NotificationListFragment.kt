@@ -1,8 +1,9 @@
 package com.togglecorp.paiso.notifications
 
-import android.app.Application
-import android.arch.lifecycle.*
+import android.arch.lifecycle.LifecycleFragment
+import android.arch.lifecycle.Observer
 import android.preference.PreferenceManager
+import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import com.togglecorp.paiso.contacts.Contact
 import com.togglecorp.paiso.database.DatabaseContext
@@ -26,6 +27,7 @@ class NotificationListFragment : LifecycleFragment() {
         notificationListAdapter = NotificationListAdapter(context, notificationList, contactList)
         view.notificationListView.layoutManager = LinearLayoutManager(context)
         view.notificationListView.adapter = notificationListAdapter
+        view.notificationListView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
         DatabaseContext.get(context).transactionDao().getNotifiable(
                 PreferenceManager.getDefaultSharedPreferences(context).getInt(
@@ -41,6 +43,7 @@ class NotificationListFragment : LifecycleFragment() {
             notifications?.forEach {
                 notificationList.add(it)
             }
+            notificationList.sortByDescending { it.editedAt }
 
             contactList.clear()
             async(CommonPool) {
@@ -49,6 +52,7 @@ class NotificationListFragment : LifecycleFragment() {
                             .findByUserId(it.contact))
                 }
             }.await()
+
             notificationListAdapter?.notifyDataSetChanged()
         }
     }

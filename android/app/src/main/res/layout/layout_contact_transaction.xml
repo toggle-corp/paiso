@@ -12,12 +12,6 @@
     android:gravity="center"
     android:background="?selectableItemBackground">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:padding="8dp"
-        android:src="@drawable/ic_account_circle"/>
-
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"

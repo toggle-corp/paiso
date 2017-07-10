@@ -2,7 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center"
+    android:background="?selectableItemBackground">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -14,12 +22,15 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:textColor="@color/colorText"
             android:text="Bought a car"/>
 
         <TextView
             android:id="@+id/date"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:textSize="11sp"
+            android:textColor="@color/colorTextLight"
             android:text="Yesterday, 11:09 AM"/>
 
     </LinearLayout>
@@ -28,6 +39,9 @@
         android:id="@+id/amount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:textSize="18sp"
+        android:fontFamily="monospace"
         android:text="700000"/>
 
 </LinearLayout>

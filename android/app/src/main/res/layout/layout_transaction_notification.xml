@@ -5,29 +5,33 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    android:background="?selectableItemBackground">
+    android:background="@color/colorPrimary">
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp">
 
         <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:padding="8dp"
             android:src="@drawable/ic_account_circle"/>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:padding="8dp"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/transactionTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sandwich"/>
+                android:textColor="@color/colorText"
+                android:text="San witch"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -38,12 +42,18 @@
                     android:id="@+id/actionName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="4dp"
+                    android:textSize="11sp"
+                    android:textColor="@color/colorTextLight"
                     android:text="Added by"/>
 
                 <TextView
                     android:id="@+id/userName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorTextLight"
                     android:text="Aditya Khatri"/>
             </LinearLayout>
 
@@ -51,6 +61,9 @@
                 android:id="@+id/notificationDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textSize="11sp"
+                android:textColor="@color/colorTextLight"
                 android:text="06/22/2017"/>
 
         </LinearLayout>
@@ -59,6 +72,9 @@
             android:id="@+id/transactionAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textSize="18sp"
+            android:fontFamily="monospace"
             android:text="5000"/>
 
     </LinearLayout>
@@ -74,6 +90,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackground"
+            android:textColor="@color/colorDanger"
             android:text="Reject"/>
 
         <Button
@@ -81,6 +98,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackground"
+            android:textColor="?colorAccent"
             android:text="Accept"/>
 
     </LinearLayout>

@@ -11,11 +11,13 @@ import android.view.MenuItem
 import android.view.View
 import com.togglecorp.paiso.R
 import com.togglecorp.paiso.database.DatabaseContext
+import com.togglecorp.paiso.misc.AmountHeader
 import com.togglecorp.paiso.transactions.EditTransactionActivity
 import com.togglecorp.paiso.transactions.PaisoTransaction
 import com.togglecorp.paiso.transactions.TransactionListAdapter
 import kotlinx.android.synthetic.main.activity_contact_details.*
 import kotlinx.android.synthetic.main.layout_amount_header.*
+import kotlinx.android.synthetic.main.layout_amount_header.view.*
 
 class ContactDetailsActivity : LifecycleActivity() {
 
@@ -34,6 +36,8 @@ class ContactDetailsActivity : LifecycleActivity() {
         transactionListAdapter = TransactionListAdapter(this, transactionList)
         transactionListView.layoutManager = LinearLayoutManager(this)
         transactionListView.adapter = transactionListAdapter
+
+        AmountHeader(this, amountHeader, null, null, null)
 
         headerTotalAmount.text = "0.0"
 
@@ -79,6 +83,7 @@ class ContactDetailsActivity : LifecycleActivity() {
     fun refresh(transactions: List<PaisoTransaction>) {
         transactionList.clear()
         transactions.forEach { transactionList.add(it) }
+        transactionList.sortByDescending { it.editedAt }
         transactionListAdapter?.notifyDataSetChanged()
 
         val total = transactionList.fold<PaisoTransaction, Float>(0.0f) {

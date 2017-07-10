@@ -101,6 +101,7 @@ class SearchUserActivity : AppCompatActivity() {
 
         searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName))
         searchView.setIconifiedByDefault(false)
+        searchView.requestFocus()
         return true
     }
 

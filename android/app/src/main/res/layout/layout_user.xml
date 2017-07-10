@@ -25,13 +25,15 @@
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textColor="@color/colorText"
             android:text="Bibek Dahal"/>
 
         <TextView
             android:id="@+id/username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textColor="@color/colorTextLight"
             android:text="bibek"/>
     </LinearLayout>
 

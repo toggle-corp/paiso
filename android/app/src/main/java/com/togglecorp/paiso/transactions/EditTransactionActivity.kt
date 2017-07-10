@@ -51,6 +51,7 @@ class EditTransactionActivity : LifecycleActivity() {
                                 finish()
                             }
                             contact = it
+                            contactName.text = it?.name ?: "Them"
                         })
 
         if (mode == "edit") {

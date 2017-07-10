@@ -2,9 +2,7 @@ package com.togglecorp.paiso.settings
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.preference.PreferenceFragmentCompat
-import android.support.v7.preference.PreferenceManager
-import android.util.Log
+import android.preference.PreferenceFragment
 import com.togglecorp.paiso.R
 import com.togglecorp.paiso.auth.Auth
 import com.togglecorp.paiso.auth.LoginActivity
@@ -14,8 +12,10 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 
 
-class SettingsFragment : PreferenceFragmentCompat() {
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+class SettingsFragment : PreferenceFragment() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         addPreferencesFromResource(R.xml.preferences)
 
         findPreference("pref_logout").setOnPreferenceClickListener {

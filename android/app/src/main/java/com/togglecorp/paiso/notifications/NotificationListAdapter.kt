@@ -10,6 +10,7 @@ import com.togglecorp.paiso.R
 import com.togglecorp.paiso.contacts.Contact
 import com.togglecorp.paiso.database.DatabaseContext
 import com.togglecorp.paiso.misc.Confirmation
+import com.togglecorp.paiso.misc.DateFormatter
 import com.togglecorp.paiso.transactions.PaisoTransaction
 import kotlinx.android.synthetic.main.layout_transaction_notification.view.*
 import kotlinx.coroutines.experimental.CommonPool
@@ -46,7 +47,7 @@ class NotificationListAdapter(val context: Context, val transactions: List<Paiso
                 itemView.actionName.text = "Deleted by"
             }
 
-            itemView.notificationDate.text = transaction.editedAt.toString()
+            itemView.notificationDate.text = DateFormatter.getReadableTime(context, transaction.editedAt)
 
             if (transaction.acknowledgedAt == null) {
                 itemView.acceptAction.text = "Accept"

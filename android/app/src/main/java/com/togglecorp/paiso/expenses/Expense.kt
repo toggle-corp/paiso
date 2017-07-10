@@ -52,7 +52,10 @@ interface ExpenseDao {
     fun getAll() : LiveData<List<Expense>>
 
     @Query("SELECT * FROM expense WHERE deleted = 0")
-    fun getAlive() : LiveData<List<Expense>>
+    fun getExisting() : LiveData<List<Expense>>
+
+    @Query("SELECT * FROM expense WHERE deleted = 0 AND editedAt >= :arg0 AND editedAt <= :arg1")
+    fun getExisting(startDate: Date, endDate: Date) : LiveData<List<Expense>>
 
     @Query("SELECT * FROM expense WHERE sync = 0")
     fun getModified() : LiveData<List<Expense>>
