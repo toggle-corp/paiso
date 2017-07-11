@@ -42,7 +42,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     Q(last_name__icontains=term) |
                     Q(username__icontains=term)
                 )
-        return queryset
+        return queryset.distinct()
 
 
 class ContactPermission(permissions.BasePermission):
@@ -56,7 +56,7 @@ class ContactViewSet(viewsets.ModelViewSet):
     permission_classes = (ContactPermission, permissions.IsAuthenticated, )
 
     def get_queryset(self):
-        return Contact.objects.filter(belongs_to=self.request.user)
+        return Contact.objects.filter(belongs_to=self.request.user).distinct()
 
 
 # EOF

@@ -8,6 +8,7 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.togglecorp.paiso.R
@@ -64,7 +65,8 @@ class LoginActivity : AccountAuthenticatorActivity() {
         Auth.attemptLogin(this, username.text.toString(), password.text.toString())
                 .catch {
                     runOnUiThread {
-                        Toast.makeText(this, it?.localizedMessage, Toast.LENGTH_SHORT).show()
+                        Log.d("Login Activity", it?.localizedMessage)
+                        Toast.makeText(this, "Failed to log in. Make sure you are connected to internet.", Toast.LENGTH_SHORT).show()
                     }
                 }
                 .then {

@@ -26,7 +26,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
                 contact__user=self.request.user,
                 contact__user__contact__user=F('user')
             )
-        )
+        ).distinct()
 
     def perform_create(self, serializer):
         transaction = serializer.save()

@@ -17,14 +17,17 @@ def generate_notification_for(transaction, me):
         user__contact__user=transaction.user
     )
 
-    url = 'https://fcm.googleapis.com/fcm/send'
+    url = 'http://fcm.googleapis.com/fcm/send'
 
     headers = {
         'Content-Type': 'application/json',
         'Authorization': 'key=' + SERVER_KEY,
     }
 
-    contact = Contact.objects.get(user=transaction.user)
+    contact = Contact.objects.get(
+        user=transaction.user,
+        belongs_to=transaction.contact.user
+    )
 
     action = 'added'
     if transaction.deleted:

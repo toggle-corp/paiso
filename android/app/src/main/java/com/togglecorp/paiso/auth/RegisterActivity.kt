@@ -4,6 +4,7 @@ import android.app.ProgressDialog
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.togglecorp.paiso.R
@@ -67,7 +68,8 @@ class RegisterActivity : AppCompatActivity() {
                 password.text.toString()
         )
                 .catch {
-                    Toast.makeText(this, it?.localizedMessage, Toast.LENGTH_SHORT).show()
+                    Log.d("Register Activity", it?.localizedMessage)
+                    Toast.makeText(this, "Failed to register. Make sure you are connected to internet.", Toast.LENGTH_SHORT).show()
                 }
                 .then {
                     progressDialog.dismiss()

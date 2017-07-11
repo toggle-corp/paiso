@@ -11,7 +11,7 @@ android {
         applicationId "com.togglecorp.paiso"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 1
+        versionCode 5
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -45,7 +45,9 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
 
     implementation 'de.hdodenhof:circleimageview:2.1.0'
+
     implementation 'com.google.firebase:firebase-messaging:11.0.1'
+    implementation 'com.firebase:firebase-jobdispatcher:0.7.0'
 }
 
 kotlin {

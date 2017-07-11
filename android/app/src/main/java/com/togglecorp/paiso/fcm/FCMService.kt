@@ -30,9 +30,10 @@ class FCMService : FirebaseMessagingService() {
         action = action[0].toUpperCase() + action.substring(1)
 
         val builder = NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle("$title ($amount)")
                 .setContentText("$action by $user")
+                .setAutoCancel(true)
 
         val resultIntent = Intent(this, MainActivity::class.java)
         val resultPendingIntent = PendingIntent.getActivity(

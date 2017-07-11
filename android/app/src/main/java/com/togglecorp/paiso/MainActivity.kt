@@ -27,6 +27,7 @@ import com.togglecorp.paiso.dashboard.DashboardFragment
 import com.togglecorp.paiso.database.SyncManager
 import com.togglecorp.paiso.expenses.ExpenseListFragment
 import com.togglecorp.paiso.fcm.sendRegistrationToServer
+import com.togglecorp.paiso.misc.AutoSyncService
 import com.togglecorp.paiso.notifications.NotificationListFragment
 import com.togglecorp.paiso.settings.SettingsActivity
 import com.togglecorp.paiso.settings.SettingsFragment
@@ -87,6 +88,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         checkAuthenticated()
+
+        AutoSyncService.schedule(this)
     }
 
     private fun refresh() {
