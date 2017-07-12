@@ -19,24 +19,31 @@ import com.togglecorp.paiso.users.UserApi
 
 
 object SyncManager {
+    val SYNC_LOCK = Unit
     fun startPushing(context: Context) {
         val cxt = context.applicationContext
         DatabaseContext.get(cxt).contactDao().getModified()
                 .observe(ProcessLifecycleOwner.get(), Observer {
-                    pushContacts(context, it)
-                            .catch { it?.printStackTrace(); null }
+                    synchronized(SYNC_LOCK) {
+                        pushContacts(context, it)
+                                .catch { it?.printStackTrace(); null }
+                    }
                 })
 
         DatabaseContext.get(cxt).transactionDao().getModified()
                 .observe(ProcessLifecycleOwner.get(), Observer {
-                    pushTransactions(context, it)
-                            .catch { it?.printStackTrace(); null }
+                    synchronized(SYNC_LOCK) {
+                        pushTransactions(context, it)
+                                .catch { it?.printStackTrace(); null }
+                    }
                 })
 
         DatabaseContext.get(cxt).expenseDao().getModified()
                 .observe(ProcessLifecycleOwner.get(), Observer {
-                    pushExpenses(context, it)
-                            .catch { it?.printStackTrace(); null }
+                    synchronized(SYNC_LOCK) {
+                        pushExpenses(context, it)
+                                .catch { it?.printStackTrace(); null }
+                    }
                 })
     }
 
@@ -81,8 +88,10 @@ object SyncManager {
                         ContactApi.post(Auth.getHeader(context), it)
                                 .promise()
                                 .then {
-                                    that.remoteId = it?.body()?.remoteId
-                                    that.saveAsSynchronized(context)
+                                    if (it?.body() != null) {
+                                        that.remoteId = it.body().remoteId
+                                        that.saveAsSynchronized(context)
+                                    }
                                     it?.body()
                                 }
                 )
@@ -142,8 +151,10 @@ object SyncManager {
                         TransactionApi.post(Auth.getHeader(context), it)
                                 .promise()
                                 .then {
-                                    that.remoteId = it?.body()?.remoteId
-                                    that.saveAsSynchronized(context);
+                                    if (it?.body() != null) {
+                                        that.remoteId = it.body()?.remoteId
+                                        that.saveAsSynchronized(context);
+                                    }
                                     it?.body()
                                 }
                 )

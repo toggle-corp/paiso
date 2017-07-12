@@ -49,7 +49,7 @@ class NotificationListFragment : LifecycleFragment() {
             async(CommonPool) {
                 notificationList.forEach {
                     contactList.add(DatabaseContext.get(getContext()).contactDao()
-                            .findByUserId(it.contact))
+                            .findByUserId(it.user))
                 }
             }.await()
 
