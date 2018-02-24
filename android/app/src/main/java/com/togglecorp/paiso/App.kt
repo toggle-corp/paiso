@@ -8,7 +8,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        SyncManager.startPushing(this)
+        SyncManager.sync(this)
     }
 
 }

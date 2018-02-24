@@ -54,6 +54,7 @@ object Auth {
             DatabaseContext.get(context).userDao().deleteAll()
             DatabaseContext.get(context).transactionDao().deleteAll()
             DatabaseContext.get(context).contactDao().deleteAll()
+            DatabaseContext.get(context).expenseDao().deleteAll()
         }
     }
 }

@@ -12,13 +12,16 @@ import retrofit2.http.*
 import java.util.*
 
 
-@Entity(indices = arrayOf(Index(value = "remoteId", unique = true)))
+@Entity(indices = arrayOf(Index(value = "remoteId", unique = true), Index(value = "uuid", unique = true)))
 data class Expense (
         @PrimaryKey(autoGenerate = true)
         var _id: Int? = null,
 
         @SerializedName("id")
         var remoteId: Int? = null,
+
+        var uuid: String = UUID.randomUUID().toString(),
+        var version: Int = 0,
 
         var user: Int? = null,
         var title: String = "",
@@ -60,11 +63,17 @@ interface ExpenseDao {
     @Query("SELECT * FROM expense WHERE sync = 0")
     fun getModified() : LiveData<List<Expense>>
 
+    @Query("SELECT * FROM expense WHERE sync = 0")
+    fun getModifiedList() : List<Expense>
+
     @Query("SELECT * FROM expense WHERE _id = :arg0 LIMIT 1")
     fun findById(id: Int) : LiveData<Expense>
 
     @Query("SELECT * FROM expense WHERE remoteId = :arg0 LIMIT 1")
     fun findByRemoteId(remoteId: Int?) : Expense?
+
+    @Query("SELECT * FROM expense WHERE uuid = :arg0 LIMIT 1")
+    fun findByUuid(uuid: String?) : Expense?
 }
 
 interface IExpenseApi {

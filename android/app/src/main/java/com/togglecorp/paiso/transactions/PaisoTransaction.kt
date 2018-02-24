@@ -13,13 +13,16 @@ import retrofit2.http.*
 import java.util.*
 
 
-@Entity(tableName = "paiso_transaction", indices = arrayOf(Index(value = "remoteId", unique = true)))
+@Entity(tableName = "paiso_transaction", indices = arrayOf(Index(value = "remoteId", unique = true), Index(value = "uuid", unique = true)))
 data class PaisoTransaction(
         @PrimaryKey(autoGenerate = true)
         var _id: Int? = null,
 
         @SerializedName("id")
         var remoteId: Int? = null,
+
+        var uuid: String = UUID.randomUUID().toString(),
+        var version: Int = 0,
 
         var user: Int? = null,
         var transactionType: String = "to",
@@ -77,11 +80,17 @@ interface TransactionDao {
     @Query("SELECT * FROM `paiso_transaction` WHERE sync = 0")
     fun getModified() : LiveData<List<PaisoTransaction>>
 
+    @Query("SELECT * FROM `paiso_transaction` WHERE sync = 0")
+    fun getModifiedList() : List<PaisoTransaction>
+
     @Query("SELECT * FROM `paiso_transaction` WHERE _id = :arg0 LIMIT 1")
     fun findById(id: Int) : LiveData<PaisoTransaction>
 
     @Query("SELECT * FROM `paiso_transaction` WHERE remoteId = :arg0 LIMIT 1")
     fun findByRemoteId(remoteId: Int?) : PaisoTransaction?
+
+    @Query("SELECT * FROM `paiso_transaction` WHERE uuid = :arg0 LIMIT 1")
+    fun findByUuid(remoteId: String?) : PaisoTransaction?
 
     @Query("SELECT * FROM `paiso_transaction` WHERE ((user = :arg1 AND status = 'approved') OR contact = :arg0) AND deleted = 0")
     fun getFor(contactId: Int?, userId: Int?) : LiveData<List<PaisoTransaction>>

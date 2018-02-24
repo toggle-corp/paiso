@@ -1,10 +1,7 @@
 package com.togglecorp.paiso.database
 
-import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ProcessLifecycleOwner
 import android.content.Context
 import android.preference.PreferenceManager
-import android.util.Log
 import com.togglecorp.paiso.api.promise
 import com.togglecorp.paiso.auth.Auth
 import com.togglecorp.paiso.contacts.Contact
@@ -16,35 +13,61 @@ import com.togglecorp.paiso.transactions.PaisoTransaction
 import com.togglecorp.paiso.transactions.TransactionApi
 import com.togglecorp.paiso.users.User
 import com.togglecorp.paiso.users.UserApi
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.async
+import java.util.concurrent.atomic.AtomicBoolean
 
 
 object SyncManager {
-    val SYNC_LOCK = Unit
-    fun startPushing(context: Context) {
+    private val SYNC_LOCK = AtomicBoolean(false)
+
+    fun sync(context: Context) : Promise<Unit?> {
         val cxt = context.applicationContext
-        DatabaseContext.get(cxt).contactDao().getModified()
-                .observe(ProcessLifecycleOwner.get(), Observer {
-                    synchronized(SYNC_LOCK) {
-                        pushContacts(context, it)
-                                .catch { it?.printStackTrace(); null }
-                    }
-                })
 
-        DatabaseContext.get(cxt).transactionDao().getModified()
-                .observe(ProcessLifecycleOwner.get(), Observer {
-                    synchronized(SYNC_LOCK) {
-                        pushTransactions(context, it)
-                                .catch { it?.printStackTrace(); null }
-                    }
-                })
+        val contactDao = DatabaseContext.get(cxt).contactDao()
+        val transactionDao = DatabaseContext.get(cxt).transactionDao()
+        val expenseDao = DatabaseContext.get(cxt).expenseDao()
 
-        DatabaseContext.get(cxt).expenseDao().getModified()
-                .observe(ProcessLifecycleOwner.get(), Observer {
-                    synchronized(SYNC_LOCK) {
-                        pushExpenses(context, it)
-                                .catch { it?.printStackTrace(); null }
+        val promise = Promise<Unit?>()
+
+        async(CommonPool) {
+            synchronized(SYNC_LOCK) {
+                while (SYNC_LOCK.get()) {
+                    (SYNC_LOCK as java.lang.Object).wait()
+                }
+                SYNC_LOCK.set(true)
+            }
+
+            pushContacts(context, contactDao.getModifiedList())
+                    .then {
+                        pushTransactions(context, transactionDao.getModifiedList())
                     }
-                })
+                    .then {
+                        pushExpenses(context, expenseDao.getModifiedList())
+                    }
+                    .then {
+                        synchronized(SYNC_LOCK) {
+                            SYNC_LOCK.set(false)
+                            (SYNC_LOCK as java.lang.Object).notifyAll()
+                        }
+                    }
+                    .catch {
+                        synchronized(SYNC_LOCK) {
+                            SYNC_LOCK.set(false)
+                            (SYNC_LOCK as java.lang.Object).notifyAll()
+                        }
+                        it?.printStackTrace(); null
+                    }
+                    .then {
+                        fetch(context)
+                        promise.resolve(null)
+                    }
+                    .catch {
+                        promise.resolve(null)
+                    }
+        }
+
+        return promise
     }
 
     fun fetch(context: Context) : Promise<Unit?> {
@@ -59,7 +82,7 @@ object SyncManager {
                 }.then { null }
     }
 
-    fun fetchSelf(context: Context) : Promise<User?> {
+    private fun fetchSelf(context: Context) : Promise<User?> {
         return UserApi.getMe(Auth.getHeader(context)).promise()
                 .then {
                     val user = it?.body()
@@ -78,7 +101,7 @@ object SyncManager {
                 .then { it }
     }
 
-    fun pushContacts(context: Context, contactList: List<Contact>?) : Promise<List<Contact?>?> {
+    private fun pushContacts(context: Context, contactList: List<Contact>?) : Promise<List<Contact?>?> {
         val promises = mutableListOf<Promise<Contact?>>()
 
         contactList?.forEach {
@@ -119,7 +142,7 @@ object SyncManager {
         return Promise.all(promises).then { it }
     }
 
-    fun fetchContacts(context: Context) : Promise<List<Contact>?> {
+    private fun fetchContacts(context: Context) : Promise<List<Contact>?> {
         return ContactApi.get(Auth.getHeader(context)).promise()
                 .then {
                     val contacts = it?.body()
@@ -128,7 +151,7 @@ object SyncManager {
                     contacts?.forEach {
                         it.sync = true
 
-                        val existing = contactDao.findByRemoteId(it.remoteId)
+                        val existing = contactDao.findByUuid(it.uuid)
                         if (existing == null) {
                             contactDao.insert(it)
                         } else {
@@ -141,7 +164,7 @@ object SyncManager {
                 }
     }
 
-    fun pushTransactions(context: Context, transactionList: List<PaisoTransaction>?) : Promise<List<PaisoTransaction?>?> {
+    private fun pushTransactions(context: Context, transactionList: List<PaisoTransaction>?) : Promise<List<PaisoTransaction?>?> {
         val promises = mutableListOf<Promise<PaisoTransaction?>>()
 
         transactionList?.forEach {
@@ -152,7 +175,7 @@ object SyncManager {
                                 .promise()
                                 .then {
                                     if (it?.body() != null) {
-                                        that.remoteId = it.body()?.remoteId
+                                        that.remoteId = it.body().remoteId
                                         that.saveAsSynchronized(context);
                                     }
                                     it?.body()
@@ -169,7 +192,7 @@ object SyncManager {
         return Promise.all(promises).then { it }
     }
 
-    fun fetchTransactions(context: Context) : Promise<List<PaisoTransaction>?> {
+    private fun fetchTransactions(context: Context) : Promise<List<PaisoTransaction>?> {
         return TransactionApi.get(Auth.getHeader(context)).promise()
                 .then {
                     val transactions = it?.body()
@@ -178,7 +201,7 @@ object SyncManager {
                     transactions?.forEach {
                         it.sync = true
 
-                        val existing = transactionDao.findByRemoteId(it.remoteId)
+                        val existing = transactionDao.findByUuid(it.uuid)
                         if (existing == null) {
                             transactionDao.insert(it)
                         } else {
@@ -191,7 +214,7 @@ object SyncManager {
                 }
     }
 
-    fun pushExpenses(context: Context, expenseList: List<Expense>?) : Promise<List<Expense?>?> {
+    private fun pushExpenses(context: Context, expenseList: List<Expense>?) : Promise<List<Expense?>?> {
         val promises = mutableListOf<Promise<Expense?>>()
 
         expenseList?.forEach {
@@ -217,7 +240,7 @@ object SyncManager {
         return Promise.all(promises).then { it }
     }
 
-    fun fetchExpenses(context: Context) : Promise<List<Expense>?> {
+    private fun fetchExpenses(context: Context) : Promise<List<Expense>?> {
         return ExpenseApi.get(Auth.getHeader(context)).promise()
                 .then {
                     val expenses = it?.body()
@@ -226,7 +249,7 @@ object SyncManager {
                     expenses?.forEach {
                         it.sync = true
 
-                        val existing = expenseDao.findByRemoteId(it.remoteId)
+                        val existing = expenseDao.findByUuid(it.uuid)
                         if (existing == null) {
                             expenseDao.insert(it)
                         } else {

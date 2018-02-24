@@ -13,15 +13,16 @@ import java.util.concurrent.Executors
 
 
 object Api {
-    val gson = GsonConverterFactory.create(GsonBuilder()
+    private val gson = GsonConverterFactory.create(GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
             .create())!!
 
     val retrofit = Retrofit.Builder()
-//            .baseUrl("http://192.168.100.11:8000/")
+            .baseUrl("http://192.168.100.11:8000/")
 //            .baseUrl("http://192.168.100.30:8000/")
-            .baseUrl("http://paiso.togglecorp.com/")
+//            .baseUrl("http://paiso.togglecorp.com/")
+//            .baseUrl("http://192.168.1.110:8000/")
             .addConverterFactory(gson)
             .callbackExecutor(Executors.newSingleThreadExecutor())
             .build()!!

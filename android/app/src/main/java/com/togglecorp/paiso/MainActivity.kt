@@ -1,19 +1,14 @@
 package com.togglecorp.paiso
 
-import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.media.Image
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.graphics.drawable.DrawableCompat
-import android.support.v4.view.MenuItemCompat
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.SearchView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -27,10 +22,8 @@ import com.togglecorp.paiso.dashboard.DashboardFragment
 import com.togglecorp.paiso.database.SyncManager
 import com.togglecorp.paiso.expenses.ExpenseListFragment
 import com.togglecorp.paiso.fcm.sendRegistrationToServer
-import com.togglecorp.paiso.misc.AutoSyncService
 import com.togglecorp.paiso.notifications.NotificationListFragment
 import com.togglecorp.paiso.settings.SettingsActivity
-import com.togglecorp.paiso.settings.SettingsFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -88,8 +81,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         checkAuthenticated()
-
-        AutoSyncService.schedule(this)
     }
 
     private fun refresh() {
@@ -103,7 +94,7 @@ class MainActivity : AppCompatActivity() {
             button.setImageResource(R.drawable.ic_sync)
             button.isEnabled = false
         }
-        SyncManager.fetch(this).then {
+        SyncManager.sync(this).then {
             sendRegistrationToServer(this)
             async(UI) {
                 button?.clearAnimation()

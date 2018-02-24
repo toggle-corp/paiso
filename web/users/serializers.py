@@ -31,8 +31,13 @@ class ContactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Contact
-        fields = ('id', 'name', 'user', 'belongs_to', 'created_at',
-                  'edited_at', )
+        fields = ('id', 'uuid', 'version', 'name', 'user', 'belongs_to',
+                  'created_at', 'edited_at', )
 
+    def validate_version(self, version):
+        if self.instance and version < self.instance.version:
+            raise serializers.ValidationError(
+                'A newer version of this object already exists')
+        return version
 
 # EOF

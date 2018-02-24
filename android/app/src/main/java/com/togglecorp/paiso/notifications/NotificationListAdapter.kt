@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import com.togglecorp.paiso.R
 import com.togglecorp.paiso.contacts.Contact
 import com.togglecorp.paiso.database.DatabaseContext
+import com.togglecorp.paiso.database.SyncManager
 import com.togglecorp.paiso.misc.Confirmation
 import com.togglecorp.paiso.misc.DateFormatter
 import com.togglecorp.paiso.transactions.PaisoTransaction
@@ -60,6 +61,8 @@ class NotificationListAdapter(val context: Context, val transactions: List<Paiso
                     async(CommonPool) {
                         DatabaseContext.get(context).transactionDao().update(transaction)
                     }
+
+                    SyncManager.sync(context)
                 }
 
                 itemView.rejectAction.setOnClickListener {
@@ -71,6 +74,8 @@ class NotificationListAdapter(val context: Context, val transactions: List<Paiso
                                 async(CommonPool) {
                                     DatabaseContext.get(context).transactionDao().update(transaction)
                                 }
+
+                                SyncManager.sync(context)
                             }
                 }
             } else {
@@ -83,6 +88,8 @@ class NotificationListAdapter(val context: Context, val transactions: List<Paiso
                     async(CommonPool) {
                         DatabaseContext.get(context).transactionDao().update(transaction)
                     }
+
+                    SyncManager.sync(context)
                 }
             }
         }

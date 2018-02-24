@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,6 +47,7 @@ class DashboardFragment : LifecycleFragment() {
 
     private fun refresh(contacts: List<ContactAmount>?) {
         dashboardList.clear()
+
         contacts?.forEach {contact ->
             val existing = dashboardList.find { it.contactId == contact.contactId }
             if (existing != null) {

@@ -7,11 +7,12 @@ import android.content.Context
 import android.preference.PreferenceManager
 
 data class ContactAmount (
-       var contactId: Int? = null,
-       var contactName: String = "",
-       var amount: Float = 0.0f,
-       var user: Int? = null,
-       var transactionType: String = "to"
+        var transactionId: Int? = null,
+        var contactId: Int? = null,
+        var contactName: String = "",
+        var amount: Float = 0.0f,
+        var user: Int? = null,
+        var transactionType: String = "to"
 ) {
     fun isMy(context: Context) : Boolean {
         return PreferenceManager.getDefaultSharedPreferences(context).getInt("myRemoteId",
@@ -33,11 +34,11 @@ data class ContactAmount (
 
 @Dao
 interface ContactAmountDao {
-    @Query("SELECT contact._id as contactId, contact.name as contactName, paiso_transaction.amount as amount, paiso_transaction.user as user, paiso_transaction.transactionType as transactionType " +
+    @Query("SELECT contact._id as contactId, contact.name as contactName, paiso_transaction._id as transactionId, paiso_transaction.amount as amount, paiso_transaction.user as user, paiso_transaction.transactionType as transactionType " +
             "FROM contact INNER JOIN paiso_transaction ON contact.remoteId = paiso_transaction.contact " +
             "WHERE contact.deleted = 0 AND paiso_transaction.deleted = 0 " +
             "UNION " +
-            "SELECT contact._id as contactId, contact.name as contactName, paiso_transaction.amount as amount, paiso_transaction.user as user, paiso_transaction.transactionType as transactionType " +
+            "SELECT contact._id as contactId, contact.name as contactName, paiso_transaction._id as transactionId, paiso_transaction.amount as amount, paiso_transaction.user as user, paiso_transaction.transactionType as transactionType " +
             "FROM contact INNER JOIN paiso_transaction ON contact.user = paiso_transaction.user " +
             "WHERE contact.deleted = 0 AND paiso_transaction.deleted = 0 AND paiso_transaction.status = 'approved'")
     fun getAll() : LiveData<List<ContactAmount>>

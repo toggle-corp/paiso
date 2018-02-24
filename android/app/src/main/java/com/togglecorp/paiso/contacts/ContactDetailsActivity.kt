@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -80,7 +81,7 @@ class ContactDetailsActivity : LifecycleActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    fun refresh(transactions: List<PaisoTransaction>) {
+    private fun refresh(transactions: List<PaisoTransaction>) {
         transactionList.clear()
         transactions.forEach { transactionList.add(it) }
         transactionList.sortByDescending { it.editedAt }

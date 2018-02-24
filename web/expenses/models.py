@@ -2,8 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+import uuid
+
 
 class Expense(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
+    version = models.IntegerField(default=1)
+
     user = models.ForeignKey(User)
     title = models.CharField(max_length=300)
     amount = models.FloatField()

@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+import uuid
+
 from users.models import Contact
 
 
@@ -16,6 +18,9 @@ class Transaction(models.Model):
         ('approved', "approved"),
         ('rejected', "rejected"),
     )
+
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
+    version = models.IntegerField(default=1)
 
     user = models.ForeignKey(User)
     contact = models.ForeignKey(Contact)

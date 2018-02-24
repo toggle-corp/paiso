@@ -9,6 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import com.togglecorp.paiso.R
 import com.togglecorp.paiso.database.DatabaseContext
+import com.togglecorp.paiso.database.SyncManager
 import com.togglecorp.paiso.misc.Confirmation
 import kotlinx.android.synthetic.main.activity_edit_expense.*
 import kotlinx.coroutines.experimental.CommonPool
@@ -87,6 +88,7 @@ class EditExpenseActivity : LifecycleActivity() {
                 expense.createdAt = Date()
             }
 
+            expense.version += 1
             expense.title = expenseTitle.text.toString()
             expense.amount = expenseAmount.text.toString().toFloat()
             expense.user = PreferenceManager
@@ -103,6 +105,8 @@ class EditExpenseActivity : LifecycleActivity() {
                 }
             }.await()
 
+            SyncManager.sync(this@EditExpenseActivity)
+
             finish()
         }
     }
@@ -115,12 +119,15 @@ class EditExpenseActivity : LifecycleActivity() {
         Confirmation.show(this, "Are you sure you want to delete this expense record?")
                 .then {
                     async(UI) {
+                        expense.version += 1
                         expense.deleted = true
                         expense.sync = false
 
                         async(CommonPool) {
                             DatabaseContext.get(this@EditExpenseActivity).expenseDao().update(expense)
                         }.await()
+
+                        SyncManager.sync(this@EditExpenseActivity)
 
                         finish()
                     }

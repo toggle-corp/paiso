@@ -15,6 +15,7 @@ import com.togglecorp.paiso.R
 import com.togglecorp.paiso.api.promise
 import com.togglecorp.paiso.auth.Auth
 import com.togglecorp.paiso.database.DatabaseContext
+import com.togglecorp.paiso.database.SyncManager
 import com.togglecorp.paiso.misc.Confirmation
 import com.togglecorp.paiso.users.SEARCH_USER
 import com.togglecorp.paiso.users.SearchUserActivity
@@ -135,6 +136,7 @@ class EditContactActivity : LifecycleActivity() {
                 contact.createdAt = Date()
             }
 
+            contact.version += 1
             contact.name = contactName.text.toString()
             contact.user = contact.user
             contact.editedAt = Date()
@@ -147,6 +149,7 @@ class EditContactActivity : LifecycleActivity() {
                     DatabaseContext.get(this@EditContactActivity).contactDao().update(contact)
                 }
             }.await()
+            SyncManager.sync(this@EditContactActivity)
 
             finish()
         }
@@ -160,12 +163,14 @@ class EditContactActivity : LifecycleActivity() {
         Confirmation.show(this, "Are you sure you want to delete this contact?")
                 .then {
                     async(UI) {
+                        contact.version += 1
                         contact.deleted = true
                         contact.sync = false
 
                         async(CommonPool) {
                             DatabaseContext.get(this@EditContactActivity).contactDao().update(contact)
                         }.await()
+                        SyncManager.sync(this@EditContactActivity)
 
                         finish()
                     }

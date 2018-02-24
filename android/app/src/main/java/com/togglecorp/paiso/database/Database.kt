@@ -25,7 +25,7 @@ class Converters {
     }
 }
 
-@Database(entities = arrayOf(Contact::class, User::class, PaisoTransaction::class, Expense::class), version = 1)
+@Database(entities = arrayOf(Contact::class, User::class, PaisoTransaction::class, Expense::class), version = 2)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun contactDao(): ContactDao

@@ -12,13 +12,16 @@ import retrofit2.http.*
 import java.util.*
 
 
-@Entity(indices = arrayOf(Index(value = "remoteId", unique = true)))
+@Entity(indices = arrayOf(Index(value = "remoteId", unique = true), Index(value = "uuid", unique = true)))
 data class Contact (
         @PrimaryKey(autoGenerate = true)
         var _id: Int? = null,
 
         @SerializedName("id")
         var remoteId: Int? = null,
+
+        var uuid: String = UUID.randomUUID().toString(),
+        var version: Int = 0,
 
         var name: String = "",
         var user: Int? = null,
@@ -46,8 +49,14 @@ interface ContactDao {
     @Query("SELECT * FROM contact WHERE sync = 0")
     fun getModified() : LiveData<List<Contact>>
 
+    @Query("SELECT * FROM contact WHERE sync = 0")
+    fun getModifiedList() : List<Contact>
+
     @Query("SELECT * FROM contact WHERE remoteId = :arg0 LIMIT 1")
     fun findByRemoteId(remoteId: Int?) : Contact?
+
+    @Query("SELECT * FROM contact WHERE uuid = :arg0 LIMIT 1")
+    fun findByUuid(uuid: String?) : Contact?
 
     @Query("SELECT * FROM contact WHERE user = :arg0 LIMIT 1")
     fun findByUserId(userId: Int?) : Contact?

@@ -11,6 +11,7 @@ import android.view.View
 import com.togglecorp.paiso.R
 import com.togglecorp.paiso.contacts.Contact
 import com.togglecorp.paiso.database.DatabaseContext
+import com.togglecorp.paiso.database.SyncManager
 import com.togglecorp.paiso.misc.Confirmation
 import kotlinx.android.synthetic.main.activity_edit_transaction.*
 import kotlinx.coroutines.experimental.CommonPool
@@ -111,6 +112,7 @@ class EditTransactionActivity : LifecycleActivity() {
                 transaction.createdAt = Date()
             }
 
+            transaction.version += 1;
             transaction.title = transactionTitle.text.toString()
             transaction.amount = transactionAmount.text.toString().toFloat()
             transaction.user = PreferenceManager
@@ -130,6 +132,9 @@ class EditTransactionActivity : LifecycleActivity() {
                 }
             }.await()
 
+
+            SyncManager.sync(this@EditTransactionActivity)
+
             finish()
         }
     }
@@ -142,6 +147,7 @@ class EditTransactionActivity : LifecycleActivity() {
         Confirmation.show(this, "Are you sure you want to delete this transaction?")
                 .then {
                     async(UI) {
+                        transaction.version += 1;
                         transaction.deleted = true
                         transaction.editedAt = Date()
                         transaction.sync = false
@@ -150,6 +156,8 @@ class EditTransactionActivity : LifecycleActivity() {
                             DatabaseContext.get(this@EditTransactionActivity).transactionDao().update(transaction)
                         }.await()
 
+
+                        SyncManager.sync(this@EditTransactionActivity)
                         finish()
                     }
                 }
